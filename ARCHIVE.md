@@ -4,6 +4,7 @@ These opportunities are kept for reference after their application deadlines pas
 
 | Opportunity | Category | Deadline | Archived reason |
 |---|---|---|---|
+| [EUROAVIA Ideathon 2026](<opportunities/archive/competitions/euroavia-ideathon-2026.md>) | competitions | 27 July 2026 | Application deadline passed |
 | [NASA Lucy Mission Internship](<opportunities/archive/internships/nasa-lucy-mission-internship.md>) | internships | March 8, 2026, by 11:59 PM PT | Application deadline passed |
 
 ---
