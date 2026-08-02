@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 import 'dotenv/config'
 
-const baseURL = process.env.E2E_CMS_URL || 'http://127.0.0.1:3001'
+const baseURL = process.env.E2E_CMS_URL || 'http://localhost:3001'
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -22,9 +22,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'PORT=3001 pnpm dev',
+    command: 'pnpm build && exec env PORT=3001 HOSTNAME=127.0.0.1 pnpm start',
     reuseExistingServer: !process.env.CI,
     url: `${baseURL}/health`,
-    timeout: 120_000,
+    timeout: 180_000,
   },
 })

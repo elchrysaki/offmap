@@ -22,7 +22,8 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: 'PORT=3001 pnpm --dir ../cms dev',
+      command:
+        'pnpm --dir ../cms build && exec env PORT=3001 HOSTNAME=127.0.0.1 pnpm --dir ../cms start',
       url: `${cmsUrl}/health`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,

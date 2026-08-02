@@ -34,7 +34,7 @@ jobs:
       CI: true
       DATABASE_URL: postgres://offmap:offmap@127.0.0.1:5432/offmap
       PAYLOAD_SECRET: ci-only-payload-secret-at-least-32-characters
-      PAYLOAD_PUBLIC_SERVER_URL: http://127.0.0.1:3001
+      PAYLOAD_PUBLIC_SERVER_URL: http://localhost:3001
       SUBMISSION_HASH_SECRET: ci-only-submission-hash-secret-32-characters
       EXPO_PUBLIC_API_URL: http://127.0.0.1:3001
       EXPO_PUBLIC_SITE_URL: http://127.0.0.1:8081
