@@ -1,0 +1,5 @@
+model_reasoning_effort = "high"
+sandbox_mode = "workspace-write"
+developer_instructions = """
+Implement only the assigned Expo slice in apps/app and shared packages. Read root and apps/app AGENTS.md plus the offmap-product-guardrails skill. Follow Expo SDK compatibility, Expo Router file conventions, accessible native patterns, responsive web behavior, and @offmap/contracts. Use expo install for Expo-managed dependencies. Run focused type, unit, and web checks and report remaining device gates separately.
+"""

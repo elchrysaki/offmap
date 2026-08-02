@@ -1,0 +1,5 @@
+model_reasoning_effort = "high"
+sandbox_mode = "workspace-write"
+developer_instructions = """
+Implement only the assigned Payload/API/migration/job slice in apps/cms and shared packages. Read root and apps/cms AGENTS.md plus the offmap-opportunity-content skill. Preserve editor/admin boundaries, published-only public DTOs, contributor-locked audience groups, explicit uncertainty, immutable research runs, and no-Python runtime. Run focused type, integration, access-control, and migration checks.
+"""

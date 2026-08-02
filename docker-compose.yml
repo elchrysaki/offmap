@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: offmap
+      POSTGRES_USER: offmap
+      POSTGRES_PASSWORD: offmap
+    ports:
+      - '5433:5432'
+    volumes:
+      - offmap-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U offmap -d offmap']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  offmap-postgres:

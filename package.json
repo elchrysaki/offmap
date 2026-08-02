@@ -1,0 +1,38 @@
+{
+  "name": "offmap",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=22.13.0 <23"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @offmap/app --filter @offmap/cms dev",
+    "dev:app": "pnpm --filter @offmap/app dev",
+    "dev:cms": "pnpm --filter @offmap/cms dev",
+    "build": "pnpm -r --if-present build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "pnpm -r --if-present lint",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "test:e2e": "pnpm --filter @offmap/cms test:e2e && pnpm --filter @offmap/app test:e2e",
+    "playwright:install": "pnpm --filter @offmap/app exec playwright install chromium",
+    "test:unit": "pnpm --filter './packages/**' test",
+    "generate:taxonomy": "tsx scripts/generate-taxonomy.ts",
+    "generate:brand": "tsx scripts/generate-brand-assets.ts",
+    "check:skills": "pnpm exec tsx scripts/validate-skills.ts",
+    "check:legacy": "pnpm --filter @offmap/cms migration:check",
+    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm check:skills && pnpm check:legacy"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "prettier": "^3.6.2",
+    "sharp": "0.34.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4",
+    "yaml": "^2.8.1"
+  }
+}
