@@ -1,0 +1,7 @@
+interface:
+  display_name: 'OffMap Release Gates'
+  short_description: 'Separate and audit OffMap release evidence'
+  brand_color: '#6E4BFF'
+  default_prompt: 'Use $offmap-release-gates to run the relevant checks and report what remains unverified for this OffMap release.'
+policy:
+  allow_implicit_invocation: true

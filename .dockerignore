@@ -1,0 +1,11 @@
+.git
+.github
+.codex
+**/.next
+**/dist
+**/node_modules
+**/playwright-report
+**/test-results
+.env
+apps/cms/.env
+apps/cms/migrations/legacy-report.json

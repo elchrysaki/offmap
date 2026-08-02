@@ -1,0 +1,70 @@
+{
+  "expected": {
+    "published": 23,
+    "archived": 2
+  },
+  "discovered": {
+    "published": 23,
+    "archived": 2,
+    "total": 25
+  },
+  "duplicates": [],
+  "missingApplicationLinks": [
+    "ea-summit-buenos-aires",
+    "ea-summit-istanbul",
+    "ea-summit-warsaw-2026",
+    "ea-summit-wellington",
+    "eagxaustralasia-2026",
+    "eagxberlin-2026",
+    "eagxindia-2026",
+    "human-aligned-ai-summer-school",
+    "lucy-mission-asteroid-ambassador-program",
+    "mission-concept-academy-mca",
+    "nasa-lucy-mission-internship",
+    "nasa-s-lucy-mission-leap-internship",
+    "research-affiliates-program",
+    "secure-sovereign-ai-workshop",
+    "syntony-engineering-fellowship",
+    "trusted-red-team-network",
+    "vision-weekend-usa-2026"
+  ],
+  "unnormalizedDeadlines": [
+    "ceealar",
+    "ea-summit-istanbul",
+    "ea-summit-wellington",
+    "eagxaustralasia-2026",
+    "eagxberlin-2026",
+    "eagxindia-2026",
+    "human-aligned-ai-summer-school",
+    "lucy-mission-asteroid-ambassador-program",
+    "nasa-s-lucy-mission-leap-internship",
+    "research-affiliates-program",
+    "secure-sovereign-ai-workshop",
+    "syntony-engineering-fellowship",
+    "trusted-red-team-network",
+    "vision-weekend-usa-2026"
+  ],
+  "missingFunding": [
+    "ea-global-new-york-city-2026",
+    "ea-summit-buenos-aires",
+    "ea-summit-istanbul",
+    "ea-summit-warsaw-2026",
+    "ea-summit-wellington",
+    "eagxaustralasia-2026",
+    "eagxberkeley-2026",
+    "eagxberlin-2026",
+    "eagxindia-2026",
+    "eagxoxford-2026",
+    "human-aligned-ai-summer-school",
+    "lucy-mission-asteroid-ambassador-program",
+    "nasa-lucy-mission-internship",
+    "nasa-proposal-writing-and-evaluation-experience-npwee",
+    "nasa-s-lucy-mission-leap-internship",
+    "pausecon-london-2026",
+    "research-affiliates-program",
+    "secure-sovereign-ai-workshop",
+    "trusted-red-team-network"
+  ],
+  "categoryMismatches": [],
+  "representativeRecords": ["eagxberkeley-2026", "nasa-lucy-mission-internship"]
+}

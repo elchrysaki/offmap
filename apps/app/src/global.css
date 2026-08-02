@@ -1,0 +1,26 @@
+:root {
+  color-scheme: light;
+  background: #f5eedc;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+  background: #f5eedc;
+}
+
+body {
+  overscroll-behavior-y: none;
+}
+
+*:focus-visible {
+  outline: 3px solid #1268ff;
+  outline-offset: 3px;
+}
+
+::selection {
+  color: #111111;
+  background: #c9f43b;
+}

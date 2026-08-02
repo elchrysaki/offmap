@@ -1,0 +1,7 @@
+interface:
+  display_name: 'OffMap Opportunity Content'
+  short_description: 'Guard taxonomy, facts, sources, and review'
+  brand_color: '#FF5A24'
+  default_prompt: 'Use $offmap-opportunity-content to review this opportunity data or backend change for editorial and publication safety.'
+policy:
+  allow_implicit_invocation: true

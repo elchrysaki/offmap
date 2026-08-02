@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title">
+  <title id="title">OffMap route mark</title>
+  <rect width="1024" height="1024" fill="#F5EEDC"/>
+  <path d="M742 0h282v326L830 274z" fill="#3D63FF"/>
+  <path d="M0 748l244-66 62 262L0 1024z" fill="#F2672E"/>
+  <path d="M552 116l252-28 14 82-252 28z" fill="#9B7CEB"/>
+  <path d="M190 730c0-190 174-160 174-356 0-146 184-146 184 18 0 148 160 192 286-88" fill="none" stroke="#111111" stroke-width="92" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="190" cy="730" r="70" fill="#D7FF35" stroke="#111111" stroke-width="28"/>
+  <circle cx="547" cy="392" r="58" fill="#F5EEDC" stroke="#111111" stroke-width="28"/>
+  <circle cx="834" cy="304" r="70" fill="#F43CA6" stroke="#111111" stroke-width="28"/>
+</svg>
