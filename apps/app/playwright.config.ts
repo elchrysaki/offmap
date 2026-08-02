@@ -23,13 +23,13 @@ export default defineConfig({
   webServer: [
     {
       command:
-        'pnpm --dir ../cms build && exec env PORT=3001 HOSTNAME=127.0.0.1 pnpm --dir ../cms start',
+        'pnpm --dir ../cms build && pnpm --dir ../cms prepare:standalone && exec env PORT=3001 HOSTNAME=127.0.0.1 node ../cms/.next/standalone/apps/cms/server.js',
       url: `${cmsUrl}/health`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
     {
-      command: `EXPO_PUBLIC_API_URL=${cmsUrl} pnpm web -- --port 8081`,
+      command: `exec env EXPO_PUBLIC_API_URL=${cmsUrl} node node_modules/expo/bin/cli start --web --port 8081`,
       url: appUrl,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,

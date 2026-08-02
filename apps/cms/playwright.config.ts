@@ -22,7 +22,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'pnpm build && exec env PORT=3001 HOSTNAME=127.0.0.1 pnpm start',
+    command:
+      'pnpm build && pnpm prepare:standalone && exec env PORT=3001 HOSTNAME=127.0.0.1 node .next/standalone/apps/cms/server.js',
     reuseExistingServer: !process.env.CI,
     url: `${baseURL}/health`,
     timeout: 180_000,

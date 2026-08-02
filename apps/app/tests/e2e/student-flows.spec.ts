@@ -51,14 +51,14 @@ test.describe('student opportunity flows', () => {
 
   test('advances the bounded guest contribution form without publishing', async ({ page }) => {
     await page.goto('/submit');
-    await expect(page.getByText('Step 1 of 2', { exact: true })).toBeVisible();
+    await expect(page.getByLabel('Step 1 of 2', { exact: true })).toBeVisible();
     await page
       .getByRole('textbox', { name: 'Official source URL' })
       .fill('https://example.org/student-program');
     await page.getByRole('textbox', { name: 'Opportunity title' }).fill('Student program');
     await page.getByRole('button', { name: 'Next: a little context' }).click();
 
-    await expect(page.getByText('Step 2 of 2', { exact: true })).toBeVisible();
+    await expect(page.getByLabel('Step 2 of 2', { exact: true })).toBeVisible();
     await expect(page.getByText('Not sure is a valid answer.', { exact: true })).toBeVisible();
     await expect(page.getByRole('checkbox')).not.toBeChecked();
     await expect(page.getByRole('button', { name: 'Send to human review' })).toBeVisible();

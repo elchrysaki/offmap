@@ -9,18 +9,6 @@ test.describe('Admin Panel', () => {
   test.beforeAll(async ({ browser }) => {
     const context = await browser.newContext()
     page = await context.newPage()
-    page.on('console', (message) => {
-      if (message.type() === 'error') console.error(`Admin console: ${message.text()}`)
-    })
-    page.on('pageerror', (error) => console.error(`Admin page error: ${error.message}`))
-    page.on('response', (response) => {
-      if (response.status() >= 400) {
-        console.error(`Admin response: ${response.status()} ${response.url()}`)
-      }
-    })
-    page.on('requestfailed', (request) => {
-      console.error(`Admin request failed: ${request.url()} ${request.failure()?.errorText}`)
-    })
 
     await login({ page, user: testUser })
   })
@@ -39,11 +27,14 @@ test.describe('Admin Panel', () => {
     await expect(listViewArtifact).toBeVisible()
   })
 
-  test('can navigate to submission create view', async () => {
-    await page.goto(`${serverURL}/admin/collections/submissions`)
-    await page.getByRole('link', { name: 'Create New', exact: false }).click()
-    await expect(page).toHaveURL(/\/admin\/collections\/submissions\/create(?:\?|$)/)
-    await page.reload({ waitUntil: 'domcontentloaded' })
-    await expect(page.locator('input[name="sourceUrl"]')).toBeVisible({ timeout: 30_000 })
+  test('can open an opportunity edit view', async () => {
+    await page.goto(`${serverURL}/admin/collections/opportunities`)
+    const opportunityLink = page
+      .locator('a[href^="/admin/collections/opportunities/"]:not([href$="/create"])')
+      .first()
+    await expect(opportunityLink).toBeVisible()
+    await opportunityLink.click()
+    await expect(page).toHaveURL(/\/admin\/collections\/opportunities\/[^/?]+(?:\?|$)/)
+    await expect(page.locator('input[name="slug"]')).toBeVisible({ timeout: 30_000 })
   })
 })

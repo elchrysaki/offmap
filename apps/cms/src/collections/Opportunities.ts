@@ -146,11 +146,11 @@ export const Opportunities: CollectionConfig = {
                 value: unknown,
                 { siblingData }: { siblingData?: Record<string, unknown> },
               ) => {
-                if (!value || !siblingData?.mainCategory) return true;
+                if (!value || !siblingData?.mainCategory) return true
                 return (
                   isValidCategoryPair(String(siblingData.mainCategory), String(value)) ||
                   'Category must belong to the selected main category.'
-                );
+                )
               },
             },
             {

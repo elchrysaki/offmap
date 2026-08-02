@@ -8,6 +8,7 @@ review-packets
 pnpm-lock.yaml
 **/next-env.d.ts
 **/expo-env.d.ts
+apps/cms/src/payload-types.ts
 .github/ISSUE_TEMPLATE
 .github/media
 .github/moderators.yml
