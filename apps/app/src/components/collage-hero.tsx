@@ -34,7 +34,6 @@ export function CollageHero() {
           ))}
         </View>
         <Text style={styles.airplane}>✈</Text>
-        <View style={styles.routeLine} />
       </View>
 
       <View style={[styles.copy, wide && styles.copyWide]}>
@@ -129,10 +128,11 @@ const styles = StyleSheet.create({
   dot: { width: 3, height: 3, borderRadius: 2, backgroundColor: colors.blue },
   airplane: {
     position: 'absolute',
-    left: '52%',
+    right: '32%',
     top: 4,
     color: colors.ink,
     fontSize: 30,
+    zIndex: 999,
     transform: [{ rotate: '-18deg' }],
   },
   routeLine: {

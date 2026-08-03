@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   navCompact: { width: '100%', justifyContent: 'center', paddingVertical: 0 },
   link: {
     minHeight: 44,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
     justifyContent: 'center',
     borderRadius: radii.pill,
   },
