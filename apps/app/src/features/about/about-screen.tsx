@@ -1,6 +1,6 @@
 import { colors, radii, spacing } from '@offmap/design';
 import { Link } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { ActionButton } from '@/components/action-button';
 import { OffMapText } from '@/components/offmap-text';
@@ -26,14 +26,20 @@ const principles = [
 ] as const;
 
 export function AboutScreen() {
+  const { width } = useWindowDimensions();
+  const compact = width < 600;
   return (
     <Page>
       <View style={styles.hero}>
         <OffMapText variant="handwritten" style={styles.kicker}>
           built by students, for students
         </OffMapText>
-        <OffMapText accessibilityRole="header" variant="display" style={styles.display}>
-          THE NOTICEBOARD WE WANTED.
+        <OffMapText
+          accessibilityRole="header"
+          variant="display"
+          style={[styles.display, compact && styles.displayCompact]}
+        >
+          the noticeboard we wanted.
         </OffMapText>
         <OffMapText variant="subtitle" style={styles.intro}>
           OffMap pulls worthwhile opportunities out of fragmented places and puts the evidence
@@ -82,6 +88,7 @@ const styles = StyleSheet.create({
   hero: { maxWidth: 860, gap: spacing.lg, marginBottom: spacing.section },
   kicker: { color: colors.violet },
   display: { fontSize: 58, lineHeight: 60 },
+  displayCompact: { fontSize: 42, lineHeight: 44 },
   intro: { color: colors.mutedInk },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xl },
   card: {
@@ -93,9 +100,10 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.ink,
     borderRadius: radii.large,
+    backgroundColor: colors.paperRaised,
   },
-  blueCard: { backgroundColor: colors.blue },
-  orangeCard: { backgroundColor: colors.orange },
+  blueCard: { borderTopWidth: 12, borderTopColor: colors.blue },
+  orangeCard: { borderTopWidth: 12, borderTopColor: colors.orange },
   editorial: {
     maxWidth: 760,
     marginTop: spacing.section,

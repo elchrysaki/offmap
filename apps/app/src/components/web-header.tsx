@@ -1,34 +1,33 @@
 import { colors, fontFamilies, layout, radii, spacing } from '@offmap/design';
 import { Link, usePathname } from 'expo-router';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+
+import { OffMapLogo } from './offmap-logo';
 
 const links = [
-  ['Home', '/'],
-  ['Opportunities', '/opportunities'],
-  ['Saved', '/saved'],
-  ['Submit', '/submit'],
-  ['About', '/about'],
+  ['Home', 'Home', '/'],
+  ['Opportunities', 'Explore', '/opportunities'],
+  ['Saved', 'Saved', '/saved'],
+  ['Submit', 'Add', '/submit'],
+  ['About', 'About', '/about'],
 ] as const;
 
 export function WebHeader() {
   const pathname = usePathname();
+  const { width } = useWindowDimensions();
+  const compact = width < 700;
   if (Platform.OS !== 'web') return null;
 
   return (
     <View style={styles.shell} accessibilityLabel="Primary navigation">
-      <View style={styles.header}>
+      <View style={[styles.header, compact && styles.headerCompact]}>
         <Link href="/" asChild>
           <Pressable accessibilityLabel="OffMap home" style={styles.logo}>
-            <Text style={styles.logoText}>OFFMAP</Text>
-            <View style={styles.logoDot} />
+            <OffMapLogo compact={compact} />
           </Pressable>
         </Link>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.nav}
-        >
-          {links.map(([label, href]) => {
+        <View style={[styles.nav, compact && styles.navCompact]}>
+          {links.map(([label, compactLabel, href]) => {
             const active = href === '/' ? pathname === '/' : pathname.startsWith(href);
             return (
               <Link key={href} href={href} asChild>
@@ -37,13 +36,15 @@ export function WebHeader() {
                   style={({ pressed }) => pressed && styles.pressed}
                 >
                   <View style={[styles.link, active && styles.activeLink]}>
-                    <Text style={[styles.linkText, active && styles.activeLinkText]}>{label}</Text>
+                    <Text style={[styles.linkText, active && styles.activeLinkText]}>
+                      {compact ? compactLabel : label}
+                    </Text>
                   </View>
                 </Pressable>
               </Link>
             );
           })}
-        </ScrollView>
+        </View>
       </View>
     </View>
   );
@@ -66,23 +67,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.xl,
   },
-  logo: { flexDirection: 'row', alignItems: 'center', minHeight: 44 },
-  logoText: {
-    color: colors.ink,
-    fontFamily: fontFamilies.display,
-    fontSize: 23,
-    letterSpacing: -1,
+  headerCompact: {
+    minHeight: 0,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    flexDirection: 'column',
+    gap: spacing.sm,
   },
-  logoDot: { width: 9, height: 9, borderRadius: 5, backgroundColor: colors.orange, marginLeft: 3 },
-  nav: { gap: spacing.sm, alignItems: 'center', paddingVertical: spacing.sm },
+  logo: { flexDirection: 'row', alignItems: 'center', minHeight: 44 },
+  nav: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingVertical: spacing.sm,
+  },
+  navCompact: { width: '100%', justifyContent: 'center', paddingVertical: 0 },
   link: {
     minHeight: 44,
     paddingHorizontal: spacing.lg,
     justifyContent: 'center',
     borderRadius: radii.pill,
   },
-  activeLink: { backgroundColor: colors.ink },
   linkText: { color: colors.ink, fontFamily: fontFamilies.bodyMedium, fontSize: 15 },
+  activeLink: { backgroundColor: colors.ink },
   activeLinkText: { color: colors.white, fontFamily: fontFamilies.bodyBold },
   pressed: { opacity: 0.7 },
 });

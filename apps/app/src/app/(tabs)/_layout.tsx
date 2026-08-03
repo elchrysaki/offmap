@@ -12,8 +12,8 @@ export default function NativeTabLayout() {
         selected: { color: colors.ink, fontFamily: fontFamilies.bodyBold, fontSize: 12 },
       }}
     >
-      <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>Discover</NativeTabs.Trigger.Label>
+      <NativeTabs.Trigger name="(discover)">
+        <NativeTabs.Trigger.Label>Explore</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           sf={{ default: 'safari', selected: 'safari.fill' }}
           md={{ default: 'explore', selected: 'explore' }}

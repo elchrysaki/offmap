@@ -4,9 +4,11 @@ import { submissionAcceptedSchema, submissionInputSchema } from '@offmap/contrac
 import { CATEGORY_CATALOG } from '@offmap/taxonomy'
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
+import { ZodError } from 'zod'
 
 import config from '@/payload.config'
 import { apiError, PUBLIC_CORS_HEADERS, requestIdFrom } from '@/lib/api-response'
+import { submissionReference } from '@/lib/submission-reference'
 import type { Submission } from '@/payload-types'
 
 const MAX_BODY_BYTES = 16_384
@@ -98,19 +100,30 @@ export async function POST(request: Request) {
       },
     })
 
-    return NextResponse.json(accepted(`OF-${submission.id}`), {
+    return NextResponse.json(accepted(submissionReference(submission.id)), {
       status: 202,
       headers: { ...PUBLIC_CORS_HEADERS, 'X-Request-Id': requestId },
     })
   } catch (error) {
     if (error instanceof SyntaxError)
       return apiError(400, 'INVALID_JSON', 'Submission must be valid JSON.', requestId)
-    return apiError(
-      400,
-      'INVALID_SUBMISSION',
-      'Check the submission and try again.',
+    if (error instanceof ZodError)
+      return apiError(
+        400,
+        'INVALID_SUBMISSION',
+        'Check the highlighted information and try again.',
+        requestId,
+        error,
+      )
+    console.error('Public submission failed.', {
       requestId,
-      error,
+      errorName: error instanceof Error ? error.name : 'UnknownError',
+    })
+    return apiError(
+      500,
+      'SUBMISSION_FAILED',
+      'We could not save this opportunity yet. Please try again.',
+      requestId,
     )
   }
 }

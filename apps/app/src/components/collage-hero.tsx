@@ -1,13 +1,26 @@
-import { colors, fontFamilies, radii, spacing } from '@offmap/design';
-import { Link } from 'expo-router';
+import { colors, fontFamilies, spacing } from '@offmap/design';
+import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { ActionButton } from './action-button';
 import { OffMapText } from './offmap-text';
 
+const studentCollage = require('../../assets/images/offmap-student-collage.png');
+
+const promises = [
+  ['⌕', 'Find opportunities'],
+  ['✦', 'Save your shortlist'],
+  ['◎', 'All fields worldwide'],
+  ['⌖', 'Checked by students'],
+] as const;
+
 export function CollageHero() {
+  const router = useRouter();
   const { width } = useWindowDimensions();
-  const wide = width >= 820;
+  const wide = width >= 880;
+  const compact = width < 520;
+
   return (
     <View style={[styles.hero, wide && styles.heroWide]}>
       <View
@@ -15,56 +28,72 @@ export function CollageHero() {
         importantForAccessibility="no-hide-descendants"
         style={[StyleSheet.absoluteFill, styles.decorations]}
       >
-        <View style={styles.bluePaper} />
-        <View style={styles.orangePaper} />
-        <View style={styles.magentaDot} />
-        <View style={styles.violetTape} />
+        <View style={styles.dots}>
+          {Array.from({ length: 20 }, (_, index) => (
+            <View key={index} style={styles.dot} />
+          ))}
+        </View>
+        <Text style={styles.airplane}>✈</Text>
         <View style={styles.routeLine} />
-        <Text style={styles.routeStar}>✦</Text>
       </View>
 
       <View style={[styles.copy, wide && styles.copyWide]}>
-        <View style={styles.eyebrow}>
-          <OffMapText variant="label">Built by students · checked by humans</OffMapText>
-        </View>
         <OffMapText
           accessibilityRole="header"
           variant="display"
-          style={[styles.headline, wide && styles.headlineWide]}
+          style={[styles.headline, compact && styles.headlineCompact, wide && styles.headlineWide]}
         >
-          YOUR MAP TO{`\n`}WHAT’S POSSIBLE
+          your map{`\n`}to what’s{`\n`}possible
         </OffMapText>
-        <View style={styles.underline} />
+        <View accessibilityElementsHidden style={styles.underline} />
         <OffMapText variant="subtitle" style={styles.subhead}>
-          Worthwhile opportunities, pulled out of forgotten newsletters, chaotic spreadsheets, and
-          the group chat you meant to search later.
+          The student-first directory of opportunities worth knowing about.
         </OffMapText>
+        <View style={styles.studentHighlight}>
+          <OffMapText variant="bodyBold">Built by students, for students.</OffMapText>
+        </View>
         <View style={styles.actions}>
-          <Link href="/opportunities" asChild>
-            <ActionButton label="Explore opportunities" tone="ink" />
-          </Link>
-          <Link href="/submit" asChild>
-            <ActionButton label="Add what you found" tone="lime" />
-          </Link>
+          <ActionButton
+            label="Explore opportunities"
+            tone="blue"
+            onPress={() => router.push('/opportunities')}
+          />
+          <ActionButton
+            label="Add what you found"
+            tone="lime"
+            onPress={() => router.push('/submit')}
+          />
         </View>
         <OffMapText variant="handwritten" style={styles.note}>
-          no account. no noise. just a place to start ↗
+          explore. apply. grow. ↗
         </OffMapText>
       </View>
 
-      {wide ? (
-        <View style={styles.poster} accessibilityLabel="Discover, save, contribute">
-          <Text style={styles.posterNumber}>01</Text>
-          <Text style={styles.posterWord}>DISCOVER</Text>
-          <View style={[styles.posterBand, styles.posterOrange]}>
-            <Text style={styles.posterBandText}>SAVE THE GOOD ONES</Text>
-          </View>
-          <View style={[styles.posterBand, styles.posterBlue]}>
-            <Text style={[styles.posterBandText, styles.posterBandLight]}>PASS ONE ON</Text>
-          </View>
-          <Text style={styles.posterFooter}>STUDENT-FIRST · WORLDWIDE</Text>
+      <View style={[styles.visual, wide && styles.visualWide]}>
+        <Image
+          accessibilityLabel="Student holding books among a collage of travel, learning, and map imagery"
+          source={studentCollage}
+          contentFit="cover"
+          style={styles.studentImage}
+        />
+        <View style={styles.stickyNote}>
+          <View accessibilityElementsHidden style={styles.tape} />
+          <OffMapText variant="handwritten" style={styles.stickyText}>
+            discover{`\n`}save{`\n`}contribute
+          </OffMapText>
         </View>
-      ) : null}
+      </View>
+
+      <View style={[styles.promiseStrip, wide && styles.promiseStripWide]}>
+        {promises.map(([icon, label]) => (
+          <View key={label} style={styles.promise}>
+            <Text style={styles.promiseIcon}>{icon}</Text>
+            <OffMapText variant="label" style={styles.promiseText}>
+              {label}
+            </OffMapText>
+          </View>
+        ))}
+      </View>
     </View>
   );
 }
@@ -73,120 +102,136 @@ const styles = StyleSheet.create({
   hero: {
     position: 'relative',
     overflow: 'hidden',
-    minHeight: 590,
-    borderWidth: 2,
-    borderColor: colors.ink,
-    borderRadius: radii.large,
-    backgroundColor: colors.paperRaised,
-    padding: spacing.xl,
-    justifyContent: 'center',
+    width: '100%',
+    gap: spacing.xxl,
+    paddingVertical: spacing.lg,
   },
-  heroWide: { minHeight: 650, padding: 48, flexDirection: 'row', alignItems: 'center', gap: 48 },
+  heroWide: {
+    minHeight: 720,
+    paddingVertical: spacing.xxl,
+    paddingHorizontal: spacing.lg,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 40,
+  },
   decorations: { pointerEvents: 'none' },
-  copy: { gap: spacing.lg, zIndex: 2 },
-  copyWide: { flex: 1.25 },
-  eyebrow: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.lime,
-    borderWidth: 2,
-    borderColor: colors.ink,
-    transform: [{ rotate: '-1deg' }],
-  },
-  headline: { fontSize: 44, lineHeight: 45, maxWidth: 650 },
-  headlineWide: { fontSize: 68, lineHeight: 66, letterSpacing: -3 },
-  underline: {
-    height: 8,
-    width: '74%',
-    backgroundColor: colors.orange,
-    transform: [{ rotate: '-1deg' }],
-  },
-  subhead: { maxWidth: 650 },
-  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
-  note: { color: colors.violet, transform: [{ rotate: '-1deg' }] },
-  bluePaper: {
+  dots: {
     position: 'absolute',
-    width: 280,
-    height: 190,
-    right: -90,
-    top: -35,
-    backgroundColor: colors.blue,
-    transform: [{ rotate: '13deg' }],
+    left: '47%',
+    top: '48%',
+    width: 120,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 14,
+    opacity: 0.9,
   },
-  orangePaper: {
+  dot: { width: 3, height: 3, borderRadius: 2, backgroundColor: colors.blue },
+  airplane: {
     position: 'absolute',
-    width: 170,
-    height: 100,
-    left: -55,
-    bottom: 40,
-    backgroundColor: colors.orange,
-    transform: [{ rotate: '-12deg' }],
-  },
-  magentaDot: {
-    position: 'absolute',
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    right: 40,
-    bottom: 32,
-    backgroundColor: colors.magenta,
-  },
-  violetTape: {
-    position: 'absolute',
-    width: 130,
-    height: 30,
-    right: 245,
-    top: 20,
-    backgroundColor: 'rgba(110,75,255,0.55)',
-    transform: [{ rotate: '-5deg' }],
+    left: '52%',
+    top: 4,
+    color: colors.ink,
+    fontSize: 30,
+    transform: [{ rotate: '-18deg' }],
   },
   routeLine: {
     position: 'absolute',
-    width: 150,
-    height: 90,
-    left: 25,
-    top: 30,
+    left: '50%',
+    top: 42,
+    width: 160,
+    height: 75,
     borderTopWidth: 3,
     borderRightWidth: 3,
     borderColor: colors.ink,
-    borderRadius: 80,
-    transform: [{ rotate: '-12deg' }],
+    borderRadius: 90,
+    transform: [{ rotate: '8deg' }],
   },
-  routeStar: { position: 'absolute', left: 155, top: 93, fontSize: 30, color: colors.ink },
-  poster: {
-    width: 310,
-    minHeight: 420,
-    padding: spacing.xl,
-    backgroundColor: colors.paper,
-    borderWidth: 3,
-    borderColor: colors.ink,
-    boxShadow: '9px 10px 0 rgba(18, 18, 18, 0.22)',
-    elevation: 5,
-    transform: [{ rotate: '2deg' }],
-    justifyContent: 'space-between',
+  copy: { width: '100%', gap: spacing.lg, zIndex: 2 },
+  copyWide: { flex: 1, minWidth: 360, maxWidth: 620 },
+  headline: {
+    fontSize: 52,
+    lineHeight: 50,
+    maxWidth: 650,
+    letterSpacing: -2.4,
   },
-  posterNumber: { fontFamily: fontFamilies.handwritten, fontSize: 34, color: colors.orange },
-  posterWord: { fontFamily: fontFamilies.display, fontSize: 42, lineHeight: 44, color: colors.ink },
-  posterBand: {
-    padding: spacing.md,
-    marginHorizontal: -34,
-    borderWidth: 2,
-    borderColor: colors.ink,
+  headlineCompact: { fontSize: 43, lineHeight: 42, letterSpacing: -2 },
+  headlineWide: { fontSize: 76, lineHeight: 70, letterSpacing: -4 },
+  underline: {
+    height: 7,
+    width: '86%',
+    backgroundColor: colors.blue,
+    borderRadius: 30,
+    transform: [{ rotate: '-1deg' }],
   },
-  posterOrange: { backgroundColor: colors.orange, transform: [{ rotate: '-2deg' }] },
-  posterBlue: { backgroundColor: colors.blue, transform: [{ rotate: '1deg' }] },
-  posterBandText: {
+  subhead: { maxWidth: 520 },
+  studentHighlight: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: spacing.md,
+    paddingVertical: 3,
+    backgroundColor: colors.lime,
+    transform: [{ rotate: '-1deg' }],
+  },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.lg, paddingTop: spacing.sm },
+  note: { color: colors.ink, transform: [{ rotate: '-2deg' }] },
+  visual: {
+    position: 'relative',
+    width: '100%',
+    maxWidth: 590,
+    aspectRatio: 0.96,
+    alignSelf: 'center',
+  },
+  visualWide: { flex: 1, minWidth: 390 },
+  studentImage: {
+    width: '100%',
+    height: '100%',
+    transform: [{ rotate: '0.7deg' }],
+  },
+  stickyNote: {
+    position: 'absolute',
+    right: 12,
+    top: 18,
+    minWidth: 150,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.lg,
+    backgroundColor: colors.lime,
+    transform: [{ rotate: '4deg' }],
+    boxShadow: '2px 5px 12px rgba(17,17,17,0.16)',
+  },
+  tape: {
+    position: 'absolute',
+    width: 66,
+    height: 17,
+    top: -9,
+    left: 42,
+    backgroundColor: colors.ink,
+    transform: [{ rotate: '4deg' }],
+  },
+  stickyText: { color: colors.ink, fontSize: 24, lineHeight: 27 },
+  promiseStrip: {
+    width: '100%',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    paddingTop: spacing.md,
+    borderTopWidth: 2,
+    borderTopColor: colors.ink,
+  },
+  promiseStripWide: { flexBasis: '100%' },
+  promise: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 150,
+    minWidth: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+  },
+  promiseIcon: {
+    color: colors.blue,
     fontFamily: fontFamilies.bodyBold,
-    fontSize: 16,
-    color: colors.ink,
-    textAlign: 'center',
+    fontSize: 25,
   },
-  posterBandLight: { color: colors.white },
-  posterFooter: {
-    fontFamily: fontFamilies.bodyBold,
-    fontSize: 12,
-    letterSpacing: 1,
-    color: colors.mutedInk,
-  },
+  promiseText: { flex: 1, color: colors.ink },
 });
