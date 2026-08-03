@@ -5,14 +5,13 @@ import { dirname, extname, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import { isValidCategoryPair } from '@offmap/taxonomy'
-import { getPayload } from 'payload'
+import type { Payload } from 'payload'
 import YAML from 'yaml'
 
-import config from '../payload.config'
 import type { Opportunity } from '../payload-types'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const repositoryRoot = resolve(here, '../../../..')
+const repositoryRoot = process.env.OFFMAP_REPOSITORY_ROOT || resolve(here, '../../../..')
 const reportPath = resolve(repositoryRoot, 'apps/cms/migrations/legacy-report.json')
 
 type LegacyText = string | null | undefined
@@ -394,8 +393,7 @@ function assertReport(report: MigrationReport): void {
     throw new Error(`Category mismatches: ${report.categoryMismatches.join(', ')}`)
 }
 
-async function writeRecords(records: LegacyOpportunity[]) {
-  const payload = await getPayload({ config })
+export async function writeLegacyRecords(payload: Payload, records: LegacyOpportunity[]) {
   let created = 0
   let skipped = 0
   for (const record of records) {
@@ -430,8 +428,23 @@ export async function runLegacyMigration(mode: 'check' | 'report' | 'write') {
   if (mode === 'report') {
     await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, 'utf8')
   }
-  const writeResult = mode === 'write' ? await writeRecords(records) : undefined
+  let writeResult: Awaited<ReturnType<typeof writeLegacyRecords>> | undefined
+  if (mode === 'write') {
+    const [{ getPayload }, { default: config }] = await Promise.all([
+      import('payload'),
+      import('../payload.config'),
+    ])
+    writeResult = await writeLegacyRecords(await getPayload({ config }), records)
+  }
   return { report, writeResult }
+}
+
+export async function importLegacyOpportunities(payload: Payload) {
+  const records = await readLegacySources()
+  records.forEach(mapLegacyOpportunity)
+  const report = buildMigrationReport(records)
+  assertReport(report)
+  return { report, writeResult: await writeLegacyRecords(payload, records) }
 }
 
 const isEntrypoint = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href
