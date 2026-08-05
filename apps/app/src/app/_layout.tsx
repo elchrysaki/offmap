@@ -55,8 +55,6 @@ export default function RootLayout() {
           screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.paper } }}
         >
           <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="opportunities/index" />
-          <Stack.Screen name="opportunities/[slug]" />
           <Stack.Screen name="about" />
         </Stack>
       </AppProviders>

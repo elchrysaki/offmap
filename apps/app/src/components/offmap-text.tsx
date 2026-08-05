@@ -17,13 +17,13 @@ const styles = StyleSheet.create({
     fontFamily: fontFamilies.body,
     fontSize: typeScale.body,
     lineHeight: 24,
+    flexShrink: 1,
   },
   display: {
     fontFamily: fontFamilies.display,
     fontSize: typeScale.display,
     lineHeight: 50,
     letterSpacing: -1.8,
-    textTransform: 'uppercase',
   },
   title: {
     fontFamily: fontFamilies.display,

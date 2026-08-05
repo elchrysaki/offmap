@@ -3,7 +3,7 @@ import { colors, fontFamilies, radii, spacing } from '@offmap/design';
 import { CATEGORY_CATALOG } from '@offmap/taxonomy';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
 
 import { submitOpportunity } from '@/api/client';
 import { ActionButton } from '@/components/action-button';
@@ -23,6 +23,8 @@ const initialForm: Form = {
 };
 
 export function SubmitScreen() {
+  const { width } = useWindowDimensions();
+  const compact = width < 600;
   const [step, setStep] = useState<1 | 2>(1);
   const [form, setForm] = useState<Form>(initialForm);
   const [validation, setValidation] = useState<string | null>(null);
@@ -55,12 +57,16 @@ export function SubmitScreen() {
   if (mutation.data) {
     return (
       <Page>
-        <View style={styles.success}>
+        <View style={[styles.success, compact && styles.successCompact]}>
           <OffMapText variant="handwritten" style={styles.kicker}>
             one link can open a door
           </OffMapText>
-          <OffMapText accessibilityRole="header" variant="display" style={styles.display}>
-            GOT IT.
+          <OffMapText
+            accessibilityRole="header"
+            variant="display"
+            style={[styles.display, compact && styles.displayCompact]}
+          >
+            got it.
           </OffMapText>
           <OffMapText variant="subtitle">{mutation.data.message}</OffMapText>
           <OffMapText variant="label">Reference {mutation.data.reference}</OffMapText>
@@ -84,8 +90,12 @@ export function SubmitScreen() {
         <OffMapText variant="handwritten" style={styles.kicker}>
           found something worthwhile?
         </OffMapText>
-        <OffMapText accessibilityRole="header" variant="display" style={styles.display}>
-          PASS IT ON.
+        <OffMapText
+          accessibilityRole="header"
+          variant="display"
+          style={[styles.display, compact && styles.displayCompact]}
+        >
+          pass it on.
         </OffMapText>
         <OffMapText variant="subtitle" style={styles.intro}>
           Send the official link. Humans check every submission before it appears; AI may prepare
@@ -97,7 +107,7 @@ export function SubmitScreen() {
         </View>
       </View>
 
-      <View style={styles.form}>
+      <View style={[styles.form, compact && styles.formCompact]}>
         {step === 1 ? (
           <>
             <Field
@@ -240,6 +250,7 @@ const styles = StyleSheet.create({
   header: { maxWidth: 800, gap: spacing.md, marginBottom: spacing.xxl },
   kicker: { color: colors.orange },
   display: { fontSize: 58, lineHeight: 60 },
+  displayCompact: { fontSize: 43, lineHeight: 45 },
   intro: { color: colors.mutedInk },
   progress: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg },
   progressBar: {
@@ -249,6 +260,7 @@ const styles = StyleSheet.create({
     borderColor: colors.ink,
     backgroundColor: colors.paperRaised,
   },
+  formCompact: { width: '100%', padding: spacing.lg, borderRadius: radii.medium },
   progressActive: { backgroundColor: colors.lime },
   form: {
     maxWidth: 820,
@@ -302,5 +314,11 @@ const styles = StyleSheet.create({
     borderColor: colors.ink,
     borderRadius: radii.large,
     backgroundColor: colors.lime,
+  },
+  successCompact: {
+    width: '100%',
+    minHeight: 380,
+    padding: spacing.xl,
+    borderRadius: radii.medium,
   },
 });

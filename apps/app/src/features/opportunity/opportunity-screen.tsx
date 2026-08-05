@@ -2,7 +2,16 @@ import { colors, fontFamilies, layout, radii, spacing } from '@offmap/design';
 import { getCategoryLabel } from '@offmap/taxonomy';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'expo-router';
-import { Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import {
+  Linking,
+  Platform,
+  Pressable,
+  Share,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 
 import { getOpportunity } from '@/api/client';
 import { ActionButton } from '@/components/action-button';
@@ -14,6 +23,8 @@ import { useSaved } from '@/providers/saved-provider';
 const confirmed = (value: string | null) => value || 'Not confirmed';
 
 export function OpportunityScreen({ slug }: { slug?: string }) {
+  const { width } = useWindowDimensions();
+  const compact = width < 700;
   const saved = useSaved();
   const query = useQuery({
     queryKey: ['opportunity', slug],
@@ -52,23 +63,29 @@ export function OpportunityScreen({ slug }: { slug?: string }) {
     : 'Open organizer page ↗';
   return (
     <Page>
-      <Link href="/opportunities" asChild>
-        <Pressable
-          accessibilityRole="link"
-          style={({ pressed }) => [styles.back, pressed && styles.pressed]}
-        >
-          <Text style={styles.backText}>← All opportunities</Text>
-        </Pressable>
-      </Link>
+      {Platform.OS === 'web' ? (
+        <Link href="/opportunities" asChild>
+          <Pressable
+            accessibilityRole="link"
+            style={({ pressed }) => [styles.back, pressed && styles.pressed]}
+          >
+            <Text style={styles.backText}>← All opportunities</Text>
+          </Pressable>
+        </Link>
+      ) : null}
 
-      <View style={styles.hero}>
-        <View style={styles.heroCopy}>
+      <View style={[styles.hero, compact && styles.heroCompact]}>
+        <View style={[styles.heroCopy, compact && styles.heroCopyCompact]}>
           <View style={styles.category}>
             <OffMapText variant="label">
               {getCategoryLabel(item.mainCategory, item.category)}
             </OffMapText>
           </View>
-          <OffMapText accessibilityRole="header" variant="display" style={styles.title}>
+          <OffMapText
+            accessibilityRole="header"
+            variant="display"
+            style={[styles.title, compact && styles.titleCompact]}
+          >
             {item.title}
           </OffMapText>
           <OffMapText variant="subtitle" style={styles.organizer}>
@@ -105,7 +122,8 @@ export function OpportunityScreen({ slug }: { slug?: string }) {
               : 'No direct application link is confirmed. The organizer page leaves OffMap.'}
           </OffMapText>
         </View>
-        <View style={styles.deadlineCard}>
+        <View style={[styles.deadlineCard, compact && styles.deadlineCardCompact]}>
+          <View accessibilityElementsHidden style={styles.deadlinePaint} />
           <OffMapText variant="handwritten" style={styles.deadlineKicker}>
             put this somewhere visible
           </OffMapText>
@@ -125,8 +143,8 @@ export function OpportunityScreen({ slug }: { slug?: string }) {
         </View>
       </View>
 
-      <View style={styles.columns}>
-        <View style={styles.mainColumn}>
+      <View style={[styles.columns, compact && styles.columnsCompact]}>
+        <View style={[styles.mainColumn, compact && styles.columnCompact]}>
           {item.details.map((section) => (
             <Section key={section.heading} title={section.heading}>
               <OffMapText>{section.body}</OffMapText>
@@ -164,7 +182,7 @@ export function OpportunityScreen({ slug }: { slug?: string }) {
             </Section>
           ) : null}
         </View>
-        <View style={styles.sideColumn}>
+        <View style={[styles.sideColumn, compact && styles.columnCompact]}>
           <Section title="Sources and review">
             <OffMapText>{item.provenance.summary}</OffMapText>
             {item.sources.map((source) => (
@@ -237,7 +255,16 @@ const styles = StyleSheet.create({
   },
   backText: { color: colors.ink, fontFamily: fontFamilies.bodyBold, fontSize: 15 },
   hero: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xxl, alignItems: 'stretch' },
-  heroCopy: { flexGrow: 2, flexBasis: 520, gap: spacing.lg, paddingVertical: spacing.lg },
+  heroCompact: { flexDirection: 'column', gap: spacing.xl },
+  heroCopy: {
+    flexGrow: 2,
+    flexShrink: 1,
+    flexBasis: 520,
+    minWidth: 0,
+    gap: spacing.lg,
+    paddingVertical: spacing.lg,
+  },
+  heroCopyCompact: { width: '100%', flexBasis: 'auto', flexGrow: 0, paddingVertical: 0 },
   category: {
     alignSelf: 'flex-start',
     paddingHorizontal: spacing.md,
@@ -248,20 +275,35 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '-1deg' }],
   },
   title: { fontSize: 54, lineHeight: 55 },
+  titleCompact: { fontSize: 38, lineHeight: 40, letterSpacing: -1.4 },
   organizer: { color: colors.violet },
   heroActions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
   externalNote: { color: colors.mutedInk },
   deadlineCard: {
     flexGrow: 1,
+    flexShrink: 1,
     flexBasis: 280,
+    minWidth: 0,
     maxWidth: 390,
+    position: 'relative',
+    overflow: 'hidden',
     gap: spacing.md,
     padding: spacing.xl,
     borderWidth: 3,
     borderColor: colors.ink,
     borderRadius: radii.large,
-    backgroundColor: colors.orange,
+    backgroundColor: colors.paperRaised,
     transform: [{ rotate: '1deg' }],
+  },
+  deadlineCardCompact: { width: '100%', flexBasis: 'auto', maxWidth: '100%', padding: spacing.lg },
+  deadlinePaint: {
+    position: 'absolute',
+    width: 180,
+    height: 36,
+    right: -30,
+    top: 12,
+    backgroundColor: 'rgba(255,90,36,0.5)',
+    transform: [{ rotate: '7deg' }],
   },
   deadlineKicker: { color: colors.ink },
   rule: { height: 2, backgroundColor: colors.ink, marginVertical: spacing.sm },
@@ -272,8 +314,17 @@ const styles = StyleSheet.create({
     marginTop: spacing.section,
     alignItems: 'flex-start',
   },
-  mainColumn: { flexGrow: 2, flexBasis: 500, maxWidth: layout.readingMaxWidth, gap: spacing.xxl },
-  sideColumn: { flexGrow: 1, flexBasis: 280, gap: spacing.xl },
+  columnsCompact: { flexDirection: 'column', marginTop: spacing.xxl, gap: spacing.xxl },
+  mainColumn: {
+    flexGrow: 2,
+    flexShrink: 1,
+    flexBasis: 500,
+    minWidth: 0,
+    maxWidth: layout.readingMaxWidth,
+    gap: spacing.xxl,
+  },
+  sideColumn: { flexGrow: 1, flexShrink: 1, flexBasis: 280, minWidth: 0, gap: spacing.xl },
+  columnCompact: { width: '100%', flexBasis: 'auto', flexGrow: 0, maxWidth: '100%' },
   section: {
     gap: spacing.lg,
     paddingBottom: spacing.xxl,
@@ -288,8 +339,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(17,17,17,0.2)',
   },
-  factLabel: { width: 145, color: colors.mutedInk },
-  factValue: { flex: 1, minWidth: 180, textTransform: 'none' },
+  factLabel: { flexBasis: 130, flexShrink: 1, color: colors.mutedInk },
+  factValue: { flex: 1, flexBasis: 160, minWidth: 0, textTransform: 'none' },
   bullets: { gap: spacing.md },
   bullet: { flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' },
   bulletMark: { color: colors.magenta, fontSize: 18, lineHeight: 24 },

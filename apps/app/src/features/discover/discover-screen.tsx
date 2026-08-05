@@ -3,7 +3,7 @@ import { colors, fontFamilies, spacing } from '@offmap/design';
 import { CATEGORY_CATALOG, getMainCategoryLabel } from '@offmap/taxonomy';
 import { useQuery } from '@tanstack/react-query';
 import { useDeferredValue, useMemo, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
 
 import { getOpportunities } from '@/api/client';
 import { ActionButton } from '@/components/action-button';
@@ -22,6 +22,8 @@ const sorts = [
 ] as const;
 
 export function DiscoverScreen({ showHero }: { showHero: boolean }) {
+  const { width } = useWindowDimensions();
+  const compact = width < 600;
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
   const [mainCategory, setMainCategory] = useState<string | undefined>();
@@ -80,11 +82,7 @@ export function DiscoverScreen({ showHero }: { showHero: boolean }) {
           <OffMapText accessibilityRole="header" variant="title">
             Browse by kind
           </OffMapText>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoryRail}
-          >
+          <View style={styles.categoryRail}>
             {Object.entries(CATEGORY_CATALOG).map(([value, definition], index) => (
               <FilterChip
                 key={value}
@@ -94,7 +92,7 @@ export function DiscoverScreen({ showHero }: { showHero: boolean }) {
                 count={query.data?.facets.mainCategories[value]}
               />
             ))}
-          </ScrollView>
+          </View>
         </View>
       ) : null}
 
@@ -126,11 +124,7 @@ export function DiscoverScreen({ showHero }: { showHero: boolean }) {
 
       <View style={styles.filterBlock}>
         {!showHero ? (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.filterRail}
-          >
+          <View style={styles.filterRail}>
             <FilterChip
               label="All categories"
               selected={!mainCategory}
@@ -145,7 +139,7 @@ export function DiscoverScreen({ showHero }: { showHero: boolean }) {
                 count={query.data?.facets.mainCategories[value]}
               />
             ))}
-          </ScrollView>
+          </View>
         ) : null}
         <View style={styles.filterRail}>
           <FilterChip
@@ -163,11 +157,7 @@ export function DiscoverScreen({ showHero }: { showHero: boolean }) {
             count={query.data?.facets.availability.rolling}
           />
         </View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterRail}
-        >
+        <View style={styles.filterRail}>
           {sorts.map(([value, label]) => (
             <FilterChip
               key={value}
@@ -176,7 +166,7 @@ export function DiscoverScreen({ showHero }: { showHero: boolean }) {
               onPress={() => chooseSort(value)}
             />
           ))}
-        </ScrollView>
+        </View>
       </View>
 
       {query.isPending ? (
@@ -210,7 +200,7 @@ export function DiscoverScreen({ showHero }: { showHero: boolean }) {
             </OffMapText>
             {query.isFetching ? <ActivityIndicator color={colors.blue} /> : null}
           </View>
-          <View style={styles.grid}>
+          <View style={[styles.grid, compact && styles.gridCompact]}>
             {query.data.items.map((item) => (
               <OpportunityCard key={item.id} opportunity={item} />
             ))}
@@ -255,7 +245,12 @@ function OpportunitySection({ title, items }: { title: string; items: Opportunit
 
 const styles = StyleSheet.create({
   categorySection: { marginTop: spacing.section, gap: spacing.md },
-  categoryRail: { gap: spacing.md, paddingVertical: spacing.sm, paddingRight: spacing.lg },
+  categoryRail: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+  },
   kicker: { color: colors.violet },
   featureSection: { marginTop: spacing.section, gap: spacing.xl },
   discoverHeader: {
@@ -266,11 +261,13 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'space-between',
   },
-  titleBlock: { gap: spacing.sm, flexGrow: 1 },
+  titleBlock: { gap: spacing.sm, flexGrow: 1, minWidth: 0 },
   search: {
     minHeight: 52,
     flexGrow: 1,
-    flexBasis: 320,
+    flexShrink: 1,
+    flexBasis: 280,
+    minWidth: 0,
     maxWidth: 520,
     borderWidth: 2,
     borderColor: colors.ink,
@@ -282,7 +279,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   filterBlock: { gap: spacing.md, marginVertical: spacing.xl },
-  filterRail: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, paddingRight: spacing.lg },
+  filterRail: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   loading: { minHeight: 260, alignItems: 'center', justifyContent: 'center', gap: spacing.lg },
   resultSummary: {
     minHeight: 44,
@@ -291,7 +288,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: spacing.lg,
   },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xl, alignItems: 'stretch' },
+  grid: {
+    width: '100%',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xl,
+    alignItems: 'stretch',
+  },
+  gridCompact: { gap: spacing.lg },
   pagination: {
     marginTop: spacing.xxl,
     flexDirection: 'row',
