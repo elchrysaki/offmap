@@ -7,7 +7,7 @@ organizer: L'SPACE Program (Arizona State University)
 main_category: courses
 category: academy
 edition: Fall 2026
-status: published
+status: archived
 summary: NPWEE is a virtual academy organized by the L'SPACE Program at Arizona State University. Participants gain hands-on experience in NASA mission planning, proposal writing, and interdisciplinary teamwork. The program immerses students in the NASA mission life cycle, focusing on mission concept development and remote project management skills.
 format: online
 location:
@@ -137,6 +137,11 @@ provenance:
   publication_pr_number: 30
   published_by: elchrysaki
   publishing_workflow: .github/workflows/rebuild-indexes.yml
+archival:
+  archived_at: '2026-08-03T04:47:17.662522+00:00'
+  reason: application-deadline-passed
+  application_deadline: '2026-08-02'
+  previous_status: published
 OFFMAP-METADATA-END -->
 
 # 🧭 NASA Proposal Writing and Evaluation Experience (NPWEE)

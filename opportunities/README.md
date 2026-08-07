@@ -2,14 +2,13 @@
 
 This index is generated automatically from reviewed opportunity files. Edit the individual opportunity pages, not this index.
 
-**Published opportunities:** 23
+**Published opportunities:** 21
 
 ## Jump to a main category
 
 - [🎤 Events](#main-events) (16)
 - [🧰 Internships](#main-internships) (1)
 - [🤝 Fellowships](#main-fellowships) (1)
-- [📚 Courses & Schools](#main-courses) (2)
 - [❤️ Volunteering](#main-volunteering) (1)
 - [✨ Other Opportunities](#main-other) (2)
 
@@ -55,17 +54,6 @@ This index is generated automatically from reviewed opportunity files. Edit the 
 | Opportunity | Type | Organizer | Deadline | Format | Location | Funding | Eligibility | Application |
 |---|---|---|---|---|---|---|---|---|
 | [Syntony Engineering Fellowship](<fellowships/syntony-engineering-fellowship.md>) | Fellowship | Syntony Engineering | Rolling applications | Online | Remote (hosted by Syntony Engineering, Durham, NC, United States) | No Application Fee, No Participation Fee, Remote | See opportunity page | [Official page](<https://www.syntonyresearch.ai/work/engineering-fellowship/?utm_source=ea-opps>) |
-
-[↑ Back to main categories](#jump-to-a-main-category)
-
-<a id="main-courses"></a>
-
-## 📚 Courses & Schools
-
-| Opportunity | Type | Organizer | Deadline | Format | Location | Funding | Eligibility | Application |
-|---|---|---|---|---|---|---|---|---|
-| [Mission Concept Academy (MCA)](<courses/mission-concept-academy-mca.md>) | Academy | L'SPACE | 2 August 2026, 11:59 PM PT | Online | Online (hosted from the United States) | No Application Fee, No Participation Fee | Undergraduate, Graduate | [Official page](<https://www.lspace.asu.edu/mission-concept-academy>) |
-| [NASA Proposal Writing and Evaluation Experience (NPWEE)](<courses/nasa-proposal-writing-and-evaluation-experience-npwee.md>) | Academy | L'SPACE Program (Arizona State University) | 2 August 2026, 11:59 PM PT | Online | Virtual program hosted from the United States | Not confirmed | See opportunity page | [Apply](<https://www.lspace.asu.edu/proposal-writing-academy>) |
 
 [↑ Back to main categories](#jump-to-a-main-category)
 
