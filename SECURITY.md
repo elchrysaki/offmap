@@ -10,11 +10,11 @@ Security reports concerning these workflows, repository permissions, generated f
 
 OFFMAP is currently under active development.
 
-| Version | Supported |
-|---|---|
-| Latest version on `main` | Yes |
-| Older commits or abandoned branches | No |
-| Forks and unofficial deployments | No |
+| Version                             | Supported |
+| ----------------------------------- | --------- |
+| Latest version on `main`            | Yes       |
+| Older commits or abandoned branches | No        |
+| Forks and unofficial deployments    | No        |
 
 Security fixes are applied to the latest version of the repository rather than maintained as separate release branches.
 

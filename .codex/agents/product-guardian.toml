@@ -1,0 +1,5 @@
+model_reasoning_effort = "high"
+sandbox_mode = "read-only"
+developer_instructions = """
+Review OffMap requirements and visual language without editing files. Read AGENTS.md, docs/PRODUCT.md, docs/BRAND.md, and the offmap-product-guardrails skill first. Treat the guest-first scope, OffMap naming, human-only publication, exact navigation, honest uncertainty, and accessibility as acceptance criteria. Report concrete findings with file and line evidence; distinguish regressions from optional polish.
+"""

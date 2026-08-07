@@ -1,0 +1,46 @@
+FROM node:22.13.0-alpine AS base
+
+ENV PNPM_HOME=/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+RUN npm install --global pnpm@11.9.0
+WORKDIR /workspace
+
+FROM base AS dependencies
+RUN apk add --no-cache libc6-compat
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/cms/package.json apps/cms/package.json
+COPY packages/contracts/package.json packages/contracts/package.json
+COPY packages/taxonomy/package.json packages/taxonomy/package.json
+COPY packages/design/package.json packages/design/package.json
+RUN pnpm install --frozen-lockfile
+
+FROM base AS builder
+COPY --from=dependencies /workspace/node_modules ./node_modules
+COPY --from=dependencies /workspace/apps/cms/node_modules ./apps/cms/node_modules
+COPY --from=dependencies /workspace/packages/contracts/node_modules ./packages/contracts/node_modules
+COPY --from=dependencies /workspace/packages/taxonomy/node_modules ./packages/taxonomy/node_modules
+COPY --from=dependencies /workspace/packages/design/node_modules ./packages/design/node_modules
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
+COPY apps/cms ./apps/cms
+COPY packages/contracts ./packages/contracts
+COPY packages/taxonomy ./packages/taxonomy
+COPY packages/design ./packages/design
+COPY data ./data
+COPY opportunities ./opportunities
+RUN PAYLOAD_SECRET=offmap-build-only-secret-not-for-runtime \
+    DATABASE_URL=postgres://offmap:offmap@postgres:5432/offmap \
+    pnpm --filter @offmap/cms build
+
+FROM node:22.13.0-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
+COPY --from=builder --chown=nextjs:nodejs /workspace/apps/cms/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /workspace/apps/cms/.next/static ./apps/cms/.next/static
+COPY --from=builder --chown=nextjs:nodejs /workspace/data ./data
+COPY --from=builder --chown=nextjs:nodejs /workspace/opportunities ./opportunities
+USER nextjs
+EXPOSE 3000
+CMD ["node", "apps/cms/server.js"]

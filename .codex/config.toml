@@ -1,0 +1,27 @@
+[features]
+multi_agent = true
+
+[agents]
+max_threads = 3
+
+[agents.product_guardian]
+description = "Read-only reviewer for OffMap product scope, brand, wording, navigation, and accessibility."
+config_file = "agents/product-guardian.toml"
+
+[agents.expo_builder]
+description = "Implements focused Expo Router universal UI and navigation work."
+config_file = "agents/expo-builder.toml"
+
+[agents.backend_builder]
+description = "Implements focused Payload, API, access-control, migration, and job work."
+config_file = "agents/backend-builder.toml"
+
+[agents.release_reviewer]
+description = "Read-only auditor for security, accessibility, regressions, and release evidence."
+config_file = "agents/release-reviewer.toml"
+
+[mcp_servers.expo]
+url = "https://mcp.expo.dev/mcp"
+
+[mcp_servers.openai_developer_docs]
+url = "https://developers.openai.com/mcp"

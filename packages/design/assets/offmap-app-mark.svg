@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title">
+  <title id="title">OffMap location mark</title>
+  <rect width="1024" height="1024" fill="#F5EEDC"/>
+  <path d="M730 0h294v300L814 250z" fill="#1268FF"/>
+  <path d="M0 758l238-70 78 270L0 1024z" fill="#FF5A24"/>
+  <path d="M566 88l245-28 14 82-245 28z" fill="#9272E9" opacity=".72"/>
+  <path d="M512 166c-184 0-322 137-322 325 0 221 228 445 322 529 94-84 322-308 322-529 0-188-138-325-322-325Z" fill="#F5EEDC" stroke="#111111" stroke-width="48" stroke-linejoin="round"/>
+  <circle cx="512" cy="482" r="204" fill="#F5EEDC" stroke="#111111" stroke-width="38"/>
+  <path d="m512 322 40 119 119 41-119 40-40 120-41-120-119-40 119-41Z" fill="#2B6970"/>
+</svg>
