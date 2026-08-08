@@ -7,7 +7,7 @@ organizer: EAGxBerkeley
 main_category: events
 category: conference
 edition: '2026'
-status: published
+status: archived
 summary: EAGxBerkeley 2026 is an in-person conference for the effective altruism community, hosted in Berkeley, California. The event aims to connect individuals interested in effective altruism, providing opportunities for networking, discussions, and learning. Open to those engaged with EA ideas, especially from the Bay Area and US West Coast.
 format: in-person
 location:
@@ -123,6 +123,11 @@ provenance:
   publication_pr_number: 58
   published_by: elchrysaki
   publishing_workflow: .github/workflows/rebuild-indexes.yml
+archival:
+  archived_at: '2026-08-08T03:01:01.345658+00:00'
+  reason: application-deadline-passed
+  application_deadline: '2026-08-07'
+  previous_status: published
 OFFMAP-METADATA-END -->
 
 # 🧭 EAGxBerkeley 2026

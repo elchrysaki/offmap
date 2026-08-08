@@ -2,11 +2,11 @@
 
 This index is generated automatically from reviewed opportunity files. Edit the individual opportunity pages, not this index.
 
-**Published opportunities:** 21
+**Published opportunities:** 20
 
 ## Jump to a main category
 
-- [🎤 Events](#main-events) (16)
+- [🎤 Events](#main-events) (15)
 - [🧰 Internships](#main-internships) (1)
 - [🤝 Fellowships](#main-fellowships) (1)
 - [❤️ Volunteering](#main-volunteering) (1)
@@ -18,7 +18,6 @@ This index is generated automatically from reviewed opportunity files. Edit the 
 
 | Opportunity | Type | Organizer | Deadline | Format | Location | Funding | Eligibility | Application |
 |---|---|---|---|---|---|---|---|---|
-| [EAGxBerkeley 2026](<events/eagxberkeley-2026.md>) | Conference | EAGxBerkeley | August 7, 2026 | In Person | In-person at Lighthaven, Berkeley, California, United States | Not confirmed | See opportunity page | [Apply](<https://effectivealtruism.my.site.com/EAGlobal/s/eagxberkeleyapplication>) |
 | [EA Summit: Buenos Aires](<events/ea-summit-buenos-aires.md>) | Conference | Effective Altruism Global / EA Summit: Buenos Aires | 15 August 2026 | In Person | In-person in Buenos Aires, Argentina | Not confirmed | See opportunity page | [Official page](<https://www.effectivealtruism.org/ea-global/events/ea-summit-buenos-aires?utm_source=ea-opps>) |
 | [EAGxSingapore 2026](<events/eagxsingapore-2026.md>) | Conference | Effective Altruism Global (EA Global) | 15 August 2026 | In Person | Catapult by CapitaLand, Singapore | Not confirmed | Southeast Asia | [Apply](<https://effectivealtruism.my.site.com/EAGlobal/s/eagxsingaporeapplication>) |
 | [PauseCon London 2026](<events/pausecon-london-2026.md>) | Conference | PauseAI Events (Global) | 21 August 2026 | In Person | In-person in London, United Kingdom | Not confirmed | See opportunity page | [Apply](<https://luma.com/4be2eqz9?utm_source=ea-opps>) |
