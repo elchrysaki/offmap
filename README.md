@@ -334,6 +334,7 @@ Listings may be removed or archived when the information becomes outdated, the o
 | 🔥 Closing soon | Conference | [EA Summit: Buenos Aires](opportunities/events/ea-summit-buenos-aires.md) | Effective altruism | 29 Aug 2026 / Buenos Aires, Argentina | In Person | Not stated | See details | [Apply](https://www.effectivealtruism.org/ea-global/events/ea-summit-buenos-aires?utm_source=ea-opps) | 15 August 2026 |
 | 🔥 Closing soon | Conference | [EAGxSingapore 2026](opportunities/events/eagxsingapore-2026.md) | Effective altruism; EA cause areas | 29–30 Aug 2026 / Singapore, Singapore | In Person | Not stated | Southeast Asia | [Apply](https://effectivealtruism.my.site.com/EAGlobal/s/eagxsingaporeapplication) | 15 August 2026 |
 | 🔥 Closing soon | Conference | [PauseCon London 2026](opportunities/events/pausecon-london-2026.md) | Conference | London, United Kingdom | In Person | Not stated | See details | [Apply](https://luma.com/4be2eqz9?utm_source=ea-opps) | 21 August 2026 |
+| 🔥 Closing soon | Conference | [EAGxOxford 2026](opportunities/events/eagxoxford-2026.md) | Effective altruism; Impactful causes | 25–27 Sep 2026 / Oxford, United Kingdom | In Person | Not stated | See details | [Apply](https://effectivealtruism.my.site.com/EAGlobal/s/eagxoxfordapplication) | 13 September 2026 |
 
 <!-- CLOSING_SOON_END -->
 
