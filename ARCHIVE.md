@@ -4,6 +4,8 @@ These opportunities are kept for reference after their application deadlines pas
 
 | Opportunity | Category | Deadline | Archived reason |
 |---|---|---|---|
+| [EAGxSingapore 2026](<opportunities/archive/events/eagxsingapore-2026.md>) | events | 15 August 2026 | Application deadline passed |
+| [EA Summit: Buenos Aires](<opportunities/archive/events/ea-summit-buenos-aires.md>) | events | 15 August 2026 | Application deadline passed |
 | [EAGxBerkeley 2026](<opportunities/archive/events/eagxberkeley-2026.md>) | events | August 7, 2026 | Application deadline passed |
 | [NASA Proposal Writing and Evaluation Experience (NPWEE)](<opportunities/archive/courses/nasa-proposal-writing-and-evaluation-experience-npwee.md>) | courses | 2 August 2026, 11:59 PM PT | Application deadline passed |
 | [Mission Concept Academy (MCA)](<opportunities/archive/courses/mission-concept-academy-mca.md>) | courses | 2 August 2026, 11:59 PM PT | Application deadline passed |

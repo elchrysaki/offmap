@@ -7,7 +7,7 @@ organizer: Effective Altruism Global (EA Global)
 main_category: events
 category: conference
 edition: '2026'
-status: published
+status: archived
 summary: EAGxSingapore 2026 is a two-day in-person conference for those interested in effective altruism, with a focus on Southeast and East Asia. Participants will engage in sessions, networking, and community interaction to explore EA cause areas and connect with like-minded individuals.
 format: in-person
 location:
@@ -148,6 +148,11 @@ provenance:
   publication_pr_number: 77
   published_by: elchrysaki
   publishing_workflow: .github/workflows/rebuild-indexes.yml
+archival:
+  archived_at: '2026-08-16T02:35:27.768238+00:00'
+  reason: application-deadline-passed
+  application_deadline: '2026-08-15'
+  previous_status: published
 OFFMAP-METADATA-END -->
 
 # 🧭 EAGxSingapore 2026

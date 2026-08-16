@@ -7,7 +7,7 @@ organizer: 'Effective Altruism Global / EA Summit: Buenos Aires'
 main_category: events
 category: conference
 edition: '2026'
-status: published
+status: archived
 summary: 'EA Summit: Buenos Aires is Argentina''s first dedicated effective altruism conference, bringing together students, researchers, entrepreneurs, professionals, nonprofit leaders, and policymakers. The one-day in-person event offers talks, networking, and discussions focused on effective altruism and related topics.'
 format: in-person
 location:
@@ -126,6 +126,11 @@ provenance:
   publication_pr_number: 46
   published_by: elchrysaki
   publishing_workflow: .github/workflows/rebuild-indexes.yml
+archival:
+  archived_at: '2026-08-16T02:35:27.700041+00:00'
+  reason: application-deadline-passed
+  application_deadline: '2026-08-15'
+  previous_status: published
 OFFMAP-METADATA-END -->
 
 # 🧭 EA Summit: Buenos Aires
