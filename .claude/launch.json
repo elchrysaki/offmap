@@ -14,6 +14,12 @@
       "port": 3000
     },
     {
+      "name": "offmap-nextjs-prod",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["exec", "next", "start", "-p", "3100"],
+      "port": 3100
+    },
+    {
       "name": "offmap-nextjs-preview",
       "url": "http://localhost:3000"
     }
