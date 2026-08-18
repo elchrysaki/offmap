@@ -98,80 +98,66 @@ export function OpportunitiesReel() {
   }, []);
 
   return (
-    <section
-      ref={wrapRef}
-      className="relative"
-      style={{ background: 'var(--ink)' }}
-    >
-      <style>{`
-        @media (min-width: 721px) and (prefers-reduced-motion: no-preference) {
-          .opp-wrap-h { height: 280vh; }
-        }
-        @media (max-width: 720px), (prefers-reduced-motion: reduce) {
-          .opp-wrap-h { height: auto; }
-        }
-      `}</style>
-      <div className="opp-wrap-h">
-        <div className="flex flex-col justify-center gap-5 overflow-hidden py-16 md:sticky md:top-0 md:h-screen md:py-0">
-          <div className="flex items-baseline justify-between px-6">
-            <h2
-              className="font-[family-name:var(--font-fraunces)] text-2xl font-extrabold uppercase md:text-3xl"
-              style={{ color: 'var(--paper)' }}
-            >
-              Opportunities
-            </h2>
-            <span
-              ref={countRef}
-              className="font-[family-name:var(--font-bungee)] text-[11px]"
-              style={{ background: 'var(--lime)', color: 'var(--ink)', borderRadius: 'var(--radius-stamp)', padding: '6px 10px' }}
-            >
-              SCROLL &darr;
-            </span>
-          </div>
-
-          {ROWS.map((row, i) => (
-            <div key={i} className="overflow-x-auto px-6 pb-1 md:overflow-visible">
-              <div
-                ref={(el) => {
-                  rowRefs.current[i] = el;
-                }}
-                className="flex gap-4 will-change-transform"
-              >
-                {row.items.map((item, j) => (
-                  <div
-                    key={j}
-                    className="flex w-[220px] flex-none flex-col gap-2.5 p-4"
-                    style={{
-                      background: 'var(--card)',
-                      border: 'var(--border-width) solid var(--ink)',
-                      borderRadius: 'var(--radius-card)',
-                    }}
-                  >
-                    <span
-                      className="font-[family-name:var(--font-archivo)] w-fit px-2 py-0.5 text-[10px] font-bold tracking-[0.06em] uppercase"
-                      style={{ background: row.color, color: 'var(--ink)', borderRadius: 'var(--radius-stamp)' }}
-                    >
-                      {item.tag}
-                    </span>
-                    <h3 className="font-[family-name:var(--font-fraunces)] text-[15px] leading-snug font-bold">
-                      {item.title}
-                    </h3>
-                    <p className="text-[12px]" style={{ color: 'var(--muted)' }}>
-                      {item.meta}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-
-          <p
-            className="font-[family-name:var(--font-archivo)] px-6 text-[11px] font-bold tracking-[0.05em] uppercase"
-            style={{ color: 'rgba(245,239,227,0.5)' }}
+    <section ref={wrapRef} className="relative md:h-[280vh]" style={{ background: 'var(--ink)' }}>
+      <div className="flex flex-col justify-center gap-5 overflow-hidden py-16 md:sticky md:top-0 md:h-screen md:py-0">
+        <div className="flex items-baseline justify-between px-6">
+          <h2
+            className="font-[family-name:var(--font-fraunces)] text-2xl font-extrabold uppercase md:text-3xl"
+            style={{ color: 'var(--paper)' }}
           >
-            Conferences · Hackathons · Courses — three registers, one deadline spine. Mock listings shown.
-          </p>
+            Opportunities
+          </h2>
+          <span
+            ref={countRef}
+            className="font-[family-name:var(--font-bungee)] text-[11px]"
+            style={{ background: 'var(--lime)', color: 'var(--ink)', borderRadius: 'var(--radius-stamp)', padding: '6px 10px' }}
+          >
+            SCROLL &darr;
+          </span>
         </div>
+
+        {ROWS.map((row, i) => (
+          <div key={i} className="overflow-x-auto px-6 pb-1 md:overflow-visible">
+            <div
+              ref={(el) => {
+                rowRefs.current[i] = el;
+              }}
+              className="flex gap-4 will-change-transform"
+            >
+              {row.items.map((item, j) => (
+                <div
+                  key={j}
+                  className="flex w-[220px] flex-none flex-col gap-2.5 p-4"
+                  style={{
+                    background: 'var(--card)',
+                    border: 'var(--border-width) solid var(--ink)',
+                    borderRadius: 'var(--radius-card)',
+                  }}
+                >
+                  <span
+                    className="font-[family-name:var(--font-archivo)] w-fit px-2 py-0.5 text-[10px] font-bold tracking-[0.06em] uppercase"
+                    style={{ background: row.color, color: 'var(--ink)', borderRadius: 'var(--radius-stamp)' }}
+                  >
+                    {item.tag}
+                  </span>
+                  <h3 className="font-[family-name:var(--font-fraunces)] text-[15px] leading-snug font-bold">
+                    {item.title}
+                  </h3>
+                  <p className="text-[12px]" style={{ color: 'var(--muted)' }}>
+                    {item.meta}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <p
+          className="font-[family-name:var(--font-archivo)] px-6 text-[11px] font-bold tracking-[0.05em] uppercase"
+          style={{ color: 'rgba(245,239,227,0.5)' }}
+        >
+          Conferences · Hackathons · Courses — three registers, one deadline spine. Mock listings shown.
+        </p>
       </div>
     </section>
   );
