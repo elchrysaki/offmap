@@ -261,7 +261,17 @@ export default function Globe({
     camera.position.set(0, 0, cameraDistance);
     camera.lookAt(0, 0, 0);
 
-    const renderer = new WebGLRenderer({ antialias: true, alpha: true });
+    let renderer: WebGLRenderer;
+    try {
+      renderer = new WebGLRenderer({ antialias: true, alpha: true });
+    } catch {
+      // A lost/unavailable WebGL context throws synchronously here instead of
+      // rejecting a promise — matches the fetch-failure error path below so
+      // this decorative accent degrades to nothing rather than crashing the
+      // page (no error boundary sits above this component).
+      setError("Failed to create WebGL context");
+      return;
+    }
     renderer.setSize(containerWidth, containerHeight);
     // Capped at 1.5, not 2 — this renders continuously (rotation) at a large
     // canvas size, and 2x on a Retina display was the main source of the
