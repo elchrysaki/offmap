@@ -53,13 +53,16 @@ export function OpportunitiesReel() {
     try {
       if (typeof window === 'undefined') return;
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const isDesktop = window.matchMedia('(min-width: 721px)').matches;
+      // Must match Tailwind's `md:` breakpoint (768px) — the pinned height and
+      // sticky positioning only exist above that width. A mismatched threshold
+      // here meant this JS ran its scroll-jack math against an unpinned,
+      // normal-height section for any width between the two breakpoints.
+      const isDesktop = window.matchMedia('(min-width: 768px)').matches;
       if (reduceMotion || !isDesktop) return;
 
       const wrap = wrapRef.current;
       if (!wrap) return;
 
-      let ticking = false;
       const shiftRow = (row: HTMLDivElement | null, progress: number, direction: 1 | -1) => {
         if (!row || !row.parentElement) return;
         const max = row.scrollWidth - row.parentElement.clientWidth;
@@ -70,7 +73,6 @@ export function OpportunitiesReel() {
       };
 
       const update = () => {
-        ticking = false;
         const rect = wrap.getBoundingClientRect();
         const viewportH = window.innerHeight;
         const scrollable = rect.height - viewportH;
@@ -79,18 +81,34 @@ export function OpportunitiesReel() {
         rowRefs.current.forEach((row, i) => shiftRow(row, progress, i % 2 === 0 ? 1 : -1));
         if (countRef.current) countRef.current.textContent = `${Math.round(progress * 100)}%`;
       };
-      const onScroll = () => {
-        if (!ticking) {
-          window.requestAnimationFrame(update);
-          ticking = true;
-        }
+
+      // Cancel-and-reschedule instead of a boolean "ticking" gate: a boolean
+      // gate that's only cleared inside the rAF callback can leave the
+      // animation showing a stale frame if that one callback is delayed —
+      // rAF is paused for hidden tabs by design, and a scroll or resize that
+      // fires while hidden would otherwise sit unresolved until the next
+      // event happened to arrive after the tab became visible again. This
+      // way every scroll/resize/visibility change always gets its own fresh
+      // frame request, and returning to the tab snaps straight to the
+      // correct position instead of waiting on the next scroll to catch up.
+      let rafId: number | null = null;
+      const schedule = () => {
+        if (rafId !== null) window.cancelAnimationFrame(rafId);
+        rafId = window.requestAnimationFrame(() => {
+          rafId = null;
+          update();
+        });
       };
-      window.addEventListener('scroll', onScroll, { passive: true });
-      window.addEventListener('resize', onScroll);
+
+      window.addEventListener('scroll', schedule, { passive: true });
+      window.addEventListener('resize', schedule);
+      document.addEventListener('visibilitychange', schedule);
       update();
       return () => {
-        window.removeEventListener('scroll', onScroll);
-        window.removeEventListener('resize', onScroll);
+        if (rafId !== null) window.cancelAnimationFrame(rafId);
+        window.removeEventListener('scroll', schedule);
+        window.removeEventListener('resize', schedule);
+        document.removeEventListener('visibilitychange', schedule);
       };
     } catch {
       // scroll-linked motion is a progressive enhancement only
