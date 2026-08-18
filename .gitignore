@@ -22,6 +22,9 @@ apps/app/ios/
 .next/
 apps/cms/media/
 
+# Supabase CLI local cache
+supabase/.temp/
+
 # Environment and local data
 .env
 .env.*
