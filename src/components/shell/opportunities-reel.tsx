@@ -65,7 +65,13 @@ export function OpportunitiesReel() {
 
       const shiftRow = (row: HTMLDivElement | null, progress: number, direction: 1 | -1) => {
         if (!row || !row.parentElement) return;
-        const max = row.scrollWidth - row.parentElement.clientWidth;
+        const containerWidth = row.parentElement.clientWidth;
+        // On wide screens the row's own cards can be narrower than the
+        // container, so there's no natural overflow to slide through. The
+        // row's parent switches to `overflow-visible` at `md:`, so falling
+        // back to a fraction of the container width still reads as a clean
+        // slide off either edge instead of silently doing nothing.
+        const max = Math.max(row.scrollWidth - containerWidth, containerWidth * 0.35);
         if (max <= 0) return;
         const start = direction > 0 ? -max * 0.5 : max * 0.5;
         const end = direction > 0 ? max * 0.5 : -max * 0.5;
