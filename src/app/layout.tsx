@@ -1,7 +1,8 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Archivo, Bungee, Fraunces } from 'next/font/google';
 
 import { AuthSaveSync } from '@/components/core/auth-save-sync';
+import { ServiceWorkerRegister } from '@/components/core/service-worker-register';
 
 import './globals.css';
 
@@ -32,6 +33,16 @@ export const metadata: Metadata = {
   title: 'OffMap',
   description:
     'The opportunities students actually get into — including the ones that never make it online.',
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'OffMap',
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#141210',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -39,6 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${fraunces.variable} ${archivo.variable} ${bungee.variable}`}>
       <body>
         <AuthSaveSync />
+        <ServiceWorkerRegister />
         {children}
       </body>
     </html>
