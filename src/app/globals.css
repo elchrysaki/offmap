@@ -1,0 +1,67 @@
+@import 'tailwindcss';
+
+:root {
+  --paper: #f5efe3; /* page ground */
+  --card: #faf6ea; /* card and panel surface */
+  --ink: #141210; /* text and borders */
+  --muted: #8a7f6b; /* meta text */
+  --rule: #ded4c2; /* hairlines */
+
+  --vermilion: #f0421c; /* DEADLINES ONLY — never decorative, never a category */
+  --pink: #f5399b; /* the NOT ONLINE stamp only */
+
+  --lime: #c9e547; /* field tiles and filters only */
+  --cobalt: #2b57e0;
+  --marigold: #ffc01e;
+  --violet: #8b4fe0;
+  --teal: #0fb3a1;
+
+  /* CLAUDE.md §7: 2px ink borders, hard offset shadow, no blur, no gradients */
+  --border-width: 2px;
+  --shadow-offset: 5px 5px 0 var(--ink);
+  --shadow-offset-sm: 3px 3px 0 var(--ink);
+  /* for ink-filled buttons: the shadow must contrast the fill, not match it */
+  --shadow-offset-paper: 5px 5px 0 var(--paper);
+  --shadow-offset-paper-sm: 3px 3px 0 var(--paper);
+  --radius-card: 18px;
+  --radius-panel: 28px;
+  --radius-pill: 20px;
+  --radius-stamp: 3px;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-marquee {
+  animation: marquee 24s linear infinite;
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+.animate-bob {
+  animation: bob 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-bob {
+    animation: none;
+  }
+}

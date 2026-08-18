@@ -16,13 +16,14 @@ OffMap helps students find credible opportunities without piecing together newsl
 1. Home: editorial hero, featured opportunities, closing soon, and category entry points.
 2. Discover: instant search, filter chips, sorting, pagination, and complete UI states.
 3. Detail: deadline, eligibility, cost/support, location, verification, source, share, save, and official apply action.
-4. Saved: local-only persistence on the current browser/device.
+4. Saved: local-only persistence on the current browser/device by default; a student may optionally sign in to sync saves across devices (ADR 0005). Signing in is never required to save.
 5. Submit: source URL, title, broad category, note, optional private email, consent, and clear human-review explanation.
 6. About: editorial standards, privacy, contribution, and organizational independence.
+7. Account (optional): email/password with verification, or Microsoft/Apple sign-in, purely to carry saved opportunities across devices. No profile, feed, or social surface comes with it.
 
 ## Explicitly out of scope
 
-Student accounts, profiles, stored applications, document uploads, application tracking, comments, ratings, social feeds, communities, literal geographic maps, stories, push notifications, and automated publication are not MVP features.
+Application tracking, document uploads, comments, ratings, social feeds, communities, literal geographic maps, stories, push notifications, personalized recommendations, and automated publication are not MVP features. Student accounts exist only for saved-opportunity sync (see Account above) — anything beyond that remains out of scope.
 
 ## Content principles
 

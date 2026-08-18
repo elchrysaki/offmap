@@ -4,7 +4,7 @@
 
 OffMap is a student-first, worldwide directory for discovering, saving, and contributing opportunities. The canonical brand is **OffMap** and the approved visual reference is `hero_section_gm.png`. “Enchanted Map”, unicorn, quest, and game concepts are legacy material and must not ship.
 
-The MVP is guest-first. Students can browse, locally save, share, open official links, and submit an opportunity without an account. Do not add student accounts, profiles, application tracking, uploaded documents, comments, ratings, communities, a literal map, push notifications, or cross-device tracking without an approved product change.
+The MVP is guest-first: browsing, saving, sharing, opening official links, and submitting an opportunity all work without an account, and that stays the default (ADR 0005). A student account is optional and exists only to sync saved opportunities across devices — signing up requires self-declared 16+ confirmation and, for email/password, a verified email before the account is usable. Do not add profiles, application tracking, uploaded documents, comments, ratings, communities, a literal map, push notifications, or any other cross-device tracking without a further approved product change. Google OAuth is code-complete but must stay disabled until the legal pages at `docs/legal/` are confirmed reviewed and live.
 
 Only authenticated CMS users may moderate content. Editors prepare and review drafts; only admins publish or delete. AI may propose research into an immutable research run, but it must never alter contributor-selected audience values, create a draft without a second explicit human action, or publish.
 
