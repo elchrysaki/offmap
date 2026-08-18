@@ -64,7 +64,6 @@ const ROWS: { color: string; direction: 1 | -1; items: MockCard[] }[] = [
 // always a full extra lap on either side of whatever's on screen, so
 // resetting the offset by one lap width never shows a seam.
 const LAPS = 3;
-const SCROLL_SPEED = 0.6; // px of row movement per px of page scroll
 
 function Card({ item, color, hidden }: { item: MockCard; color: string; hidden?: boolean }) {
   return (
@@ -97,6 +96,7 @@ export function OpportunitiesReel() {
   const countRef = useRef<HTMLSpanElement>(null);
   const offsetRef = useRef<number[]>(ROWS.map(() => 0));
   const lapWidthRef = useRef<number[]>(ROWS.map(() => 0));
+  const speedRef = useRef<number[]>(ROWS.map(() => 0));
   const draggingRef = useRef<Array<{ pointerId: number; startX: number; startOffset: number } | null>>(
     ROWS.map(() => null),
   );
@@ -130,6 +130,23 @@ export function OpportunitiesReel() {
         }
       });
 
+      // Same pacing as before the recycling change: scrolling through the
+      // whole pinned range still sweeps each row across its full travel
+      // distance (its natural overflow, or 35% of the container as a
+      // fallback on rows that fit) — only now that sweep keeps going and
+      // wraps, instead of stopping dead at the end.
+      const computeSpeeds = () => {
+        const scrollable = wrap.getBoundingClientRect().height - window.innerHeight;
+        rowRefs.current.forEach((row, i) => {
+          if (!row || !row.parentElement) return;
+          const containerWidth = row.parentElement.clientWidth;
+          const lap = lapWidthRef.current[i] ?? 0;
+          const travel = Math.max(lap - containerWidth, containerWidth * 0.35);
+          speedRef.current[i] = scrollable > 0 ? travel / scrollable : 0;
+        });
+      };
+      computeSpeeds();
+
       const wrapOffset = (i: number) => {
         const lap = lapWidthRef.current[i] ?? 0;
         if (lap <= 0) return;
@@ -159,7 +176,7 @@ export function OpportunitiesReel() {
         if (delta !== 0 && isPinned()) {
           ROWS.forEach((row, i) => {
             if (draggingRef.current[i]) return; // paused — under manual control
-            offsetRef.current[i] = (offsetRef.current[i] ?? 0) + delta * SCROLL_SPEED * row.direction;
+            offsetRef.current[i] = (offsetRef.current[i] ?? 0) + delta * (speedRef.current[i] ?? 0) * row.direction;
             wrapOffset(i);
           });
         }
@@ -194,8 +211,13 @@ export function OpportunitiesReel() {
       lastScrollYRef.current = window.scrollY;
       paint();
 
+      const onResize = () => {
+        computeSpeeds();
+        schedule();
+      };
+
       window.addEventListener('scroll', schedule, { passive: true });
-      window.addEventListener('resize', schedule);
+      window.addEventListener('resize', onResize);
       document.addEventListener('visibilitychange', schedule);
 
       // Manual control: grab-drag or trackpad/wheel horizontal swipe on any
@@ -257,7 +279,7 @@ export function OpportunitiesReel() {
       return () => {
         if (rafId !== null) window.cancelAnimationFrame(rafId);
         window.removeEventListener('scroll', schedule);
-        window.removeEventListener('resize', schedule);
+        window.removeEventListener('resize', onResize);
         document.removeEventListener('visibilitychange', schedule);
         cleanupRowListeners.forEach((fn) => fn());
       };
