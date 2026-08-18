@@ -466,18 +466,21 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          last_alert_sent_at: string | null
           opportunity_id: string
           profile_id: string
         }
         Insert: {
           created_at?: string
           id?: string
+          last_alert_sent_at?: string | null
           opportunity_id: string
           profile_id: string
         }
         Update: {
           created_at?: string
           id?: string
+          last_alert_sent_at?: string | null
           opportunity_id?: string
           profile_id?: string
         }
