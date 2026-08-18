@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "OffMap",
+    "slug": "offmap",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/offmap-icon.png",
+    "scheme": "offmap",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F5EEDC",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "org.offmap.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F5EEDC",
+        "foregroundImage": "./assets/images/offmap-adaptive-foreground.png",
+        "monochromeImage": "./assets/images/offmap-adaptive-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": true,
+      "package": "org.offmap.app"
+    },
+    "web": {
+      "output": "server",
+      "favicon": "./assets/images/offmap-favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F5EEDC",
+          "image": "./assets/images/offmap-splash.png",
+          "imageWidth": 128
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "401963e2-b1f0-464b-a097-07e0841b63d5"
+      }
+    },
+    "owner": "achrysakis"
+  }
+}

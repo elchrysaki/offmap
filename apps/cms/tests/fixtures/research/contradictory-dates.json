@@ -1,0 +1,53 @@
+{
+  "title": "Example Student Forum 2027",
+  "organizer": "Example Institute",
+  "edition": "2027",
+  "summary": "A student forum with conflicting deadline evidence that requires editorial review.",
+  "mainCategory": "events",
+  "category": "forum",
+  "audienceGroupsObserved": [],
+  "dates": {
+    "applicationDeadline": null,
+    "startAt": "2027-06-12T09:00:00.000Z",
+    "endAt": "2027-06-14T17:00:00.000Z",
+    "timezone": "Europe/Athens",
+    "rolling": false
+  },
+  "location": {
+    "display": "Athens, Greece",
+    "city": "Athens",
+    "country": "Greece",
+    "countryCode": "GR",
+    "region": "Europe"
+  },
+  "format": "in-person",
+  "eligibilitySummary": null,
+  "funding": {
+    "applicationFee": null,
+    "participationFee": null,
+    "scholarship": null,
+    "travelSupport": null,
+    "accommodation": null,
+    "meals": null,
+    "stipendOrSalary": null,
+    "prizes": null,
+    "visaSupport": null,
+    "accessibilitySupport": null,
+    "otherSupport": []
+  },
+  "officialUrl": "https://example.edu/forum",
+  "applicationUrl": null,
+  "citations": [
+    {
+      "url": "https://example.edu/forum",
+      "label": "Official forum page",
+      "checkedAt": "2026-08-02T12:00:00.000Z",
+      "supportedFields": ["title", "organizer", "startAt", "endAt", "location"],
+      "reviewer": null
+    }
+  ],
+  "warnings": [
+    "Two official pages show different application deadlines; no deadline was proposed."
+  ],
+  "unsupportedFields": ["applicationDeadline", "eligibility", "funding"]
+}

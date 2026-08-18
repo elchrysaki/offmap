@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: offmap-cms-achrysakis
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: mvp
+    dockerfilePath: ./Dockerfile.cms
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: offmap-showcase-db
+          property: connectionString
+      - key: PAYLOAD_SECRET
+        generateValue: true
+      - key: SUBMISSION_HASH_SECRET
+        generateValue: true
+      - key: OFFMAP_ADMIN_EMAIL
+        sync: false
+      - key: OFFMAP_ADMIN_PASSWORD
+        sync: false
+      - key: OFFMAP_ADMIN_NAME
+        value: OffMap Admin
+      - key: OFFMAP_SEED_ADMIN_ON_INIT
+        value: 'true'
+      - key: OFFMAP_IMPORT_LEGACY_ON_INIT
+        value: 'true'
+      - key: OFFMAP_REPOSITORY_ROOT
+        value: /app
+      - key: OFFMAP_RUN_PROD_MIGRATIONS
+        value: 'true'
+
+databases:
+  - name: offmap-showcase-db
+    plan: free
+    region: frankfurt
+    databaseName: offmap
+    user: offmap
+    postgresMajorVersion: '17'
+    ipAllowList: []

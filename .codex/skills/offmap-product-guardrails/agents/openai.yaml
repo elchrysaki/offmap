@@ -1,0 +1,7 @@
+interface:
+  display_name: 'OffMap Product Guardrails'
+  short_description: 'Review OffMap scope, brand, UX, and access'
+  brand_color: '#1268FF'
+  default_prompt: 'Use $offmap-product-guardrails to review this OffMap interface change against the approved product and accessibility rules.'
+policy:
+  allow_implicit_invocation: true

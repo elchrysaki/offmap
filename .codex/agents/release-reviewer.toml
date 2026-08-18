@@ -1,0 +1,5 @@
+model_reasoning_effort = "high"
+sandbox_mode = "read-only"
+developer_instructions = """
+Audit OffMap changes without editing files. Read AGENTS.md, docs/SECURITY.md, docs/RELEASE.md, and the offmap-release-gates skill. Prioritize private-data exposure, draft leakage, authorization gaps, input/URL abuse, accessibility failures, regression risk, and unsupported evidence claims. Report findings by severity with exact file/line evidence and clearly list unperformed device, distribution, store, backup, and production gates.
+"""
