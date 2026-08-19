@@ -11,6 +11,7 @@ import {
   getTypes,
 } from '@/lib/queries/taxonomy';
 import { getCurrentUserRole } from '@/lib/queries/profile';
+import { getMissingPublishFields } from '@/lib/opportunity-publish-gate';
 import type { OpportunityResearch } from '@/lib/ai/verify-opportunity';
 
 import {
@@ -101,6 +102,7 @@ export default async function AdminOpportunityPage({
   const runAiResearchWithId = runAiResearch.bind(null, id);
 
   const research = opportunity.ai_research as OpportunityResearch | { error: string } | null;
+  const missing = getMissingPublishFields(opportunity);
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-16">
@@ -200,7 +202,33 @@ export default async function AdminOpportunityPage({
         </div>
       )}
 
+      {opportunity.apply_url_candidate && (
+        // Written only by the weekly check-application-links Edge Function
+        // (supabase/functions/check-application-links), not by the on-demand
+        // button above — surfaced here so a moderator sees it too. Same rule
+        // as the AI research block: a candidate, never copied into apply_url
+        // automatically.
+        <div className="mt-4 rounded-[18px] border-2 border-[color:var(--marigold)] bg-[color:var(--card)] p-5">
+          <h2 className="text-sm font-bold tracking-wide text-[color:var(--marigold)] uppercase">
+            Candidate apply URL from the weekly link check — not applied automatically
+          </h2>
+          <p className="mt-2 text-sm break-all">{opportunity.apply_url_candidate}</p>
+          {opportunity.apply_url_candidate_note && (
+            <p className={helpClass}>{opportunity.apply_url_candidate_note}</p>
+          )}
+          <p className={helpClass}>
+            Copy this into the Apply URL field below by hand once you&apos;ve checked it.
+          </p>
+        </div>
+      )}
+
       <form action={saveWithId} className="mt-6 space-y-6">
+        {/* Read by saveOpportunity to detect a first-ever save on a fresh
+            'lead' row, so it can advance it to 'in_review' — that's the
+            signal the queue page uses to tell untouched rows apart from
+            ones already being worked on. Never used to jump straight to
+            published/rejected; those only happen via their own actions. */}
+        <input type="hidden" name="review_state" value={opportunity.review_state} />
         <Section title="The basics">
           <div>
             <label htmlFor="title" className={labelClass}>
@@ -615,6 +643,29 @@ export default async function AdminOpportunityPage({
         <p className={helpClass}>
           * required to publish — enforced by the database, not just this form.
         </p>
+
+        {/* Preview of the same publish_gate CHECK constraint the database
+            enforces (supabase/migrations/20260816234558_init_schema.sql) —
+            shown before a publish attempt, not just after it bounces off
+            the constraint. This is a UI convenience only; the database is
+            still the real gate. */}
+        {missing.length > 0 ? (
+          <div className="rounded-[18px] border-2 border-[color:var(--vermilion)] bg-[color:var(--card)] p-4">
+            <p className="text-sm font-medium text-[color:var(--vermilion)]">
+              Not ready to publish yet — still missing: {missing.join(', ')}
+            </p>
+            <p className={helpClass}>
+              Verification date and moderator are stamped automatically when this publishes.
+            </p>
+          </div>
+        ) : (
+          <div className="rounded-[18px] border-2 border-[color:var(--ink)] bg-[color:var(--card)] p-4">
+            <p className="text-sm font-medium">
+              Every publish-gate field is filled in. Publishing stamps today&apos;s date and your
+              account as the verifier.
+            </p>
+          </div>
+        )}
 
         <div className="sticky bottom-4 flex gap-3 rounded-[18px] border-2 border-[color:var(--ink)] bg-[color:var(--paper)] p-4 shadow-[5px_5px_0_var(--ink)]">
           <button
