@@ -7,6 +7,7 @@ const NAV_LINKS = [
   { href: '/browse', label: 'Browse' },
   { href: '/community', label: 'Community' },
   { href: '/get-app', label: 'Get the app' },
+  { href: '/submit', label: 'Add opportunity' },
 ];
 
 // The "sandwich" (hamburger) nav for the iPad-width band — the desktop top

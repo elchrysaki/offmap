@@ -7,6 +7,7 @@ const COLUMNS: { heading: string; links: { href: string; label: string }[] }[] =
       { href: '/browse', label: 'Browse' },
       { href: '/community', label: 'Community' },
       { href: '/get-app', label: 'Get the app' },
+      { href: '/submit', label: 'Add opportunity' },
     ],
   },
   {

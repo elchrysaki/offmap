@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { href: '/browse', label: 'Browse' },
   { href: '/community', label: 'Community' },
   { href: '/get-app', label: 'Get the app' },
+  { href: '/submit', label: 'Add opportunity' },
 ];
 
 // Top nav, desktop web. Bottom tab bar (BottomNav) covers mobile/app.

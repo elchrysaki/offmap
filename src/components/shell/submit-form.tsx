@@ -27,7 +27,13 @@ const inputStyle = {
 const labelClass =
   'font-[family-name:var(--font-archivo)] text-[11px] font-extrabold tracking-[0.1em] uppercase';
 
-export function SubmitForm({ types }: { types: TypeOption[] }) {
+export function SubmitForm({
+  types,
+  submitterEmail,
+}: {
+  types: TypeOption[];
+  submitterEmail: string;
+}) {
   const [state, formAction, isPending] = useActionState<SubmitState, FormData>(
     submitOpportunity,
     initialSubmitState,
@@ -191,11 +197,11 @@ export function SubmitForm({ types }: { types: TypeOption[] }) {
         }}
       >
         <legend className={labelClass} style={{ color: 'var(--muted)' }}>
-          Who&apos;s submitting this (optional)
+          Who&apos;s submitting this
         </legend>
         <div>
           <label htmlFor="submitter_name" className={labelClass}>
-            Your name
+            Your name <span style={{ color: 'var(--muted)', fontWeight: 500 }}>(optional)</span>
           </label>
           <input
             id="submitter_name"
@@ -214,10 +220,15 @@ export function SubmitForm({ types }: { types: TypeOption[] }) {
             id="submitter_email"
             name="submitter_email"
             type="email"
-            placeholder="Only if a moderator needs to ask a question. Never shown publicly."
-            className="mt-1.5 w-full px-3.5 py-2.5 text-[15px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--cobalt)]"
-            style={inputStyle}
+            defaultValue={submitterEmail}
+            readOnly
+            className="mt-1.5 w-full px-3.5 py-2.5 text-[15px]"
+            style={{ ...inputStyle, opacity: 0.7 }}
           />
+          <p className="mt-1.5 text-[13px]" style={{ color: 'var(--muted)' }}>
+            From your account. Only used if a moderator needs to ask a question — never shown
+            publicly.
+          </p>
         </div>
       </fieldset>
 

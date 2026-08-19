@@ -1,13 +1,22 @@
+import { redirect } from 'next/navigation';
+
 import { SubmitForm } from '@/components/shell/submit-form';
+import { getCurrentUserEmail } from '@/lib/queries/current-user';
 import { getTypes } from '@/lib/queries/taxonomy';
 
-// Public, unauthenticated intake (CLAUDE.md §7, §12 step 10) — not the
-// ambassador tool at /admin/new. Shell register: this is where the collage
-// lives, not the browse/detail pages. Writes a `lead` row via the
+// Account-gated intake (Elena's call, 19 Aug — supersedes the "submit never
+// requires an account" clause in ADR 0005; see CLAUDE.md §12 step 10). Not
+// the ambassador tool at /admin/new. Shell register: this is where the
+// collage lives, not the browse/detail pages. Writes a `lead` row via the
 // submitOpportunity server action, which only has an insert path at all
-// because of the narrowly-scoped RLS policy added in
-// supabase/migrations/20260819120000_public_lead_submission.sql.
+// because of the RLS policy in
+// supabase/migrations/20260819130000_require_auth_for_lead_submission.sql.
 export default async function SubmitPage() {
+  const email = await getCurrentUserEmail();
+  if (!email) {
+    redirect('/sign-in?next=/submit');
+  }
+
   const types = await getTypes();
 
   return (
@@ -38,12 +47,12 @@ export default async function SubmitPage() {
           Organising something selective — or know someone who is?
         </h1>
         <p className="mt-4 max-w-xl text-[16px] font-medium" style={{ color: 'var(--muted)' }}>
-          Send us the link. No account, no forms to fill out twice — an ambassador or moderator
-          takes it from there and checks everything before it ever goes live.
+          Send us the link. An ambassador or moderator takes it from there and checks everything
+          before it ever goes live.
         </p>
 
         <div className="mt-10">
-          <SubmitForm types={types} />
+          <SubmitForm types={types} submitterEmail={email} />
         </div>
 
         <p className="mt-8 text-center text-[13px]" style={{ color: 'var(--muted)' }}>
