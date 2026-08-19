@@ -48,7 +48,14 @@ We use a small number of service providers ("processors") to run OffMap, each on
 | Vercel   | Hosting the website                                 | Frankfurt, Germany (EU) |
 | Google   | Sign-in, if you choose to use "Sign in with Google" | United States           |
 
-**International transfers:** where a provider (such as Google) processes data outside the EU/EEA, that transfer is covered by an approved safeguard — Standard Contractual Clauses and/or the EU-US Data Privacy Framework, depending on the provider's current certification. [Confirm each provider's current transfer mechanism before publishing — these change.]
+**International transfers:** checked against each provider's own Data Processing Addendum and the official Data Privacy Framework register (dataprivacyframework.gov) as of August 2026:
+
+- **Supabase** — relies on Standard Contractual Clauses (2021 EU SCCs, per their DPA). Not currently Data Privacy Framework-certified. Your data itself stays in their Frankfurt (EU) region; this covers their own subprocessors.
+- **Resend** — certified under the EU-U.S. Data Privacy Framework (and its UK and Swiss extensions), with Standard Contractual Clauses as a contractual backstop.
+- **Vercel** — certified under the EU-U.S. Data Privacy Framework (and its UK and Swiss extensions), with Standard Contractual Clauses (2021 EU SCCs, plus the UK IDTA for UK transfers) as a contractual backstop.
+- **Google** — certified under the EU-U.S. Data Privacy Framework (and its UK and Swiss extensions), with Standard Contractual Clauses available as an alternative basis.
+
+Certifications can lapse or change; if this matters to you, verify current status directly at dataprivacyframework.gov before relying on it.
 
 There is no student-to-student visibility on OffMap — no messaging, no comments, no public profiles. Other students can never see your saved list, your email, or your alerts.
 
