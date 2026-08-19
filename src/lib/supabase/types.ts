@@ -113,6 +113,27 @@ export type Database = {
         };
         Relationships: [];
       };
+      goal: {
+        Row: {
+          id: string;
+          label_el: string;
+          label_en: string;
+          sort_order: number;
+        };
+        Insert: {
+          id: string;
+          label_el: string;
+          label_en: string;
+          sort_order: number;
+        };
+        Update: {
+          id?: string;
+          label_el?: string;
+          label_en?: string;
+          sort_order?: number;
+        };
+        Relationships: [];
+      };
       opportunity: {
         Row: {
           additional_information: string | null;
@@ -429,54 +450,150 @@ export type Database = {
           },
         ];
       };
+      profile_field: {
+        Row: {
+          field_id: string;
+          profile_id: string;
+        };
+        Insert: {
+          field_id: string;
+          profile_id: string;
+        };
+        Update: {
+          field_id?: string;
+          profile_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'profile_field_field_id_fkey';
+            columns: ['field_id'];
+            isOneToOne: false;
+            referencedRelation: 'field';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'profile_field_profile_id_fkey';
+            columns: ['profile_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      profile_goal: {
+        Row: {
+          goal_id: string;
+          profile_id: string;
+        };
+        Insert: {
+          goal_id: string;
+          profile_id: string;
+        };
+        Update: {
+          goal_id?: string;
+          profile_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'profile_goal_goal_id_fkey';
+            columns: ['goal_id'];
+            isOneToOne: false;
+            referencedRelation: 'goal';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'profile_goal_profile_id_fkey';
+            columns: ['profile_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       profiles: {
         Row: {
           age_confirmed_16_plus: boolean;
           age_confirmed_at: string;
+          country: string | null;
           created_at: string;
+          experience_level: Database['public']['Enums']['experience_level'] | null;
+          first_name: string | null;
           id: string;
+          last_name: string | null;
+          onboarding_completed_at: string | null;
           role: Database['public']['Enums']['profile_role'] | null;
+          status: Database['public']['Enums']['profile_status'] | null;
           updated_at: string;
         };
         Insert: {
           age_confirmed_16_plus: boolean;
           age_confirmed_at?: string;
+          country?: string | null;
           created_at?: string;
+          experience_level?: Database['public']['Enums']['experience_level'] | null;
+          first_name?: string | null;
           id: string;
+          last_name?: string | null;
+          onboarding_completed_at?: string | null;
           role?: Database['public']['Enums']['profile_role'] | null;
+          status?: Database['public']['Enums']['profile_status'] | null;
           updated_at?: string;
         };
         Update: {
           age_confirmed_16_plus?: boolean;
           age_confirmed_at?: string;
+          country?: string | null;
           created_at?: string;
+          experience_level?: Database['public']['Enums']['experience_level'] | null;
+          first_name?: string | null;
           id?: string;
+          last_name?: string | null;
+          onboarding_completed_at?: string | null;
           role?: Database['public']['Enums']['profile_role'] | null;
+          status?: Database['public']['Enums']['profile_status'] | null;
           updated_at?: string;
         };
         Relationships: [];
       };
       saved_opportunity: {
         Row: {
+          closing_alert_sent_at: string | null;
           created_at: string;
           id: string;
-          last_alert_sent_at: string | null;
+          notify_closing: boolean;
+          notify_opens: boolean;
+          notify_start_writing: boolean;
+          opens_alert_sent_at: string | null;
           opportunity_id: string;
           profile_id: string;
+          start_writing_alert_sent_at: string | null;
+          status: Database['public']['Enums']['saved_status'];
         };
         Insert: {
+          closing_alert_sent_at?: string | null;
           created_at?: string;
           id?: string;
-          last_alert_sent_at?: string | null;
+          notify_closing?: boolean;
+          notify_opens?: boolean;
+          notify_start_writing?: boolean;
+          opens_alert_sent_at?: string | null;
           opportunity_id: string;
           profile_id: string;
+          start_writing_alert_sent_at?: string | null;
+          status?: Database['public']['Enums']['saved_status'];
         };
         Update: {
+          closing_alert_sent_at?: string | null;
           created_at?: string;
           id?: string;
-          last_alert_sent_at?: string | null;
+          notify_closing?: boolean;
+          notify_opens?: boolean;
+          notify_start_writing?: boolean;
+          opens_alert_sent_at?: string | null;
           opportunity_id?: string;
           profile_id?: string;
+          start_writing_alert_sent_at?: string | null;
+          status?: Database['public']['Enums']['saved_status'];
         };
         Relationships: [
           {
@@ -669,12 +786,15 @@ export type Database = {
     };
     Enums: {
       deadline_precision: 'exact' | 'month' | 'unknown' | 'rolling';
+      experience_level: 'high_school' | 'undergraduate' | 'graduate' | 'professional';
       format: 'online' | 'in_person' | 'hybrid';
       funding: 'fully_funded' | 'partially_funded' | 'unfunded';
       prep_time: 'under_an_hour' | 'a_weekend' | 'longer';
       profile_role: 'ambassador' | 'moderator';
+      profile_status: 'student' | 'professor' | 'organiser' | 'other';
       reach: 'local' | 'national' | 'international';
       review_state: 'lead' | 'in_review' | 'published' | 'rejected' | 'archived';
+      saved_status: 'goals' | 'apply' | 'applied' | 'archived';
       source_type: 'ambassador' | 'submission' | 'pipeline';
     };
     CompositeTypes: {
@@ -691,12 +811,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals;
 }
@@ -716,12 +836,13 @@ export type Tables<
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    keyof DefaultSchema['Tables'] | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    | keyof DefaultSchema['Tables']
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals;
 }
@@ -740,12 +861,13 @@ export type TablesInsert<
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    keyof DefaultSchema['Tables'] | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    | keyof DefaultSchema['Tables']
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals;
 }
@@ -764,12 +886,13 @@ export type TablesUpdate<
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    keyof DefaultSchema['Enums'] | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+    | keyof DefaultSchema['Enums']
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
-    : never) = never,
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals;
 }
@@ -780,12 +903,13 @@ export type Enums<
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    keyof DefaultSchema['CompositeTypes'] | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+    | keyof DefaultSchema['CompositeTypes']
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
-    : never) = never,
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals;
 }
@@ -798,12 +922,15 @@ export const Constants = {
   public: {
     Enums: {
       deadline_precision: ['exact', 'month', 'unknown', 'rolling'],
+      experience_level: ['high_school', 'undergraduate', 'graduate', 'professional'],
       format: ['online', 'in_person', 'hybrid'],
       funding: ['fully_funded', 'partially_funded', 'unfunded'],
       prep_time: ['under_an_hour', 'a_weekend', 'longer'],
       profile_role: ['ambassador', 'moderator'],
+      profile_status: ['student', 'professor', 'organiser', 'other'],
       reach: ['local', 'national', 'international'],
       review_state: ['lead', 'in_review', 'published', 'rejected', 'archived'],
+      saved_status: ['goals', 'apply', 'applied', 'archived'],
       source_type: ['ambassador', 'submission', 'pipeline'],
     },
   },
