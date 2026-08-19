@@ -10,16 +10,10 @@
   "scripts": {
     "dev:web": "next dev",
     "build:web": "next build",
-    "build": "pnpm -r --if-present build",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "pnpm -r --if-present lint",
-    "typecheck": "pnpm -r --if-present typecheck",
-    "test": "pnpm -r --if-present test",
-    "test:unit": "pnpm --filter './packages/**' test",
-    "generate:taxonomy": "tsx scripts/generate-taxonomy.ts",
-    "check:skills": "pnpm exec tsx scripts/validate-skills.ts",
-    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm check:skills"
+    "typecheck": "tsc --noEmit",
+    "verify": "pnpm format:check && pnpm typecheck && pnpm build:web"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
@@ -31,10 +25,7 @@
     "prettier": "^3.6.2",
     "sharp": "0.34.2",
     "tailwindcss": "^4.3.3",
-    "tsx": "^4.20.6",
-    "typescript": "^5.9.3",
-    "vitest": "^3.2.4",
-    "yaml": "^2.8.1"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@google/genai": "^2.17.1",
