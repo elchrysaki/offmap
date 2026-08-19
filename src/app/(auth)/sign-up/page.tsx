@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { createClient } from '@/lib/supabase/client';
 
@@ -8,6 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 // /callback after the email is confirmed — this just starts that flow and
 // carries age confirmation along as auth metadata for the callback to use.
 export default function SignUpPage() {
+  const router = useRouter();
   const supabase = createClient();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +23,7 @@ export default function SignUpPage() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -34,6 +36,18 @@ export default function SignUpPage() {
 
     if (error) {
       setError(error.message);
+      return;
+    }
+
+    // Supabase's documented way to detect "this email already has an
+    // account" without leaking that fact via a distinguishable error (which
+    // would let an attacker enumerate registered emails): a genuinely new
+    // signup returns a user with one identity; signUp'ing an email that's
+    // already registered returns a user with an empty identities array and
+    // no error at all — it deliberately looks identical to success
+    // otherwise, including sending no new confirmation email.
+    if (data.user && data.user.identities?.length === 0) {
+      router.push(`/sign-in?next=/browse&notice=account-exists&email=${encodeURIComponent(email)}`);
       return;
     }
 

@@ -74,7 +74,7 @@ function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(searchParams.get('email') ?? '');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -82,6 +82,11 @@ function SignInForm() {
   // '/' is the marketing/shell landing page (site IA, 17 Aug) — a signed-in
   // student wants the actual listing dashboard, not the hero page.
   const next = searchParams.get('next') || '/browse';
+  // Set by /sign-up when a signup attempt matches an already-registered
+  // email (see that page's comment on how it detects this via Supabase's
+  // empty-identities response) — steers them here instead of leaving them
+  // stuck waiting on a confirmation email that was never sent.
+  const accountExists = searchParams.get('notice') === 'account-exists';
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -146,6 +151,20 @@ function SignInForm() {
             Guest-first, always. Sign in only to sync your saved opportunities across devices.
           </p>
 
+          {accountExists && (
+            <p
+              className="mt-4 px-3 py-2.5 text-[13px] font-semibold"
+              style={{
+                background: 'rgba(15,179,161,0.12)',
+                border: 'var(--border-width) solid var(--teal)',
+                borderRadius: '8px',
+                color: 'var(--ink)',
+              }}
+            >
+              You already have an account with that email — sign in below.
+            </p>
+          )}
+
           <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
             <div>
               <label
@@ -168,13 +187,26 @@ function SignInForm() {
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="font-[family-name:var(--font-archivo)] block text-[11px] font-extrabold tracking-[0.08em] uppercase"
-                style={{ color: 'var(--muted)' }}
-              >
-                Password
-              </label>
+              <div className="flex items-baseline justify-between">
+                <label
+                  htmlFor="password"
+                  className="font-[family-name:var(--font-archivo)] block text-[11px] font-extrabold tracking-[0.08em] uppercase"
+                  style={{ color: 'var(--muted)' }}
+                >
+                  Password
+                </label>
+                <Link
+                  href={
+                    email
+                      ? `/forgot-password?email=${encodeURIComponent(email)}`
+                      : '/forgot-password'
+                  }
+                  className="font-[family-name:var(--font-archivo)] text-[12px] font-bold underline"
+                  style={{ color: 'var(--cobalt)' }}
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <input
                 id="password"
                 type="password"
