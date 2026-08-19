@@ -13,9 +13,9 @@ const COLUMNS: { heading: string; links: { href: string; label: string }[] }[] =
   {
     heading: 'Account',
     links: [
+      { href: '/profile', label: 'Profile' },
       { href: '/sign-in', label: 'Sign in' },
       { href: '/sign-up', label: 'Create account' },
-      { href: '/profile', label: 'Profile' },
     ],
   },
   {
@@ -29,6 +29,14 @@ const COLUMNS: { heading: string; links: { href: string; label: string }[] }[] =
   },
 ];
 
+// Redesigned 20 Aug (Elena's call) — dropped the FooterReveal curtain
+// effect (fixed/pinned on desktop, uncovered by scroll) in favour of a
+// plain in-flow footer; it was the one non-obvious interaction in an
+// otherwise static page and wasn't earning its complexity. Column
+// content also trimmed: the earlier draft this was modeled on included
+// "Network" and "Your connections" links, which would be student-to-
+// student visibility — CLAUDE.md non-negotiable #2 bans that outright,
+// so neither exists here.
 export function SiteFooter() {
   return (
     <div
@@ -48,7 +56,7 @@ export function SiteFooter() {
           boxShadow: '0 0 0 4px var(--card), 0 0 0 7px var(--marigold)',
         }}
       >
-        <div className="relative z-10 flex flex-wrap items-start justify-between gap-10">
+        <div className="relative z-10 grid grid-cols-1 gap-10 md:grid-cols-[auto_1fr_auto] md:items-start md:gap-14">
           <span
             className="font-[family-name:var(--font-bungee)] text-lg tracking-tight uppercase"
             style={{ color: 'var(--paper)' }}
@@ -83,7 +91,7 @@ export function SiteFooter() {
           </nav>
 
           <Link
-            href="/sign-in"
+            href="/get-app"
             className="font-[family-name:var(--font-archivo)] inline-flex shrink-0 items-center gap-2 px-6 py-3 text-[13px] font-extrabold tracking-[0.05em] uppercase transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--marigold)]"
             style={{
               borderRadius: 'var(--radius-pill)',
@@ -93,7 +101,7 @@ export function SiteFooter() {
               boxShadow: '4px 4px 0 rgba(245,239,227,0.25)',
             }}
           >
-            Sign in &rarr;
+            Get the app &rarr;
           </Link>
         </div>
 
