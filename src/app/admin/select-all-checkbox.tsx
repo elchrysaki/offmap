@@ -13,11 +13,9 @@ export function SelectAllCheckbox() {
         className="h-4 w-4 border-2 border-[color:var(--ink)]"
         onChange={(event) => {
           const checked = event.currentTarget.checked;
-          document
-            .querySelectorAll<HTMLInputElement>('input[name="ids"]')
-            .forEach((box) => {
-              box.checked = checked;
-            });
+          document.querySelectorAll<HTMLInputElement>('input[name="ids"]').forEach((box) => {
+            box.checked = checked;
+          });
         }}
       />
       Select all

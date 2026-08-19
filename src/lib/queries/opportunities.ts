@@ -78,3 +78,34 @@ export async function getOpportunityById(id: string) {
   if (error) throw error;
   return data;
 }
+
+const TAXONOMY_JUNCTIONS = {
+  field: { table: 'opportunity_field', column: 'field_id' },
+  academic_level: { table: 'opportunity_academic_level', column: 'academic_level_id' },
+  geo_scope: { table: 'opportunity_geo_scope', column: 'geo_scope_id' },
+  audience_group: { table: 'opportunity_audience_group', column: 'audience_group_id' },
+  funding_feature: { table: 'opportunity_funding_feature', column: 'funding_feature_id' },
+} as const;
+
+export type TaxonomyKey = keyof typeof TAXONOMY_JUNCTIONS;
+
+// Public read of the selected taxonomy ids for one opportunity, via the same
+// junction tables the admin dashboard writes to. RLS on each junction table
+// only returns rows whose parent opportunity is published and not expired,
+// so this is safe to call for anon visitors (CLAUDE.md §5).
+export async function getOpportunityTaxonomyIds(
+  id: string,
+): Promise<Record<TaxonomyKey, string[]>> {
+  const supabase = await createClient();
+
+  const results = await Promise.all(
+    (Object.keys(TAXONOMY_JUNCTIONS) as TaxonomyKey[]).map(async (key) => {
+      const { table, column } = TAXONOMY_JUNCTIONS[key];
+      const { data, error } = await supabase.from(table).select(column).eq('opportunity_id', id);
+      if (error) throw error;
+      return [key, (data ?? []).map((row) => row[column as keyof typeof row] as string)] as const;
+    }),
+  );
+
+  return Object.fromEntries(results) as Record<TaxonomyKey, string[]>;
+}

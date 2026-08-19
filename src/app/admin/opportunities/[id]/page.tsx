@@ -145,36 +145,68 @@ export default async function AdminOpportunityPage({
             <p className="mt-2 text-sm text-[color:var(--vermilion)]">{research.error}</p>
           ) : (
             <div className="mt-3 space-y-2 text-sm">
+              <p className={helpClass}>
+                Method: {research.research_method}
+                {research.fallback_reason ? ` — fell back to search: ${research.fallback_reason}` : ''}
+              </p>
               <p>
                 <strong>Official URL:</strong> {research.official_url.value ?? 'not found'}{' '}
                 <span className={helpClass}>
-                  ({research.official_url.confidence}) {research.official_url.note}
+                  ({research.official_url.confidence}
+                  {research.official_url.matches_current === false ? ', differs from current' : ''}){' '}
+                  {research.official_url.note}
                 </span>
               </p>
               <p>
                 <strong>Application URL:</strong> {research.application_url.value ?? 'not found'}{' '}
                 <span className={helpClass}>
-                  ({research.application_url.confidence}) {research.application_url.note}
+                  ({research.application_url.confidence}
+                  {research.application_url.matches_current === false ? ', differs from current' : ''}){' '}
+                  {research.application_url.note}
                 </span>
               </p>
               <p>
-                <strong>Deadline:</strong> {research.deadline.value ?? 'not found'}{' '}
+                <strong>Deadline:</strong> {research.deadline.value ?? 'not found'}
+                {research.deadline.precision ? ` (${research.deadline.precision})` : ''}{' '}
                 <span className={helpClass}>
                   ({research.deadline.confidence}) {research.deadline.note}
                 </span>
               </p>
               <p>
-                <strong>Contact:</strong> {research.contact.email ?? 'not found'}{' '}
-                <span className={helpClass}>{research.contact.note}</span>
+                <strong>Contact:</strong> {research.contact_email.value ?? 'not found'}{' '}
+                <span className={helpClass}>{research.contact_email.note}</span>
               </p>
-              {research.funding_summary && (
+              {research.funding.value && (
                 <p>
-                  <strong>Funding:</strong> {research.funding_summary}
+                  <strong>Funding:</strong> {research.funding.value}{' '}
+                  <span className={helpClass}>
+                    ({research.funding.confidence}
+                    {research.funding.matches_current === false ? ', differs from current' : ''})
+                  </span>
                 </p>
               )}
-              {research.eligibility_summary && (
+              {research.eligibility.value && (
                 <p>
-                  <strong>Eligibility:</strong> {research.eligibility_summary}
+                  <strong>Eligibility:</strong> {research.eligibility.value}{' '}
+                  <span className={helpClass}>
+                    ({research.eligibility.confidence}
+                    {research.eligibility.matches_current === false ? ', differs from current' : ''})
+                  </span>
+                </p>
+              )}
+              {research.additional_findings?.length > 0 && (
+                <p>
+                  <strong>Additional findings:</strong> {research.additional_findings.join(' · ')}
+                </p>
+              )}
+              {research.missing_information?.length > 0 && (
+                <p className={helpClass}>
+                  Not stated on source: {research.missing_information.join(' · ')}
+                </p>
+              )}
+              {research.excluded_claims?.length > 0 && (
+                <p className={helpClass}>
+                  Excluded (unverifiable): {research.excluded_claims.join(' · ')}
                 </p>
               )}
               <p className={helpClass}>

@@ -41,3 +41,6 @@ test-results/
 .DS_Store
 .idea/
 .vscode/
+
+# Ephemeral agent worktrees (Agent tool isolation:worktree)
+.claude/worktrees/

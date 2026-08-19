@@ -14,7 +14,13 @@ const pillClass =
 const actionButtonClass =
   'rounded-[3px] border-2 px-3 py-1.5 text-xs font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[color:var(--cobalt)]';
 
-function QueueRow({ opportunity, isModerator }: { opportunity: AdminOpportunity; isModerator: boolean }) {
+function QueueRow({
+  opportunity,
+  isModerator,
+}: {
+  opportunity: AdminOpportunity;
+  isModerator: boolean;
+}) {
   const missing = getMissingPublishFields(opportunity);
   const runAiWithId = runAiResearchFromQueue.bind(null, opportunity.id);
   const rejectWithId = quickRejectFromQueue.bind(null, opportunity.id);
@@ -33,16 +39,23 @@ function QueueRow({ opportunity, isModerator }: { opportunity: AdminOpportunity;
 
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <Link href={`/admin/opportunities/${opportunity.id}`} className="font-medium hover:underline">
+          <Link
+            href={`/admin/opportunities/${opportunity.id}`}
+            className="font-medium hover:underline"
+          >
             {opportunity.title || '(untitled)'}
           </Link>
           {opportunity.ai_research != null && (
-            <span className={`${pillClass} border-[color:var(--cobalt)] text-[color:var(--cobalt)]`}>
+            <span
+              className={`${pillClass} border-[color:var(--cobalt)] text-[color:var(--cobalt)]`}
+            >
               AI draft ready — review before applying
             </span>
           )}
           {opportunity.apply_url_candidate != null && (
-            <span className={`${pillClass} border-[color:var(--marigold)] text-[color:var(--marigold)]`}>
+            <span
+              className={`${pillClass} border-[color:var(--marigold)] text-[color:var(--marigold)]`}
+            >
               Apply URL candidate
             </span>
           )}

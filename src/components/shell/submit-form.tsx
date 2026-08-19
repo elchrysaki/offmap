@@ -2,11 +2,21 @@
 
 import { useActionState } from 'react';
 
-import { initialSubmitState, submitOpportunity, type SubmitState } from '@/app/(public)/submit/actions';
+import {
+  initialSubmitState,
+  submitOpportunity,
+  type SubmitState,
+} from '@/app/(public)/submit/actions';
 
 type TypeOption = { id: string; label_en: string };
 
-const TAG_COLORS = ['var(--cobalt)', 'var(--marigold)', 'var(--violet)', 'var(--teal)', 'var(--lime)'];
+const TAG_COLORS = [
+  'var(--cobalt)',
+  'var(--marigold)',
+  'var(--violet)',
+  'var(--teal)',
+  'var(--lime)',
+];
 
 const inputStyle = {
   border: 'var(--border-width) solid var(--ink)',
@@ -50,10 +60,9 @@ export function SubmitForm({ types }: { types: TypeOption[] }) {
           It&apos;s in the queue.
         </p>
         <p className="mx-auto mt-3 max-w-md text-[15px]" style={{ color: 'var(--muted)' }}>
-          An ambassador or moderator checks every submission by hand — the funding, the
-          eligibility, whether it&apos;s actually selective. If it holds up, it goes live with a
-          &ldquo;Submitted by&rdquo; line crediting you. Nothing publishes just because it was
-          sent in.
+          An ambassador or moderator checks every submission by hand — the funding, the eligibility,
+          whether it&apos;s actually selective. If it holds up, it goes live with a &ldquo;Submitted
+          by&rdquo; line crediting you. Nothing publishes just because it was sent in.
         </p>
         <a
           href="/submit"
@@ -156,7 +165,8 @@ export function SubmitForm({ types }: { types: TypeOption[] }) {
 
       <div>
         <label htmlFor="note" className={labelClass}>
-          Why is it selective? <span style={{ color: 'var(--muted)', fontWeight: 500 }}>(optional)</span>
+          Why is it selective?{' '}
+          <span style={{ color: 'var(--muted)', fontWeight: 500 }}>(optional)</span>
         </label>
         <textarea
           id="note"
