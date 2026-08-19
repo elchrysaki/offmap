@@ -18,3 +18,14 @@ export const getAcademicLevels = () => getLookup('academic_level');
 export const getGeoScopes = () => getLookup('geo_scope');
 export const getAudienceGroups = () => getLookup('audience_group');
 export const getFundingFeatures = () => getLookup('funding_feature');
+
+// Onboarding goals — same lookup shape as the taxonomy tables above but a
+// separate table (supabase/migrations/20260819172931_profile_personalization.sql),
+// since it describes a student's own intent rather than an opportunity.
+export async function getGoals() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('goal').select('id, label_en').order('sort_order');
+
+  if (error) throw error;
+  return data;
+}

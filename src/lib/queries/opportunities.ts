@@ -51,6 +51,38 @@ export async function listBrowseOpportunities(filters: BrowseFilters = {}) {
   return data;
 }
 
+// The post-onboarding "recommended for you" sweep — opportunities tagged
+// with at least one of the student's chosen fields, soonest deadline
+// first. Deliberately simple (no scoring/ranking beyond that) — CLAUDE.md
+// §12 step 11 calls real match/ranking logic later work, this is just
+// enough to make onboarding feel like it did something.
+export async function listRecommendedOpportunities(fieldIds: string[], limit = 6) {
+  if (fieldIds.length === 0) return [];
+
+  const supabase = await createClient();
+  const { data: matches, error: matchError } = await supabase
+    .from('opportunity_field')
+    .select('opportunity_id')
+    .in('field_id', fieldIds);
+
+  if (matchError) throw matchError;
+
+  const opportunityIds = Array.from(new Set((matches ?? []).map((row) => row.opportunity_id)));
+  if (opportunityIds.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from('opportunity_public')
+    .select(
+      'id, title, organiser, funding, eligibility, host_city, country, format, reach, prep_time, deadline_precision, days_remaining, status, type_id',
+    )
+    .in('id', opportunityIds)
+    .order('days_remaining', { ascending: true, nullsFirst: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return data;
+}
+
 // Distinct countries across published, open opportunities — for the
 // country filter bar. Small dataset for now; a dedicated indexed query if
 // the catalogue grows large enough for this to matter.

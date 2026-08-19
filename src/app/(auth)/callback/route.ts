@@ -32,26 +32,43 @@ export async function GET(request: NextRequest) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id')
+    .select('id, onboarding_completed_at')
     .eq('id', user.id)
     .maybeSingle();
 
   if (profile) {
+    // Covers both a fresh account continuing straight through and a
+    // returning student who signed up, confirmed, but never finished
+    // onboarding — either way, don't hand them `next` until it's done.
+    if (!profile.onboarding_completed_at) {
+      return NextResponse.redirect(`${origin}/onboarding?next=${encodeURIComponent(next)}`);
+    }
     return NextResponse.redirect(`${origin}${next}`);
   }
 
-  // Email/password signups carry age confirmation from the sign-up form as
-  // auth metadata; OAuth signups have no such form, so send them to confirm
-  // it before a profile (and thus an active account) exists.
+  // Email/password signups carry age confirmation (and the rest of the
+  // sign-up form) from auth metadata; OAuth signups have no such form, so
+  // send them to confirm age before a profile (and thus an active account)
+  // exists. OAuth providers don't give us status/country at all, and their
+  // name field varies by provider, so those stay unset for OAuth accounts.
   const ageConfirmed = user.user_metadata?.age_confirmed_16_plus === true;
 
   if (!ageConfirmed) {
     return NextResponse.redirect(`${origin}/confirm-age?next=${encodeURIComponent(next)}`);
   }
 
-  const { error: insertError } = await supabase
-    .from('profiles')
-    .insert({ id: user.id, age_confirmed_16_plus: true });
+  const fullName = (user.user_metadata?.full_name ?? user.user_metadata?.name) as
+    string | undefined;
+  const [oauthFirstName, ...oauthLastNameParts] = (fullName ?? '').trim().split(/\s+/);
+
+  const { error: insertError } = await supabase.from('profiles').insert({
+    id: user.id,
+    age_confirmed_16_plus: true,
+    first_name: user.user_metadata?.first_name || oauthFirstName || null,
+    last_name: user.user_metadata?.last_name || oauthLastNameParts.join(' ') || null,
+    status: user.user_metadata?.status || null,
+    country: user.user_metadata?.country || null,
+  });
 
   if (insertError) {
     return NextResponse.redirect(
@@ -59,5 +76,5 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  return NextResponse.redirect(`${origin}${next}`);
+  return NextResponse.redirect(`${origin}/onboarding?next=${encodeURIComponent(next)}`);
 }

@@ -93,7 +93,7 @@ function SignInForm() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       setError(error.message);
@@ -101,7 +101,21 @@ function SignInForm() {
       return;
     }
 
-    router.push(next);
+    // OAuth always routes through /callback, which already applies this
+    // same check — password sign-in skips straight here, so it needs its
+    // own check for a student who confirmed their email but never finished
+    // the onboarding walkthrough.
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('onboarding_completed_at')
+      .eq('id', data.user.id)
+      .maybeSingle();
+
+    router.push(
+      profile && !profile.onboarding_completed_at
+        ? `/onboarding?next=${encodeURIComponent(next)}`
+        : next,
+    );
     router.refresh();
   }
 

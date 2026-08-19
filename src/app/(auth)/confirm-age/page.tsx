@@ -33,9 +33,16 @@ function ConfirmAgeForm() {
       return;
     }
 
-    const { error } = await supabase
-      .from('profiles')
-      .insert({ id: user.id, age_confirmed_16_plus: true });
+    const fullName = (user.user_metadata?.full_name ?? user.user_metadata?.name) as
+      string | undefined;
+    const [oauthFirstName, ...oauthLastNameParts] = (fullName ?? '').trim().split(/\s+/);
+
+    const { error } = await supabase.from('profiles').insert({
+      id: user.id,
+      age_confirmed_16_plus: true,
+      first_name: oauthFirstName || null,
+      last_name: oauthLastNameParts.join(' ') || null,
+    });
 
     setLoading(false);
 
@@ -44,7 +51,7 @@ function ConfirmAgeForm() {
       return;
     }
 
-    router.push(next);
+    router.push(`/onboarding?next=${encodeURIComponent(next)}`);
     router.refresh();
   }
 
