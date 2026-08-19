@@ -64,43 +64,87 @@ const ROWS: { color: string; direction: 1 | -1; items: MockCard[] }[] = [
 // always a full extra lap on either side of whatever's on screen, so
 // resetting the offset by one lap width never shows a seam.
 const LAPS = 3;
+const LOOP_COUNT = 2.5; // full laps travelled while scrolling through the reel phase
 
-function Card({ item, color, hidden }: { item: MockCard; color: string; hidden?: boolean }) {
+// Phase boundaries, as fractions of the section's total pinned scroll range.
+// Reel → flip (the strip rolls over, showing its "wrong side") → throw (a
+// card peels off and gets flung) → slide (it skids along the bottom edge) →
+// fade (it lifts away, unveiling How It Works underneath, unchanged).
+const REEL_END = 0.6;
+const FLIP_END = 0.72;
+const THROW_END = 0.85;
+const SLIDE_END = 0.95;
+
+const THROWN_ITEM = ROWS[0]!.items[0]!;
+const THROWN_COLOR = ROWS[0]!.color;
+
+function clamp01(v: number) {
+  return Math.max(0, Math.min(1, v));
+}
+
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t;
+}
+
+function wrapToRange(value: number, lap: number) {
+  if (lap <= 0) return 0;
+  let v = value % lap;
+  if (v > 0) v -= lap;
+  return v;
+}
+
+function Card({ item, color, variant = 'front' }: { item: MockCard; color: string; variant?: 'front' | 'back' }) {
+  const back = variant === 'back';
   return (
     <div
-      aria-hidden={hidden || undefined}
       className="flex w-[220px] flex-none flex-col gap-2.5 p-4"
       style={{
-        background: 'var(--card)',
-        border: 'var(--border-width) solid var(--ink)',
+        background: back ? 'var(--ink)' : 'var(--card)',
+        border: `var(--border-width) solid ${back ? 'var(--paper)' : 'var(--ink)'}`,
         borderRadius: 'var(--radius-card)',
       }}
     >
       <span
         className="font-[family-name:var(--font-archivo)] w-fit px-2 py-0.5 text-[10px] font-bold tracking-[0.06em] uppercase"
-        style={{ background: color, color: 'var(--ink)', borderRadius: 'var(--radius-stamp)' }}
+        style={{ background: color, color: 'var(--ink)', borderRadius: 'var(--radius-stamp)', opacity: back ? 0.55 : 1 }}
       >
         {item.tag}
       </span>
-      <h3 className="font-[family-name:var(--font-fraunces)] text-[15px] leading-snug font-bold">{item.title}</h3>
-      <p className="text-[12px]" style={{ color: 'var(--muted)' }}>
+      <h3
+        className="font-[family-name:var(--font-fraunces)] text-[15px] leading-snug font-bold"
+        style={back ? { color: 'var(--paper)' } : undefined}
+      >
+        {item.title}
+      </h3>
+      <p className="text-[12px]" style={{ color: back ? 'rgba(245,239,227,0.55)' : 'var(--muted)' }}>
         {item.meta}
       </p>
     </div>
   );
 }
 
+function FilmSprockets() {
+  return (
+    <div
+      aria-hidden
+      className="h-3 w-full shrink-0"
+      style={{
+        backgroundImage:
+          'repeating-linear-gradient(to right, var(--paper) 0, var(--paper) 10px, transparent 10px, transparent 26px)',
+        opacity: 0.3,
+      }}
+    />
+  );
+}
+
 export function OpportunitiesReel() {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const frontRowRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const backRowRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const thrownRef = useRef<HTMLDivElement>(null);
   const countRef = useRef<HTMLSpanElement>(null);
-  const offsetRef = useRef<number[]>(ROWS.map(() => 0));
   const lapWidthRef = useRef<number[]>(ROWS.map(() => 0));
-  const speedRef = useRef<number[]>(ROWS.map(() => 0));
-  const draggingRef = useRef<Array<{ pointerId: number; startX: number; startOffset: number } | null>>(
-    ROWS.map(() => null),
-  );
-  const lastScrollYRef = useRef(0);
 
   useEffect(() => {
     try {
@@ -114,80 +158,110 @@ export function OpportunitiesReel() {
       const wrap = wrapRef.current;
       if (!wrap) return;
 
-      // Duplicate each row's cards into extra laps so the belt has
-      // somewhere to go when it wraps — done once, imperatively, so mobile
-      // and no-JS visitors only ever see the single real lap React rendered.
-      rowRefs.current.forEach((row, i) => {
-        if (!row) return;
+      // Duplicate each row's cards into extra laps so the belt has somewhere
+      // to go when it wraps — done once, imperatively, so mobile and no-JS
+      // visitors only ever see the single real lap React rendered.
+      const tripleRow = (row: HTMLDivElement | null) => {
+        if (!row) return 0;
         const originalCards = Array.from(row.children);
-        lapWidthRef.current[i] = row.scrollWidth;
-        for (let lap = 1; lap < LAPS; lap++) {
+        const lap = row.scrollWidth;
+        for (let lap_i = 1; lap_i < LAPS; lap_i++) {
           originalCards.forEach((card) => {
             const clone = card.cloneNode(true) as HTMLElement;
-            clone.setAttribute('aria-hidden', 'true');
             row.appendChild(clone);
           });
         }
+        return lap;
+      };
+
+      frontRowRefs.current.forEach((row, i) => {
+        lapWidthRef.current[i] = tripleRow(row);
       });
+      backRowRefs.current.forEach((row) => tripleRow(row));
 
-      // Same pacing as before the recycling change: scrolling through the
-      // whole pinned range still sweeps each row across its full travel
-      // distance (its natural overflow, or 35% of the container as a
-      // fallback on rows that fit) — only now that sweep keeps going and
-      // wraps, instead of stopping dead at the end.
-      const computeSpeeds = () => {
-        const scrollable = wrap.getBoundingClientRect().height - window.innerHeight;
-        rowRefs.current.forEach((row, i) => {
-          if (!row || !row.parentElement) return;
-          const containerWidth = row.parentElement.clientWidth;
-          const lap = lapWidthRef.current[i] ?? 0;
-          const travel = Math.max(lap - containerWidth, containerWidth * 0.35);
-          speedRef.current[i] = scrollable > 0 ? travel / scrollable : 0;
-        });
-      };
-      computeSpeeds();
-
-      const wrapOffset = (i: number) => {
-        const lap = lapWidthRef.current[i] ?? 0;
-        if (lap <= 0) return;
-        let offset = offsetRef.current[i] ?? 0;
-        while (offset <= -lap) offset += lap;
-        while (offset > 0) offset -= lap;
-        offsetRef.current[i] = offset;
-      };
-
-      const paint = () => {
-        rowRefs.current.forEach((row, i) => {
-          if (!row) return;
-          row.style.transform = `translateX(${offsetRef.current[i]}px)`;
-        });
-      };
-
-      const isPinned = () => {
+      const getProgress = () => {
         const rect = wrap.getBoundingClientRect();
-        return rect.top <= 0 && rect.bottom >= window.innerHeight;
+        const scrollable = rect.height - window.innerHeight;
+        return scrollable > 0 ? clamp01(-rect.top / scrollable) : 0;
+      };
+
+      const paintReel = (progress: number) => {
+        const reelT = clamp01(progress / REEL_END);
+        ROWS.forEach((row, i) => {
+          const lap = lapWidthRef.current[i] ?? 0;
+          const travel = lap * LOOP_COUNT;
+          const offset = wrapToRange(-reelT * travel * row.direction, lap);
+          const transform = `translateX(${offset}px)`;
+          const front = frontRowRefs.current[i];
+          const back = backRowRefs.current[i];
+          if (front) front.style.transform = transform;
+          if (back) back.style.transform = transform;
+        });
+      };
+
+      const paintFlip = (progress: number) => {
+        const flipT = clamp01((progress - REEL_END) / (FLIP_END - REEL_END));
+        if (stageRef.current) stageRef.current.style.transform = `rotateX(${flipT * 180}deg)`;
+      };
+
+      const paintThrow = (progress: number) => {
+        const card = thrownRef.current;
+        if (!card) return;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        const startX = w * 0.86;
+        const startY = h * 0.24;
+        const landX = w * 0.7;
+        const landY = h * 0.84;
+        const slideX = w * 0.28;
+        const liftY = h * 0.62;
+
+        let x: number;
+        let y: number;
+        let rot: number;
+        let scale: number;
+        let opacity: number;
+
+        if (progress <= FLIP_END) {
+          x = startX;
+          y = startY;
+          rot = -8;
+          scale = 0.7;
+          opacity = 0;
+        } else if (progress <= THROW_END) {
+          const throwT = clamp01((progress - FLIP_END) / (THROW_END - FLIP_END));
+          x = lerp(startX, landX, throwT);
+          y = lerp(startY, landY, throwT);
+          rot = lerp(-8, 22, throwT);
+          scale = lerp(0.7, 1.05, throwT);
+          opacity = clamp01(throwT / 0.3);
+        } else if (progress <= SLIDE_END) {
+          const slideT = clamp01((progress - THROW_END) / (SLIDE_END - THROW_END));
+          x = lerp(landX, slideX, slideT);
+          y = landY;
+          rot = lerp(22, 0, slideT);
+          scale = lerp(1.05, 1, slideT);
+          opacity = 1;
+        } else {
+          const fadeT = clamp01((progress - SLIDE_END) / (1 - SLIDE_END));
+          x = slideX;
+          y = lerp(landY, liftY, fadeT);
+          rot = 0;
+          scale = lerp(1, 1.12, fadeT);
+          opacity = 1 - fadeT;
+        }
+
+        card.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) rotate(${rot}deg) scale(${scale})`;
+        card.style.opacity = String(opacity);
       };
 
       const update = () => {
-        const y = window.scrollY;
-        const delta = y - lastScrollYRef.current;
-        lastScrollYRef.current = y;
-
-        if (delta !== 0 && isPinned()) {
-          ROWS.forEach((row, i) => {
-            if (draggingRef.current[i]) return; // paused — under manual control
-            offsetRef.current[i] = (offsetRef.current[i] ?? 0) + delta * (speedRef.current[i] ?? 0) * row.direction;
-            wrapOffset(i);
-          });
-        }
-        paint();
-
-        if (countRef.current) {
-          const rect = wrap.getBoundingClientRect();
-          const scrollable = rect.height - window.innerHeight;
-          const progress = scrollable > 0 ? Math.max(0, Math.min(1, -rect.top / scrollable)) : 0;
-          countRef.current.textContent = `${Math.round(progress * 100)}%`;
-        }
+        const progress = getProgress();
+        paintReel(progress);
+        paintFlip(progress);
+        paintThrow(progress);
+        if (countRef.current) countRef.current.textContent = `${Math.round(progress * 100)}%`;
       };
 
       // Cancel-and-reschedule instead of a boolean "ticking" gate: a boolean
@@ -208,80 +282,16 @@ export function OpportunitiesReel() {
         });
       };
 
-      lastScrollYRef.current = window.scrollY;
-      paint();
-
-      const onResize = () => {
-        computeSpeeds();
-        schedule();
-      };
-
+      update();
       window.addEventListener('scroll', schedule, { passive: true });
-      window.addEventListener('resize', onResize);
+      window.addEventListener('resize', schedule);
       document.addEventListener('visibilitychange', schedule);
-
-      // Manual control: grab-drag or trackpad/wheel horizontal swipe on any
-      // row pauses that row's scroll-driven movement and lets the visitor
-      // move it themselves. Scrolling the page again afterwards resumes
-      // from wherever they left it — nothing snaps back, nothing resets.
-      const cleanupRowListeners: Array<() => void> = [];
-      rowRefs.current.forEach((row, i) => {
-        if (!row) return;
-
-        const onPointerDown = (e: PointerEvent) => {
-          draggingRef.current[i] = {
-            pointerId: e.pointerId,
-            startX: e.clientX,
-            startOffset: offsetRef.current[i] ?? 0,
-          };
-          row.setPointerCapture(e.pointerId);
-        };
-        const onPointerMove = (e: PointerEvent) => {
-          const drag = draggingRef.current[i];
-          if (!drag || drag.pointerId !== e.pointerId) return;
-          offsetRef.current[i] = drag.startOffset + (e.clientX - drag.startX);
-          wrapOffset(i);
-          paint();
-        };
-        const endDrag = (e: PointerEvent) => {
-          const drag = draggingRef.current[i];
-          if (!drag || drag.pointerId !== e.pointerId) return;
-          draggingRef.current[i] = null;
-          try {
-            row.releasePointerCapture(e.pointerId);
-          } catch {
-            // pointer capture may already be released by the browser
-          }
-        };
-        const onWheel = (e: WheelEvent) => {
-          if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; // vertical swipe — let the page scroll
-          e.preventDefault();
-          offsetRef.current[i] = (offsetRef.current[i] ?? 0) - e.deltaX;
-          wrapOffset(i);
-          paint();
-        };
-
-        row.addEventListener('pointerdown', onPointerDown);
-        row.addEventListener('pointermove', onPointerMove);
-        row.addEventListener('pointerup', endDrag);
-        row.addEventListener('pointercancel', endDrag);
-        row.addEventListener('wheel', onWheel, { passive: false });
-
-        cleanupRowListeners.push(() => {
-          row.removeEventListener('pointerdown', onPointerDown);
-          row.removeEventListener('pointermove', onPointerMove);
-          row.removeEventListener('pointerup', endDrag);
-          row.removeEventListener('pointercancel', endDrag);
-          row.removeEventListener('wheel', onWheel);
-        });
-      });
 
       return () => {
         if (rafId !== null) window.cancelAnimationFrame(rafId);
         window.removeEventListener('scroll', schedule);
-        window.removeEventListener('resize', onResize);
+        window.removeEventListener('resize', schedule);
         document.removeEventListener('visibilitychange', schedule);
-        cleanupRowListeners.forEach((fn) => fn());
       };
     } catch {
       // scroll-linked motion is a progressive enhancement only
@@ -289,8 +299,10 @@ export function OpportunitiesReel() {
   }, []);
 
   return (
-    <section ref={wrapRef} className="relative overflow-x-hidden md:h-[280vh]" style={{ background: 'var(--ink)' }}>
-      <div className="flex flex-col justify-center gap-5 overflow-hidden py-16 md:sticky md:top-0 md:h-screen md:py-0">
+    <section ref={wrapRef} className="relative overflow-x-hidden md:h-[420vh]" style={{ background: 'var(--ink)' }}>
+      <div className="relative flex flex-col justify-center gap-5 overflow-hidden py-16 md:sticky md:top-0 md:h-screen md:py-0">
+        <FilmSprockets />
+
         <div className="flex items-baseline justify-between px-6">
           <h2
             className="font-[family-name:var(--font-fraunces)] text-2xl font-extrabold uppercase md:text-3xl"
@@ -307,28 +319,65 @@ export function OpportunitiesReel() {
           </span>
         </div>
 
-        {ROWS.map((row, i) => (
-          <div key={i} className="overflow-x-auto px-6 pb-1 md:overflow-hidden">
+        <div style={{ perspective: '1400px' }}>
+          <div ref={stageRef} className="relative flex flex-col gap-5" style={{ transformStyle: 'preserve-3d', willChange: 'transform' }}>
+            <div className="flex flex-col gap-5" style={{ backfaceVisibility: 'hidden' }}>
+              {ROWS.map((row, i) => (
+                <div key={i} className="overflow-x-auto px-6 pb-1 md:overflow-hidden">
+                  <div
+                    ref={(el) => {
+                      frontRowRefs.current[i] = el;
+                    }}
+                    className="flex w-fit gap-4 will-change-transform"
+                  >
+                    {row.items.map((item, j) => (
+                      <Card key={j} item={item} color={row.color} />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
             <div
-              ref={(el) => {
-                rowRefs.current[i] = el;
-              }}
-              className="flex w-fit cursor-grab gap-4 will-change-transform select-none active:cursor-grabbing"
+              aria-hidden="true"
+              className="absolute inset-0 flex flex-col justify-center gap-5"
+              style={{ backfaceVisibility: 'hidden', transform: 'rotateX(180deg)' }}
             >
-              {row.items.map((item, j) => (
-                <Card key={j} item={item} color={row.color} />
+              {ROWS.map((row, i) => (
+                <div key={i} className="overflow-hidden px-6 pb-1">
+                  <div
+                    ref={(el) => {
+                      backRowRefs.current[i] = el;
+                    }}
+                    className="flex w-fit gap-4 will-change-transform"
+                  >
+                    {row.items.map((item, j) => (
+                      <Card key={j} item={item} color={row.color} variant="back" />
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
-        ))}
+        </div>
+
+        <div
+          ref={thrownRef}
+          aria-hidden
+          className="pointer-events-none absolute top-0 left-0 opacity-0"
+          style={{ willChange: 'transform, opacity' }}
+        >
+          <Card item={THROWN_ITEM} color={THROWN_COLOR} />
+        </div>
 
         <p
           className="font-[family-name:var(--font-archivo)] px-6 text-[11px] font-bold tracking-[0.05em] uppercase"
           style={{ color: 'rgba(245,239,227,0.5)' }}
         >
-          Conferences · Hackathons · Courses — three registers, one deadline spine. Drag any row to explore. Mock
-          listings shown.
+          Conferences · Hackathons · Courses — three registers, one deadline spine. Mock listings shown.
         </p>
+
+        <FilmSprockets />
       </div>
     </section>
   );
