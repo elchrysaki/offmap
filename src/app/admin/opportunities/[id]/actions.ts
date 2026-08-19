@@ -5,13 +5,12 @@ import { revalidatePath } from 'next/cache';
 
 import { createClient } from '@/lib/supabase/server';
 import {
-  getOpportunityById,
   rejectOpportunity,
   setOpportunitySelections,
   updateOpportunity,
   type MultiselectKey,
 } from '@/lib/queries/admin-opportunities';
-import { researchOpportunity } from '@/lib/ai/verify-opportunity';
+import { runAiResearchForOpportunity } from '@/lib/admin/ai-research';
 import type { Enums } from '@/lib/supabase/types';
 
 function stringOrNull(value: FormDataEntryValue | null) {
@@ -67,13 +66,25 @@ async function saveMultiselects(id: string, formData: FormData) {
   );
 }
 
-// Saves edits without changing review_state — "request info" in effect,
-// since the row just sits in the queue until an admin explicitly publishes it.
+// Saves edits without forcing any particular review_state — "request info"
+// in effect, since the row just sits in the queue until an admin explicitly
+// publishes or rejects it. The one exception: a fresh 'lead' row that gets
+// its first manual save has clearly moved past "untouched", so it advances
+// to 'in_review' — this is what the queue page uses to tell freshly-created
+// rows apart from ones someone has already started working. Never moves a
+// row further than that (never sets published/rejected from here).
 export async function saveOpportunity(id: string, formData: FormData) {
-  await updateOpportunity(id, basePatch(formData));
+  const patch: Parameters<typeof updateOpportunity>[1] = basePatch(formData);
+  const reviewState = formData.get('review_state');
+  if (reviewState === 'lead') {
+    patch.review_state = 'in_review';
+  }
+
+  await updateOpportunity(id, patch);
   await saveMultiselects(id, formData);
 
   revalidatePath(`/admin/opportunities/${id}`);
+  revalidatePath('/admin');
 }
 
 // Publishing IS the verification act — last_verified_at and verified_by are
@@ -110,25 +121,11 @@ export async function rejectOpportunityAction(id: string) {
 // Research only — never writes to a gate field (official_url, apply_url,
 // funding, etc.). Findings sit in ai_research for a human to read and apply
 // by hand, same boundary as excluded_claims / missing_information (§6).
+// The actual Gemini call + write lives in lib/admin/ai-research.ts, shared
+// with the queue page's bulk-verify action so there's one call site.
 export async function runAiResearch(id: string) {
-  const opportunity = await getOpportunityById(id);
-
-  let research;
-  let errorMessage: string | null = null;
-  try {
-    research = await researchOpportunity({
-      title: opportunity.title,
-      organiser: opportunity.organiser,
-      officialUrl: opportunity.official_url,
-    });
-  } catch (err) {
-    errorMessage = err instanceof Error ? err.message : 'AI research failed.';
-  }
-
-  await updateOpportunity(id, {
-    ai_research: errorMessage ? { error: errorMessage } : research,
-    ai_research_at: new Date().toISOString(),
-  });
+  await runAiResearchForOpportunity(id);
 
   revalidatePath(`/admin/opportunities/${id}`);
+  revalidatePath('/admin');
 }
