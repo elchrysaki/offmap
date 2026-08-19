@@ -1,3 +1,6 @@
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+
 import { renderLegalDoc } from '@/lib/legal-doc';
 
 export const metadata = {
@@ -5,7 +8,8 @@ export const metadata = {
 };
 
 export default async function TermsPage() {
-  const { title, body } = await renderLegalDoc('docs/legal/terms.md');
+  const raw = await readFile(path.join(process.cwd(), 'docs/legal/terms.md'), 'utf8');
+  const { title, body } = renderLegalDoc(raw);
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-14">

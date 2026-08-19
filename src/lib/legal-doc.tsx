@@ -1,5 +1,3 @@
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
 import type { ReactNode } from 'react';
 
 // Deliberately not a general markdown engine — docs/legal/*.md only ever
@@ -67,10 +65,12 @@ function renderTable(lines: string[], key: number) {
   );
 }
 
-export async function renderLegalDoc(
-  relativePath: string,
-): Promise<{ title: string; body: ReactNode }> {
-  const raw = await readFile(path.join(process.cwd(), relativePath), 'utf8');
+// Takes already-read file contents rather than a path — reading with a
+// literal string argument has to happen at each call site so Next's file
+// tracer can see it and include the .md file in the deployment bundle. A
+// path built from a variable here defeats that trace and 500s in production
+// (the .md file silently doesn't ship).
+export function renderLegalDoc(raw: string): { title: string; body: ReactNode } {
   const lines = raw.split('\n');
 
   let title = '';

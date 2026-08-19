@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 // Refreshes the Supabase auth session on every request so server components
 // always see a valid (or correctly expired) session. Without this, sessions
 // silently go stale — this is the standard @supabase/ssr Next.js pattern.
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
