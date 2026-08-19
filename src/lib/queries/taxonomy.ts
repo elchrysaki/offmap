@@ -2,12 +2,11 @@ import 'server-only';
 
 import { createClient } from '@/lib/supabase/server';
 
-async function getLookup(table: 'type' | 'field' | 'academic_level' | 'geo_scope' | 'audience_group' | 'funding_feature') {
+async function getLookup(
+  table: 'type' | 'field' | 'academic_level' | 'geo_scope' | 'audience_group' | 'funding_feature',
+) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from(table)
-    .select('id, label_en')
-    .order('sort_order');
+  const { data, error } = await supabase.from(table).select('id, label_en').order('sort_order');
 
   if (error) throw error;
   return data;

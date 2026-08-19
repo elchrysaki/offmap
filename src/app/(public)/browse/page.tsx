@@ -22,7 +22,9 @@ const VALID_RUNGS: EffortRung[] = ['coffee_break', 'weekend_trip', 'aim_higher',
 // personalization.
 export default async function BrowsePage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
-  const rung = VALID_RUNGS.includes(params.rung as EffortRung) ? (params.rung as EffortRung) : undefined;
+  const rung = VALID_RUNGS.includes(params.rung as EffortRung)
+    ? (params.rung as EffortRung)
+    : undefined;
 
   const [opportunities, types, countries, email] = await Promise.all([
     listBrowseOpportunities({ rung, country: params.country, typeId: params.type }),
@@ -45,7 +47,9 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
       >
         {rows.length} open right now
       </p>
-      <h1 className="font-[family-name:var(--font-fraunces)] mt-1 text-3xl font-extrabold">Browse</h1>
+      <h1 className="font-[family-name:var(--font-fraunces)] mt-1 text-3xl font-extrabold">
+        Browse
+      </h1>
       <p className="mt-1 text-[14px]" style={{ color: 'var(--muted)' }}>
         The opportunities students actually get into.
       </p>
@@ -65,7 +69,11 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
       </div>
 
       <div className="mt-3">
-        <TypeFilter types={types ?? []} active={params.type} otherParams={{ rung: params.rung, country: params.country }} />
+        <TypeFilter
+          types={types ?? []}
+          active={params.type}
+          otherParams={{ rung: params.rung, country: params.country }}
+        />
       </div>
 
       {newest.length > 0 && !hasFilters && (
@@ -82,7 +90,10 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
           <ul className="mt-3">
             {newest.map((opportunity) => (
               <li key={opportunity.id}>
-                <OpportunityRow opportunity={opportunity} typeLabel={typeLabels.get(opportunity.type_id ?? '')} />
+                <OpportunityRow
+                  opportunity={opportunity}
+                  typeLabel={typeLabels.get(opportunity.type_id ?? '')}
+                />
               </li>
             ))}
           </ul>
@@ -118,7 +129,10 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
         <ul className="mt-6">
           {rows.map((opportunity) => (
             <li key={opportunity.id}>
-              <OpportunityRow opportunity={opportunity} typeLabel={typeLabels.get(opportunity.type_id ?? '')} />
+              <OpportunityRow
+                opportunity={opportunity}
+                typeLabel={typeLabels.get(opportunity.type_id ?? '')}
+              />
             </li>
           ))}
         </ul>

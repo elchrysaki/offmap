@@ -92,7 +92,8 @@ export default function GetAppPage() {
 
       {!installed && !installEvent && !isIOS && (
         <p className="mt-8 text-[13px]" style={{ color: 'var(--muted)' }}>
-          Open this page in Chrome, Edge, or another installable browser to add OffMap to your device.
+          Open this page in Chrome, Edge, or another installable browser to add OffMap to your
+          device.
         </p>
       )}
     </main>

@@ -38,7 +38,11 @@ export function prepTimeLabel(prepTime: string | null) {
   return prepTime ? (PREP_TIME_LABEL[prepTime] ?? prepTime) : null;
 }
 
-export function locationLabel(hostCity: string | null, country: string | null, format: string | null) {
+export function locationLabel(
+  hostCity: string | null,
+  country: string | null,
+  format: string | null,
+) {
   if (format === 'online' && !hostCity) return 'Online';
   return [hostCity, country].filter(Boolean).join(', ') || null;
 }

@@ -18,12 +18,12 @@ If you don't create an account, we don't collect anything about you beyond stand
 
 If you create an account, we collect:
 
-| Data | Why we collect it | Legal basis |
-|---|---|---|
-| Email address | Sign you in, send deadline alerts you've asked for | Performance of a contract (running your account) |
-| Sign-in method (email/password, or basic Google profile info if you use Google sign-in) | Authenticate you securely | Performance of a contract |
-| Age confirmation (16+, yes/no — no birth date, no ID) | Comply with our own 16+ policy | Legitimate interest / legal compliance |
-| Saved opportunities and alert preferences | Remember what you've saved, send alerts you've opted into | Consent (for alerts) / performance of a contract (for saving) |
+| Data                                                                                    | Why we collect it                                         | Legal basis                                                   |
+| --------------------------------------------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------- |
+| Email address                                                                           | Sign you in, send deadline alerts you've asked for        | Performance of a contract (running your account)              |
+| Sign-in method (email/password, or basic Google profile info if you use Google sign-in) | Authenticate you securely                                 | Performance of a contract                                     |
+| Age confirmation (16+, yes/no — no birth date, no ID)                                   | Comply with our own 16+ policy                            | Legitimate interest / legal compliance                        |
+| Saved opportunities and alert preferences                                               | Remember what you've saved, send alerts you've opted into | Consent (for alerts) / performance of a contract (for saving) |
 
 We do **not** collect payment information. OffMap is free for students — there's no paid tier, and we never will build one.
 
@@ -41,12 +41,12 @@ We don't use automated decision-making or profiling that produces legal or simil
 
 We use a small number of service providers ("processors") to run OffMap, each only processing data on our behalf under a data processing agreement:
 
-| Provider | Purpose | Data location |
-|---|---|---|
-| Supabase | Database, authentication | Frankfurt, Germany (EU) |
-| Resend | Sending deadline/digest emails | EU region |
-| Vercel | Hosting the website | [confirm region — Vercel's edge network may process data outside the EEA] |
-| Google | Sign-in, if you choose to use "Sign in with Google" | United States |
+| Provider | Purpose                                             | Data location                                                             |
+| -------- | --------------------------------------------------- | ------------------------------------------------------------------------- |
+| Supabase | Database, authentication                            | Frankfurt, Germany (EU)                                                   |
+| Resend   | Sending deadline/digest emails                      | EU region                                                                 |
+| Vercel   | Hosting the website                                 | [confirm region — Vercel's edge network may process data outside the EEA] |
+| Google   | Sign-in, if you choose to use "Sign in with Google" | United States                                                             |
 
 **International transfers:** where a provider (such as Google) processes data outside the EU/EEA, that transfer is covered by an approved safeguard — Standard Contractual Clauses and/or the EU-US Data Privacy Framework, depending on the provider's current certification. [Confirm each provider's current transfer mechanism before publishing — these change.]
 

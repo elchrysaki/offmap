@@ -98,7 +98,10 @@ export default function CommunityPage() {
           <h1 className="font-[family-name:var(--font-fraunces)] mt-3 text-4xl leading-[1.02] font-black uppercase md:text-6xl">
             Verified by people, not just software.
           </h1>
-          <p className="mt-5 max-w-xl text-lg font-semibold" style={{ color: 'rgba(20,18,16,0.72)' }}>
+          <p
+            className="mt-5 max-w-xl text-lg font-semibold"
+            style={{ color: 'rgba(20,18,16,0.72)' }}
+          >
             Every listing on OffMap was found, checked, and signed off by someone real. This is who
             they are and how the checking actually works.
           </p>
@@ -116,11 +119,13 @@ export default function CommunityPage() {
               The mindset
             </p>
             <p className="font-[family-name:var(--font-fraunces)] mt-3.5 max-w-2xl text-2xl leading-snug font-medium md:text-[2.15rem]">
-              An ambassador isn&apos;t a job title. It&apos;s noticing a deadline before it matters to
-              someone else, and{' '}
+              An ambassador isn&apos;t a job title. It&apos;s noticing a deadline before it matters
+              to someone else, and{' '}
               <em
                 className="not-italic font-bold"
-                style={{ background: 'linear-gradient(to top, var(--marigold) 40%, transparent 40%)' }}
+                style={{
+                  background: 'linear-gradient(to top, var(--marigold) 40%, transparent 40%)',
+                }}
               >
                 writing it down so it doesn&apos;t disappear.
               </em>
@@ -140,7 +145,9 @@ export default function CommunityPage() {
                   transitionDelay: `${i * 60}ms`,
                 }}
               >
-                <h3 className="font-[family-name:var(--font-fraunces)] text-lg font-bold">{p.title}</h3>
+                <h3 className="font-[family-name:var(--font-fraunces)] text-lg font-bold">
+                  {p.title}
+                </h3>
                 <p className="mt-2 text-[13px] leading-relaxed" style={{ color: 'var(--muted)' }}>
                   {p.body}
                 </p>
@@ -160,9 +167,12 @@ export default function CommunityPage() {
             >
               Run by people who found the gaps themselves
             </h2>
-            <p className="max-w-[34ch] text-[15px] font-semibold" style={{ color: 'rgba(245,239,227,0.78)' }}>
-              Ambassadors and contributors across the network, verifying listings and finding the ones
-              that never made it online.
+            <p
+              className="max-w-[34ch] text-[15px] font-semibold"
+              style={{ color: 'rgba(245,239,227,0.78)' }}
+            >
+              Ambassadors and contributors across the network, verifying listings and finding the
+              ones that never made it online.
             </p>
           </Reveal>
           <div className="mt-10 grid gap-4.5 sm:grid-cols-2 lg:grid-cols-4">
@@ -184,7 +194,9 @@ export default function CommunityPage() {
                 >
                   {a.initials}
                 </div>
-                <h4 className="font-[family-name:var(--font-fraunces)] text-base font-bold">{a.name}</h4>
+                <h4 className="font-[family-name:var(--font-fraunces)] text-base font-bold">
+                  {a.name}
+                </h4>
                 <div
                   className="font-[family-name:var(--font-archivo)] mt-0.5 text-[11px] font-bold tracking-[0.05em] uppercase"
                   style={{ color: 'var(--muted)' }}
@@ -251,16 +263,16 @@ export default function CommunityPage() {
             <h2 className="font-[family-name:var(--font-fraunces)] mt-3.5 text-2xl leading-snug font-bold md:text-[2rem]">
               The listing set is narrow on purpose. The audience isn&apos;t.
             </h2>
-            <p className="mt-4 max-w-xl text-[15px] font-semibold" style={{ color: 'rgba(20,18,16,0.72)' }}>
+            <p
+              className="mt-4 max-w-xl text-[15px] font-semibold"
+              style={{ color: 'rgba(20,18,16,0.72)' }}
+            >
               OffMap lists selective, time-bounded programmes with an official organiser, a real
               application route, and a benefit beyond a CV line. If a listing pushes toward the
               excluded categories, an ambassador flags it and it doesn&apos;t go up.
             </p>
           </Reveal>
-          <Reveal
-            className="flex flex-col gap-2.5"
-            style={{ transitionDelay: '80ms' }}
-          >
+          <Reveal className="flex flex-col gap-2.5" style={{ transitionDelay: '80ms' }}>
             <span
               className="font-[family-name:var(--font-archivo)] text-[11px] font-extrabold tracking-[0.1em] uppercase"
               style={{ color: 'rgba(20,18,16,0.55)' }}
@@ -285,7 +297,10 @@ export default function CommunityPage() {
       </section>
 
       {/* Network + CTA */}
-      <section className="relative overflow-hidden px-6 py-16 md:py-24" style={{ background: 'var(--ink)' }}>
+      <section
+        className="relative overflow-hidden px-6 py-16 md:py-24"
+        style={{ background: 'var(--ink)' }}
+      >
         <NetworkGlobe />
         <div className="relative mx-auto max-w-5xl">
           <Reveal className="max-w-xl">
@@ -295,16 +310,25 @@ export default function CommunityPage() {
             >
               Know a deadline that only exists on a noticeboard?
             </h2>
-            <p className="mt-4.5 max-w-[42ch] text-[15px] font-semibold" style={{ color: 'rgba(245,239,227,0.78)' }}>
-              That&apos;s exactly what an ambassador does. No experience required — just the habit of
-              noticing before it&apos;s too late for someone else.
+            <p
+              className="mt-4.5 max-w-[42ch] text-[15px] font-semibold"
+              style={{ color: 'rgba(245,239,227,0.78)' }}
+            >
+              That&apos;s exactly what an ambassador does. No experience required — just the habit
+              of noticing before it&apos;s too late for someone else.
             </p>
             <div className="mt-6">
               <RadialRevealButton
                 label="Become an ambassador"
                 link="/contact"
                 addIcon
-                icon={{ symbol: '→', side: 'right', size: 15, color: 'var(--paper)', hoverColor: 'var(--ink)' }}
+                icon={{
+                  symbol: '→',
+                  side: 'right',
+                  size: 15,
+                  color: 'var(--paper)',
+                  hoverColor: 'var(--ink)',
+                }}
                 padding="16px 28px"
                 colors={{
                   fill: 'transparent',

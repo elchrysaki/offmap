@@ -66,12 +66,15 @@ export default function MarketingHomePage() {
               Most of what&apos;s selective{' '}
               <em
                 className="not-italic font-bold"
-                style={{ background: 'linear-gradient(to top, var(--marigold) 40%, transparent 40%)' }}
+                style={{
+                  background: 'linear-gradient(to top, var(--marigold) 40%, transparent 40%)',
+                }}
               >
                 never makes it online.
               </em>{' '}
-              It travels by word of mouth — a teacher who happens to know, a group chat you weren&apos;t
-              in. OffMap is where that word of mouth gets written down, verified, and put on a deadline.
+              It travels by word of mouth — a teacher who happens to know, a group chat you
+              weren&apos;t in. OffMap is where that word of mouth gets written down, verified, and
+              put on a deadline.
             </p>
             <div className="mt-6 flex flex-wrap gap-2.5">
               {FACTS.map((fact) => (
@@ -107,7 +110,10 @@ export default function MarketingHomePage() {
                   transitionDelay: `${i * 60}ms`,
                 }}
               >
-                <span className="font-[family-name:var(--font-bungee)] text-2xl" style={{ color: 'var(--vermilion)' }}>
+                <span
+                  className="font-[family-name:var(--font-bungee)] text-2xl"
+                  style={{ color: 'var(--vermilion)' }}
+                >
                   {stat.num}
                 </span>
                 <span className="text-[13px] font-bold" style={{ color: 'var(--muted)' }}>
@@ -140,14 +146,15 @@ export default function MarketingHomePage() {
       <section className="px-6 py-16 md:py-24" style={{ background: 'var(--marigold)' }}>
         <div className="mx-auto max-w-5xl">
           <Reveal className="flex flex-wrap items-end justify-between gap-5">
-            <h2
-              className="font-[family-name:var(--font-fraunces)] max-w-[14ch] text-3xl leading-[1.02] font-extrabold uppercase md:text-4xl"
-            >
+            <h2 className="font-[family-name:var(--font-fraunces)] max-w-[14ch] text-3xl leading-[1.02] font-extrabold uppercase md:text-4xl">
               Run by people who found the gaps themselves
             </h2>
-            <p className="max-w-[34ch] text-[15px] font-semibold" style={{ color: 'rgba(20,18,16,0.72)' }}>
-              Ambassadors and contributors across the network, verifying listings and finding the ones
-              that never made it online.
+            <p
+              className="max-w-[34ch] text-[15px] font-semibold"
+              style={{ color: 'rgba(20,18,16,0.72)' }}
+            >
+              Ambassadors and contributors across the network, verifying listings and finding the
+              ones that never made it online.
             </p>
           </Reveal>
           <div className="mt-10 grid gap-4.5 sm:grid-cols-2 lg:grid-cols-4">
@@ -169,7 +176,9 @@ export default function MarketingHomePage() {
                 >
                   {a.initials}
                 </div>
-                <h4 className="font-[family-name:var(--font-fraunces)] text-base font-bold">{a.name}</h4>
+                <h4 className="font-[family-name:var(--font-fraunces)] text-base font-bold">
+                  {a.name}
+                </h4>
                 <div
                   className="font-[family-name:var(--font-archivo)] mt-0.5 text-[11px] font-bold tracking-[0.05em] uppercase"
                   style={{ color: 'var(--muted)' }}
@@ -184,7 +193,10 @@ export default function MarketingHomePage() {
       </section>
 
       {/* Community & mindset */}
-      <section className="relative overflow-hidden px-6 py-16 md:py-24" style={{ background: 'var(--ink)' }}>
+      <section
+        className="relative overflow-hidden px-6 py-16 md:py-24"
+        style={{ background: 'var(--ink)' }}
+      >
         <NetworkGlobe />
         <div className="relative mx-auto max-w-5xl">
           <Reveal className="max-w-xl">
@@ -194,16 +206,25 @@ export default function MarketingHomePage() {
             >
               The network runs on people who show up for someone they&apos;ll never meet.
             </h2>
-            <p className="mt-4.5 max-w-[42ch] text-[15px] font-semibold" style={{ color: 'rgba(245,239,227,0.78)' }}>
-              An ambassador isn&apos;t a job title. It&apos;s noticing a deadline before it matters to
-              someone else, and writing it down so it doesn&apos;t disappear.
+            <p
+              className="mt-4.5 max-w-[42ch] text-[15px] font-semibold"
+              style={{ color: 'rgba(245,239,227,0.78)' }}
+            >
+              An ambassador isn&apos;t a job title. It&apos;s noticing a deadline before it matters
+              to someone else, and writing it down so it doesn&apos;t disappear.
             </p>
             <div className="mt-6">
               <RadialRevealButton
                 label="Become an ambassador"
                 link="/contact"
                 addIcon
-                icon={{ symbol: '→', side: 'right', size: 15, color: 'var(--paper)', hoverColor: 'var(--ink)' }}
+                icon={{
+                  symbol: '→',
+                  side: 'right',
+                  size: 15,
+                  color: 'var(--paper)',
+                  hoverColor: 'var(--ink)',
+                }}
                 padding="16px 28px"
                 colors={{
                   fill: 'transparent',

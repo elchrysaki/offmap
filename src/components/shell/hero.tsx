@@ -75,8 +75,8 @@ export function Hero() {
           </h1>
 
           <p className="max-w-xl text-lg font-semibold" style={{ color: 'rgba(20,18,16,0.72)' }}>
-            Selective programmes with a real organiser, a real deadline and a real funder — including
-            the ones that never make it online.
+            Selective programmes with a real organiser, a real deadline and a real funder —
+            including the ones that never make it online.
           </p>
 
           <div className="mt-2 flex flex-wrap items-center gap-4">
@@ -84,7 +84,13 @@ export function Hero() {
               label="For students"
               link="/browse"
               addIcon
-              icon={{ symbol: '→', side: 'right', size: 15, color: 'var(--card)', hoverColor: 'var(--card)' }}
+              icon={{
+                symbol: '→',
+                side: 'right',
+                size: 15,
+                color: 'var(--card)',
+                hoverColor: 'var(--card)',
+              }}
               padding="16px 28px"
               colors={{
                 fill: 'var(--ink)',
@@ -116,7 +122,10 @@ export function Hero() {
           className="pointer-events-none absolute bottom-7 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1.5 md:flex"
           style={{ opacity: 0.6 }}
         >
-          <span className="animate-bob font-[family-name:var(--font-archivo)] text-sm font-bold" style={{ color: 'var(--ink)' }}>
+          <span
+            className="animate-bob font-[family-name:var(--font-archivo)] text-sm font-bold"
+            style={{ color: 'var(--ink)' }}
+          >
             &darr;
           </span>
           <span

@@ -1,16 +1,16 @@
 // Radial Reveal Button — Originkit
 // Re-skinned to OffMap's tokens (Archivo, 2px ink border, hard offset
 // shadow via `style`, pill radius). Internals unchanged from the source.
-"use client";
+'use client';
 
-import * as React from "react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import * as React from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   useAnimate,
   useReducedMotion,
   type AnimationPlaybackControls,
   type Transition,
-} from "framer-motion";
+} from 'framer-motion';
 
 /** Rounded is a percent of the MAXIMUM possible radius — half the short side —
  *  so 100 is a true pill at any button size and 0 is a square corner. A CSS
@@ -21,7 +21,7 @@ const radiusFromPercent = (w: number, h: number, pct: number) =>
   (Math.min(w, h) / 2) * (Math.max(0, Math.min(100, pct)) / 100);
 
 export type IconConfig = {
-  type?: "symbol" | "image";
+  type?: 'symbol' | 'image';
   symbol?: string;
   image?: string | { src?: string; srcSet?: string; alt?: string };
   color?: string;
@@ -29,7 +29,7 @@ export type IconConfig = {
   size?: number;
   padding?: number;
   rounded?: number;
-  side?: "left" | "right";
+  side?: 'left' | 'right';
 };
 
 type HoverConfig = {
@@ -77,7 +77,7 @@ type Props = {
 type BandWidths = { top: number; right: number; bottom: number; left: number };
 
 const num = (v: unknown) => {
-  const parsed = parseFloat(String(v ?? ""));
+  const parsed = parseFloat(String(v ?? ''));
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 };
 
@@ -100,54 +100,54 @@ const innerRadiusOf = (radius: number, b: BandWidths): string => {
 };
 
 const DEFAULT_TRANSITION: Transition = {
-  type: "tween",
-  ease: "easeInOut",
+  type: 'tween',
+  ease: 'easeInOut',
   duration: 0.4,
 };
 
-const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
+const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 // OffMap defaults — Archivo, uppercase, brand ink/paper/cobalt.
 const DEFAULT_FONT: React.CSSProperties = {
-  fontFamily: "var(--font-archivo)",
+  fontFamily: 'var(--font-archivo)',
   fontWeight: 800,
   fontSize: 14,
   lineHeight: 1,
-  letterSpacing: "0.03em",
-  textAlign: "left",
-  textTransform: "uppercase",
+  letterSpacing: '0.03em',
+  textAlign: 'left',
+  textTransform: 'uppercase',
 };
 
 const DEFAULT_COLORS: Colors = {
-  fill: "var(--ink)",
-  hoverFill: "var(--cobalt)",
-  textColor: "var(--card)",
-  hoverTextColor: "var(--card)",
+  fill: 'var(--ink)',
+  hoverFill: 'var(--cobalt)',
+  textColor: 'var(--card)',
+  hoverTextColor: 'var(--card)',
 };
 
 const DEFAULT_ICON: IconConfig = {
-  type: "symbol",
-  symbol: "→",
-  image: "",
-  color: "var(--card)",
-  hoverColor: "var(--card)",
+  type: 'symbol',
+  symbol: '→',
+  image: '',
+  color: 'var(--card)',
+  hoverColor: 'var(--card)',
   size: 16,
   padding: 0,
   rounded: 0,
-  side: "right",
+  side: 'right',
 };
 
 const DEFAULT_BORDER: BorderConfig = {
   borderWidth: 2,
-  borderStyle: "solid",
-  borderColor: "var(--ink)",
+  borderStyle: 'solid',
+  borderColor: 'var(--ink)',
 };
 
 export default function RadialRevealButton({
-  label = "Radial reveal",
+  label = 'Radial reveal',
   font = DEFAULT_FONT,
   showText = true,
-  padding = "16px 28px",
+  padding = '16px 28px',
   rounded = 100,
   fill: fillProp,
   textColor: textColorProp,
@@ -157,16 +157,16 @@ export default function RadialRevealButton({
   gap = 8,
   border = DEFAULT_BORDER,
   hover = {},
-  link = "",
+  link = '',
   transition = DEFAULT_TRANSITION,
   newTab = false,
   style,
 }: Props) {
-  const fill = colors?.fill ?? fillProp ?? "var(--ink)";
-  const textColor = colors?.textColor ?? textColorProp ?? "var(--card)";
+  const fill = colors?.fill ?? fillProp ?? 'var(--ink)';
+  const textColor = colors?.textColor ?? textColorProp ?? 'var(--card)';
   const {
-    fill: hoverFill = colors?.hoverFill ?? "var(--cobalt)",
-    textColor: hoverTextColor = colors?.hoverTextColor ?? "var(--card)",
+    fill: hoverFill = colors?.hoverFill ?? 'var(--cobalt)',
+    textColor: hoverTextColor = colors?.hoverTextColor ?? 'var(--card)',
   } = hover;
 
   const [scope, animate] = useAnimate();
@@ -261,31 +261,31 @@ export default function RadialRevealButton({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const Tag = (link ? "a" : "button") as React.ElementType;
+  const Tag = (link ? 'a' : 'button') as React.ElementType;
   const tagProps = {
-    "aria-label": showText ? undefined : label || undefined,
+    'aria-label': showText ? undefined : label || undefined,
     ...(link
       ? {
           href: link,
-          target: newTab ? "_blank" : undefined,
-          rel: newTab ? "noopener noreferrer" : undefined,
+          target: newTab ? '_blank' : undefined,
+          rel: newTab ? 'noopener noreferrer' : undefined,
         }
-      : { type: "button" }),
+      : { type: 'button' }),
   };
 
   const {
-    type: iconKind = "symbol",
-    symbol: iconSymbol = "→",
+    type: iconKind = 'symbol',
+    symbol: iconSymbol = '→',
     image,
-    color: iconColor = "var(--card)",
-    hoverColor: iconHoverColor = "var(--card)",
-    side: iconSide = "right",
+    color: iconColor = 'var(--card)',
+    hoverColor: iconHoverColor = 'var(--card)',
+    side: iconSide = 'right',
     size: iconSize = 16,
     padding: iconPaddingProp = 0,
     rounded: iconRounded = 0,
   } = icon;
-  const iconSrc = typeof image === "string" ? image : image?.src ? image.src : "";
-  const iconMode = iconKind === "image" && iconSrc ? "image" : "symbol";
+  const iconSrc = typeof image === 'string' ? image : image?.src ? image.src : '';
+  const iconMode = iconKind === 'image' && iconSrc ? 'image' : 'symbol';
   const iconPx = Math.max(1, Math.round(iconSize));
   const iconPadPx = Math.max(0, Math.round(iconPaddingProp));
   const iconRadius = radiusFromPercent(iconPx, iconPx, iconRounded);
@@ -293,20 +293,20 @@ export default function RadialRevealButton({
   const hasIcon = addIcon;
 
   const faceStyle: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     padding,
-    whiteSpace: "nowrap",
-    boxSizing: "border-box",
+    whiteSpace: 'nowrap',
+    boxSizing: 'border-box',
     gap: hasIcon && showText ? gapPx : 0,
-    flexDirection: iconSide === "right" ? "row-reverse" : "row",
+    flexDirection: iconSide === 'right' ? 'row-reverse' : 'row',
   };
 
   const content = (isHoverFace: boolean) => (
     <>
       {hasIcon &&
-        (iconMode === "image" ? (
+        (iconMode === 'image' ? (
           <img
             src={iconSrc}
             alt=""
@@ -316,11 +316,11 @@ export default function RadialRevealButton({
               width: iconPx,
               height: iconPx,
               margin: iconPadPx,
-              objectFit: iconRadius > 0 ? "cover" : "contain",
+              objectFit: iconRadius > 0 ? 'cover' : 'contain',
               borderRadius: Math.min(iconRadius, iconPx / 2),
-              display: "block",
-              flex: "none",
-              pointerEvents: "none",
+              display: 'block',
+              flex: 'none',
+              pointerEvents: 'none',
             }}
           />
         ) : (
@@ -331,8 +331,8 @@ export default function RadialRevealButton({
               margin: iconPadPx,
               lineHeight: 1,
               color: isHoverFace ? iconHoverColor : iconColor,
-              flex: "none",
-              pointerEvents: "none",
+              flex: 'none',
+              pointerEvents: 'none',
             }}
           >
             {iconSymbol}
@@ -349,20 +349,20 @@ export default function RadialRevealButton({
       onPointerEnter={onEnter}
       onPointerLeave={onLeave}
       style={{
-        position: "relative",
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
+        position: 'relative',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         borderRadius: radiusPx,
         borderWidth: border?.borderWidth,
         borderStyle: border?.borderStyle,
         borderColor: border?.borderColor,
         backgroundColor: fill,
-        textDecoration: "none",
-        cursor: "pointer",
-        overflow: "hidden",
-        boxSizing: "border-box",
-        userSelect: "none",
+        textDecoration: 'none',
+        cursor: 'pointer',
+        overflow: 'hidden',
+        boxSizing: 'border-box',
+        userSelect: 'none',
         ...fontStyles,
         ...style,
       }}
@@ -374,14 +374,14 @@ export default function RadialRevealButton({
         aria-hidden
         style={{
           ...faceStyle,
-          position: "absolute",
+          position: 'absolute',
           inset: 0,
           backgroundColor: hoverFill,
           color: hoverTextColor,
-          pointerEvents: "none",
+          pointerEvents: 'none',
           borderRadius: innerRadiusOf(radiusPx, band),
-          clipPath: "circle(0% at 100% 100%)",
-          WebkitClipPath: "circle(0% at 100% 100%)",
+          clipPath: 'circle(0% at 100% 100%)',
+          WebkitClipPath: 'circle(0% at 100% 100%)',
         }}
       >
         {content(true)}

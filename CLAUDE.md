@@ -24,7 +24,7 @@ These are settled. Do not propose alternatives; flag a conflict if code would br
 
 1. **Students never pay.** No paywall, no premium tier, no `plan` column, no copy anywhere mentioning upgrades. Revenue comes from organisations, later.
 2. **Student data is never sold or exposed.** No student name, email, or list leaves OffMap. No student-to-student visibility of any kind — no messaging, comments, or public profiles.
-3. **Paid placement is always labelled and never affects organic ranking.** Partner spotlight is a separate module with a fixed slot count and the plain-text label *Paid placement*. Closing soon and Near you contain zero paid entries, ever.
+3. **Paid placement is always labelled and never affects organic ranking.** Partner spotlight is a separate module with a fixed slot count and the plain-text label _Paid placement_. Closing soon and Near you contain zero paid entries, ever.
 4. **Never publish an inference.** See §6.
 5. **Nothing publishes without funding, eligibility and `last_verified_at`.** Enforced in the database, not in the app.
 6. **An expired listing must never reach a client.** Filtering in a component is not sufficient.
@@ -37,18 +37,18 @@ These are settled. Do not propose alternatives; flag a conflict if code would br
 
 ## 3. Stack
 
-| Layer | Choice |
-|---|---|
-| Framework | Next.js, App Router, TypeScript |
-| Styling | Tailwind v4, design tokens as CSS custom properties in `globals.css` |
-| Components | Hand-rolled. Radix primitives allowed **only** for dialog, popover, select, and combobox, for keyboard and screen-reader behaviour. No component library — the 2px borders and hard offset shadows fight every default theme. |
-| Hosting | Vercel |
-| Database, auth, storage | Supabase, region `eu-central-1` (Frankfurt) — permanent |
-| Email | Resend, EU region. From `alerts@contact.offmap.gr`, reply-to `hello@offmap.gr` |
-| Map (October) | MapLibre + Protomaps or MapTiler free tier. **Never Mapbox** |
-| Submission & review | Web dashboard only. Ambassadors and moderators sign in at `/admin` (email/password) and create, edit, publish, or reject listings directly against Supabase. **No GitHub involvement for ambassadors or moderators** — GitHub is source control for Elena's own code, nothing else. Superseded the earlier GitHub Actions + GitHub Models pipeline; those workflows have been deleted. |
-| Student auth | Supabase Auth. Guest-first stays the default (ADR 0005 supersedes ADR 0003) — an account is an *opt-in* upgrade that exists only to sync saved opportunities across devices, never a requirement to browse, save, or submit. Email/password (verified email required) or OAuth (Microsoft, Apple; Google stays behind a flag until `docs/legal/` is reviewed and live). Self-declared 16+, no parental-consent flow, `profiles.role` (`ambassador`/`moderator`/null) is never self-assignable through any signup path. |
-| AI verification | **Gemini** (`gemini-2.5-flash` + Google Search grounding), via `@google/genai`. Two call sites: an on-demand "Verify with AI" button in `/admin` (`src/lib/ai/verify-opportunity.ts`), and a weekly Supabase Edge Function + `pg_cron` job (`supabase/functions/check-application-links/`) that checks published listings with no `apply_url` yet. Chosen over Claude/OpenAI on cost — Google's free grounding allowance covers this project's volume. Neither call site writes to a gate field directly; see §6. |
+| Layer                   | Choice                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework               | Next.js, App Router, TypeScript                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Styling                 | Tailwind v4, design tokens as CSS custom properties in `globals.css`                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Components              | Hand-rolled. Radix primitives allowed **only** for dialog, popover, select, and combobox, for keyboard and screen-reader behaviour. No component library — the 2px borders and hard offset shadows fight every default theme.                                                                                                                                                                                                                                                                                          |
+| Hosting                 | Vercel                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Database, auth, storage | Supabase, region `eu-central-1` (Frankfurt) — permanent                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Email                   | Resend, EU region. From `alerts@contact.offmap.gr`, reply-to `hello@offmap.gr`                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Map (October)           | MapLibre + Protomaps or MapTiler free tier. **Never Mapbox**                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Submission & review     | Web dashboard only. Ambassadors and moderators sign in at `/admin` (email/password) and create, edit, publish, or reject listings directly against Supabase. **No GitHub involvement for ambassadors or moderators** — GitHub is source control for Elena's own code, nothing else. Superseded the earlier GitHub Actions + GitHub Models pipeline; those workflows have been deleted.                                                                                                                                 |
+| Student auth            | Supabase Auth. Guest-first stays the default (ADR 0005 supersedes ADR 0003) — an account is an _opt-in_ upgrade that exists only to sync saved opportunities across devices, never a requirement to browse, save, or submit. Email/password (verified email required) or OAuth (Microsoft, Apple; Google stays behind a flag until `docs/legal/` is reviewed and live). Self-declared 16+, no parental-consent flow, `profiles.role` (`ambassador`/`moderator`/null) is never self-assignable through any signup path. |
+| AI verification         | **Gemini** (`gemini-2.5-flash` + Google Search grounding), via `@google/genai`. Two call sites: an on-demand "Verify with AI" button in `/admin` (`src/lib/ai/verify-opportunity.ts`), and a weekly Supabase Edge Function + `pg_cron` job (`supabase/functions/check-application-links/`) that checks published listings with no `apply_url` yet. Chosen over Claude/OpenAI on cost — Google's free grounding allowance covers this project's volume. Neither call site writes to a gate field directly; see §6.      |
 
 **App strategy is Route D:** one backend, two front ends. Rules live in the database so a future native client inherits them rather than reimplementing them. PWA before public launch. No Capacitor, no React Native, no Expo — that branch is archived.
 
@@ -79,13 +79,15 @@ src/
 docs/                         pillar docs + ADRs — **drift warning**: as of 17 Aug some of these (ARCHITECTURE.md,
                                AI-PIPELINE.md, parts of DATA_MODEL.md) still describe the old Payload/Expo/OpenAI/
                                GitHub-issue stack. Don't trust them over this file or the actual code until reconciled.
-apps/                         app (Expo) + cms (Payload) — the old stack. Still physically present, no longer built.
 .github/
-  workflows/                  ci.yml only now — targets the deleted apps/ (Payload/Expo) pipeline, so it cannot
-                               pass against the current app. Broken, not just stale — needs a rewrite for the
-                               Next.js app before it means anything. The old submission/review/archive workflows
-                               are deleted; see §12/§15.
+  workflows/                  ci.yml — installs, typechecks, and builds the real Next.js app. The old
+                               submission/review/archive workflows are deleted; see §12/§15.
 ```
+
+**`apps/` (Expo app, Payload CMS) and `packages/design`'s only consumer script are deleted** — dead code from the
+pre-greenfield stack, removed 19 Aug once nothing still referenced them. `packages/design`, `packages/taxonomy`,
+and `packages/contracts` still exist and are still workspace packages, but nothing in `src/` imports from them —
+worth a follow-up pass to confirm they're genuinely orphaned before deleting those too.
 
 **Migrations are forward-only.** Once applied to the hosted project, a migration is never edited. Fix by adding a new one.
 
@@ -102,11 +104,12 @@ apps/                         app (Expo) + cms (Payload) — the old stack. Stil
 **Several taxonomies are genuinely multi-select**, not single-FK — a listing can be both "Engineering" and "Policy". `field`, `academic_level`, `geo_scope` (includes `worldwide`, for listings with no single host country), `audience_group`, and `funding_feature` each get their own `opportunity_<taxonomy>` junction table (`opportunity_id`, `<taxonomy>_id`), RLS'd to follow the parent `opportunity` row's own visibility rules. This replaced an earlier single-`field_id`-column design that undercounted reality — see `supabase/migrations/20260817123426_multiselect_taxonomy.sql`.
 
 **Derived values are never stored.** Computed in Postgres, exposed through views:
+
 - `days_remaining` — from `deadline_at`
 - `status` — open / closing_soon / opens_soon / rolling / closed, from the dates
 - the effort-ladder rung — from `reach` + `country` + `prep_time`
 
-A stored `status` column that must be kept in sync with a deadline *is* the EAGxBerkeley bug. Never reintroduce one.
+A stored `status` column that must be kept in sync with a deadline _is_ the EAGxBerkeley bug. Never reintroduce one.
 
 **Dates keep `_raw` and normalized.** `deadline_raw` preserves what the source page literally said. `deadline_precision` (`exact` / `month` / `unknown` / `rolling`) stops "closes in March" becoming a fake exact date. There is **no display date column** — the UI formats one way: `9 August 2026`.
 
@@ -114,9 +117,9 @@ A stored `status` column that must be kept in sync with a deadline *is* the EAGx
 
 **Required fields differ by state:**
 
-| | `lead` requires | `published` requires |
-|---|---|---|
-| Fields | `official_url` + `type` | everything above |
+|        | `lead` requires         | `published` requires |
+| ------ | ----------------------- | -------------------- |
+| Fields | `official_url` + `type` | everything above     |
 
 An ambassador sends a link and a type. Everything else is OffMap's job.
 
@@ -146,25 +149,25 @@ If you are writing code that fills a gap with a plausible value, you are writing
 - **Shell** — landing, `/about`, empty states, `/submit`, share cards. Full collage: halftone, cut-paper shapes, tape, saturated blocks, rotated stickers. `/submit` is a public "organising something selective, or know someone who is?" contact-style form — not an authenticated ambassador tool. It writes a `lead` row (or similar low-commitment intake) into the same review queue ambassadors work from in `/admin`; it does not let the public writer set `review_state` or bypass the publish gate. Not built yet — see §12.
 - **Core** — browse, rows, cards, detail, filters, alerts. Cream, ink base, plus category colour (see below). No texture, no collage.
 
-A 16-year-old with nine days to a deadline needs the quiet register. Giving it to them *is* the personality. **17 Aug reversal (Elena's call, supersedes non-negotiable #9):** the core register may now carry decorative/category colour — it no longer has to be monochrome-plus-one-deadline-colour. What stays fixed even after the reversal: vermilion means deadline urgency and nowhere else, pink means the NOT ONLINE stamp and nowhere else, and the countdown numeral / stamp / effort ladder keep their exact functional meaning. Category colour (one of `--cobalt`/`--marigold`/`--violet`/`--teal`/`--lime`, mapped consistently per `type_id`) is now allowed as a small tag/tile on rows and cards for scannability — it's additive, not a replacement for the status colours.
+A 16-year-old with nine days to a deadline needs the quiet register. Giving it to them _is_ the personality. **17 Aug reversal (Elena's call, supersedes non-negotiable #9):** the core register may now carry decorative/category colour — it no longer has to be monochrome-plus-one-deadline-colour. What stays fixed even after the reversal: vermilion means deadline urgency and nowhere else, pink means the NOT ONLINE stamp and nowhere else, and the countdown numeral / stamp / effort ladder keep their exact functional meaning. Category colour (one of `--cobalt`/`--marigold`/`--violet`/`--teal`/`--lime`, mapped consistently per `type_id`) is now allowed as a small tag/tile on rows and cards for scannability — it's additive, not a replacement for the status colours.
 
 ### Tokens
 
 ```css
---paper:     #F5EFE3;  /* page ground */
---card:      #FAF6EA;  /* card and panel surface */
---ink:       #141210;  /* text and borders */
---muted:     #8A7F6B;  /* meta text */
---rule:      #DED4C2;  /* hairlines */
+--paper: #f5efe3; /* page ground */
+--card: #faf6ea; /* card and panel surface */
+--ink: #141210; /* text and borders */
+--muted: #8a7f6b; /* meta text */
+--rule: #ded4c2; /* hairlines */
 
---vermilion: #F0421C;  /* DEADLINES ONLY — never decorative, never a category */
---pink:      #F5399B;  /* the NOT ONLINE stamp only */
+--vermilion: #f0421c; /* DEADLINES ONLY — never decorative, never a category */
+--pink: #f5399b; /* the NOT ONLINE stamp only */
 
---lime:      #C9E547;  /* field tiles and filters only */
---cobalt:    #2B57E0;
---marigold:  #FFC01E;
---violet:    #8B4FE0;
---teal:      #0FB3A1;
+--lime: #c9e547; /* field tiles and filters only */
+--cobalt: #2b57e0;
+--marigold: #ffc01e;
+--violet: #8b4fe0;
+--teal: #0fb3a1;
 ```
 
 Vermilion appears only within 14 days of a deadline, so its meaning is learned in one visit. Category colour (17 Aug reversal, see above) now may appear on a listing row as a small type tag — kept to one flat token colour per type, no gradients, doesn't touch the deadline-numeral colour logic.
@@ -187,20 +190,20 @@ Subset to Latin, preload the two variable files, no layout shift on swap.
 2. **The NOT ONLINE stamp.** Bungee 10px, pink ground, cream text, rotated -3deg. Fires on `reach: local`, nowhere else. The product thesis compressed into one mark.
 3. **The effort ladder as primary navigation**, above type and field filters:
 
-| Rung | Filter logic |
-|---|---|
+| Rung         | Filter logic                                              |
+| ------------ | --------------------------------------------------------- |
 | Coffee break | `reach: local` + own country + `prep_time: under_an_hour` |
-| Weekend trip | `reach: national` + `prep_time: a_weekend` |
-| Aim higher | `reach: international` |
-| Off path | `reach: local` in a country other than the user's |
+| Weekend trip | `reach: national` + `prep_time: a_weekend`                |
+| Aim higher   | `reach: international`                                    |
+| Off path     | `reach: local` in a country other than the user's         |
 
 ### Component rules
 
 - **Row** (browse): numeral column 56px right-aligned · title Fraunces 16px · meta Archivo 13px muted reading `funding · eligibility · location, format` · stamp right if local. 1.5px hairline separator. No card, no border, no shadow.
 - **Card** (featured modules only): category pill top-left, quiet Save top-right, numeral column left, title Fraunces 21px, organiser and location beneath, hairline, two-column grid with condensed-caps `FUNDING` / `WHO CAN APPLY`. Bottom row: provenance left, stamp right.
 - **Card rule, non-negotiable:** answers when it closes, what it costs, who can apply — without a click. No description on a card or row.
-- **Provenance line on every card and detail page:** *"Verified 9 August by Elena"* or *"Submitted by Nikos. Verified 9 August."*
-- **Empty state:** shell register, *"Nothing here yet. Tell me when there is."* plus one **Alert me** button writing a `filter_alert`. Every empty result is a subscription prompt.
+- **Provenance line on every card and detail page:** _"Verified 9 August by Elena"_ or _"Submitted by Nikos. Verified 9 August."_
+- **Empty state:** shell register, _"Nothing here yet. Tell me when there is."_ plus one **Alert me** button writing a `filter_alert`. Every empty result is a subscription prompt.
 - **Zero-count categories are hidden**, not shown as empty chips.
 
 ### No raster assets
@@ -215,7 +218,7 @@ Cartographic sage, topographic palettes, expedition imagery, terminal/mono aesth
 
 ## 8. Copy rules
 
-Active voice, plain verbs, sentence case. A button's label matches the confirmation it produces — **Save opportunity** produces *Saved*. Errors say what happened and how to fix it, without apologising. One date format everywhere: `9 August 2026`. Never claim coverage; claim verification.
+Active voice, plain verbs, sentence case. A button's label matches the confirmation it produces — **Save opportunity** produces _Saved_. Errors say what happened and how to fix it, without apologising. One date format everywhere: `9 August 2026`. Never claim coverage; claim verification.
 
 ---
 
@@ -228,6 +231,7 @@ Active voice, plain verbs, sentence case. A button's label matches the confirmat
 **Slow down and explain before writing:** RLS policies, auth flows, anything touching the users table, the publish-gate constraint, the archive job.
 
 **Never do without asking first:**
+
 - Relax or drop a CHECK constraint
 - Disable RLS on any table, even temporarily
 - Edit an already-applied migration
@@ -263,7 +267,7 @@ A change is not done until:
 
 Do not reorder. Each step assumes the one above.
 
-1. **Supabase project created** in `eu-central-1`. *(Blocking — do by hand.)* ✅ done
+1. **Supabase project created** in `eu-central-1`. _(Blocking — do by hand.)_ ✅ done
 2. **Migrations applied**, types generated, taxonomy seeded. ✅ done
 3. **RLS tested by cross-account read** — sign in as one account, attempt to read another's profile row. This is a ship gate, not a nice-to-have. ✅ done
 4. **Admin dashboard auth** — email + password for ambassadors/moderators at `/admin`, gated by `profiles.role`. ✅ done. Student-facing auth (email + Google, 16+ gate at signup) is still separate, later work — Google OAuth still needs privacy policy and terms URLs live (drafted, not yet reviewed/hosted).
@@ -316,12 +320,12 @@ Sole owner, sole builder, roughly 20 hours a week of which about 8 is build. Dir
 - Resend configured on `contact.offmap.gr`, EU region — **verification status unconfirmed**
 - Supabase project **created**: "OffMap Website", `eu-central-1`, ref `uddfpfdekdltftrmvbqh`
 - Schema live: multi-select taxonomy (`type`, `field`, `academic_level`, `geo_scope`, `audience_group`, `funding_feature` + junction tables), `opportunity` with publish-gate `CHECK` constraint and AI-suggestion columns (`ai_research`, `apply_url_candidate`), `profiles` with `role` (`ambassador` | `moderator`, nullable = ordinary student), `saved_opportunity`, RLS on every table, all verified by direct cross-account read test. 11 migrations applied so far.
-- Next.js app live at repo-root `src/` (App Router, Tailwind v4, design tokens wired). `apps/app` (Expo) / `apps/cms` (Payload) are still physically present but are dead code, not the active build — worth deleting once nobody's still referencing them.
+- Next.js app live at repo-root `src/` (App Router, Tailwind v4, design tokens wired). `apps/app` (Expo) / `apps/cms` (Payload) — deleted 19 Aug, were dead code no longer referenced by anything.
 - Admin dashboard at `/admin`: ambassador/moderator sign-in, create/edit/publish/reject a listing, multi-select taxonomy fields, "Verify with AI" button — all against Supabase directly, no GitHub involved
 - **AI provider is Gemini** (`gemini-2.5-flash` + Google Search grounding), not Claude or OpenAI — picked for cost given this project's volume (Google's free grounding allowance likely covers it entirely). Two call sites: the admin "Verify with AI" button, and a weekly `pg_cron` + Edge Function job that checks published listings missing an `apply_url`. **`GEMINI_API_KEY` is created and in place** (confirmed 17 Aug) — AI call sites can run. `.env.example` itself is still the stale Payload/Expo/OpenAI template and doesn't list `GEMINI_API_KEY`, `RESEND_API_KEY`, or the Supabase URL/anon key vars the app actually needs — needs a rewrite to match the real stack (tracked as its own cleanup, not blocking).
 - Guest-first browse/save/detail pages are live; optional student accounts (email/password + Microsoft/Apple OAuth, Google gated behind a flag) exist per ADR 0005 (supersedes ADR 0003) — an account only exists to sync saved opportunities across devices
-- **GitHub Actions supply pipeline deleted** (`process-submission.yml`, `rebuild-indexes.yml`, `cleanup-closed-submission.yml`, `archive-expired.yml`, `update-closing-soon.yml`) — superseded by the web dashboard. `ci.yml` remains but targets the deleted `apps/` (Expo/Payload) packages, so it cannot pass against the current app — it's broken, not merely stale. Needs a rewrite for the Next.js app, not yet done
-- **No deadline-alert sending exists.** `filter_alert` rows get written by the empty-state "Alert me" button but nothing reads them and no Resend email goes out. This is the top open backend item — it's the product's core promise and a ship gate (§13); sequence it ahead of new surface area given the 7 Sept soft launch.
+- **GitHub Actions supply pipeline deleted** (`process-submission.yml`, `rebuild-indexes.yml`, `cleanup-closed-submission.yml`, `archive-expired.yml`, `update-closing-soon.yml`) — superseded by the web dashboard. `ci.yml` rewritten 19 Aug to install/typecheck/build the real Next.js app instead of the dead `apps/` packages.
+- **Deadline-alert sending is built** (`supabase/functions/send-deadline-alerts`, daily `pg_cron` job) — wired and confirmed correct via manual invocation, but no real email has landed in a real inbox yet since there are no real listings/saves to trigger one. Still the top blocker before the 7 Sept soft launch, now downstream of migrating real listings (§12 step 8) rather than of the alert code itself.
 - **No `/submit` route exists.** Public "organising something, or know someone who is?" intake form is still only a doc reference (§7), not built.
 - Google OAuth **not configured** — blocked on privacy policy + terms URLs (drafted at `docs/legal/`, not reviewed or hosted live yet)
 - ~25 listings still live as files in the repo (`data/opportunities.json`), single-sourced, most missing funding and eligibility — not yet migrated into Supabase
@@ -330,6 +334,7 @@ Sole owner, sole builder, roughly 20 hours a week of which about 8 is build. Dir
 - **Site IA expanded 17 Aug (Elena's call):** `/` becomes a marketing/shell landing page (hero, what-OffMap-is, opportunities teaser, community teaser); the former root browse page moves to `/browse` and becomes the "dashboard" entry point (effort ladder, listing rows, a placeholder "new in your sector" section — real sector-matching isn't built, this is mocked UI ahead of the backend per Elena's explicit instruction). New pages: `/community` (editorial only — spotlights/impact/how-it-works, **not** social; non-negotiable #2 still bans student-to-student visibility), `/get-app` (PWA install), `/contact`, `/licenses`, `/profile` (placeholder, auth-status aware). Top nav (web) + bottom tab nav (mobile/app), per Route D. `src/app/loading.tsx` added as the app-wide loading/welcome screen. Content on new pages is placeholder text pending real copy.
 
 **Multiple Claude Code sessions have been working on this repo concurrently** (at least 5 seen at once on 17 Aug) — auth/saved-opportunities, browse/detail UI, and this AI/admin work all landed in parallel. So far no destructive collisions, but §14's "one tool at a time" rule has not been holding in practice. Elena is aware and deciding how to handle it.
+
 - **Several docs under `docs/` are stale** and describe the old, pre-greenfield stack (`ARCHITECTURE.md` and `AI-PIPELINE.md` fully — Payload/Expo/OpenAI/GitHub-issues; `DATA_MODEL.md` partially — some sections match the real Supabase schema, others still describe Payload collections). Don't trust them over this file or the actual code until someone reconciles them.
 
 **Soft launch 7 September. Public launch week of 28 September. Do not slip past 12 October** — after that the peak is spent rather than used, and the next real window is January.

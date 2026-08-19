@@ -77,7 +77,10 @@ export function EffortLadder() {
       })}
 
       {needsCountry && (
-        <label className="ml-1 flex items-center gap-2 text-[13px]" style={{ color: 'var(--muted)' }}>
+        <label
+          className="ml-1 flex items-center gap-2 text-[13px]"
+          style={{ color: 'var(--muted)' }}
+        >
           Your country
           <input
             type="text"

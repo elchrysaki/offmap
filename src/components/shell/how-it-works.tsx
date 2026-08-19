@@ -4,14 +4,21 @@ import { useEffect, useRef, useState } from 'react';
 
 type Step = { num: string; title: string; body: string; detail: string; icon: React.ReactNode };
 
-const iconProps = { width: 26, height: 26, viewBox: '0 0 22 22', fill: 'none', 'aria-hidden': true } as const;
+const iconProps = {
+  width: 26,
+  height: 26,
+  viewBox: '0 0 22 22',
+  fill: 'none',
+  'aria-hidden': true,
+} as const;
 
 const STEPS: Step[] = [
   {
     num: '01',
     title: 'Browse',
     body: 'Filter by effort, not just category — coffee break, weekend trip, or aim higher.',
-    detail: 'The effort ladder is the primary filter, above type and field — reach and prep time first.',
+    detail:
+      'The effort ladder is the primary filter, above type and field — reach and prep time first.',
     icon: (
       <svg {...iconProps}>
         <circle cx="9.5" cy="9.5" r="6" stroke="currentColor" strokeWidth="1.8" />
@@ -23,10 +30,16 @@ const STEPS: Step[] = [
     num: '02',
     title: 'Save',
     body: 'No account needed. Save on your device, or sign in to sync across devices.',
-    detail: 'Guest saves live on your device. Sign in once and they merge into your account automatically.',
+    detail:
+      'Guest saves live on your device. Sign in once and they merge into your account automatically.',
     icon: (
       <svg {...iconProps}>
-        <path d="M5 3.5h12a1 1 0 0 1 1 1V19l-7-4-7 4V4.5a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+        <path
+          d="M5 3.5h12a1 1 0 0 1 1 1V19l-7-4-7 4V4.5a1 1 0 0 1 1-1Z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinejoin="round"
+        />
       </svg>
     ),
   },
@@ -43,7 +56,12 @@ const STEPS: Step[] = [
           strokeWidth="1.8"
           strokeLinejoin="round"
         />
-        <path d="M9 17.5a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path
+          d="M9 17.5a2 2 0 0 0 4 0"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
       </svg>
     ),
   },
@@ -51,11 +69,18 @@ const STEPS: Step[] = [
     num: '04',
     title: 'Apply',
     body: "Straight to the organiser's own application — we never sit in the middle.",
-    detail: 'No application fee, no OffMap account required on their end. You apply directly to them.',
+    detail:
+      'No application fee, no OffMap account required on their end. You apply directly to them.',
     icon: (
       <svg {...iconProps}>
         <path d="M3.5 11h13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-        <path d="M11.5 5l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path
+          d="M11.5 5l6 6-6 6"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     ),
   },
@@ -172,10 +197,16 @@ export function HowItWorks() {
             />
             {step.title}
           </h3>
-          <p className="mt-2.5 max-w-[46ch] text-[17px] leading-relaxed font-medium" style={{ color: 'var(--ink)' }}>
+          <p
+            className="mt-2.5 max-w-[46ch] text-[17px] leading-relaxed font-medium"
+            style={{ color: 'var(--ink)' }}
+          >
             {step.body}
           </p>
-          <p className="mt-3 max-w-[50ch] text-[14.5px] leading-relaxed" style={{ color: 'var(--muted)' }}>
+          <p
+            className="mt-3 max-w-[50ch] text-[14.5px] leading-relaxed"
+            style={{ color: 'var(--muted)' }}
+          >
             {step.detail}
           </p>
         </div>
@@ -236,7 +267,11 @@ export function HowItWorks() {
             aria-label="Next step"
             onClick={() => goTo(active + 1)}
             className="flex h-9 w-9 items-center justify-center rounded-full transition-transform hover:translate-x-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--cobalt)]"
-            style={{ border: '1.6px solid var(--ink)', background: 'var(--ink)', color: 'var(--paper)' }}
+            style={{
+              border: '1.6px solid var(--ink)',
+              background: 'var(--ink)',
+              color: 'var(--paper)',
+            }}
           >
             &rarr;
           </button>

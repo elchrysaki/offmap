@@ -2,12 +2,6 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "offmap-web",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@offmap/app", "web"],
-      "port": 8081
-    },
-    {
       "name": "offmap-nextjs",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["run", "dev:web"],

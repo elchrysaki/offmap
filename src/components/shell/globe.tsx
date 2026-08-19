@@ -2,9 +2,9 @@
 // Re-skinned to OffMap's flat, no-gradient, no-photographic-texture rules:
 // transparent ocean (no lit sphere), ink dot mesh, paper outline, marigold
 // markers on the ambassador cities. Internals unchanged from the source.
-"use client";
+'use client';
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import {
   Scene,
   PerspectiveCamera,
@@ -22,13 +22,13 @@ import {
   CatmullRomCurve3,
   Vector3,
   CanvasTexture,
-} from "three";
-import { geoEquirectangular, geoPath } from "d3-geo";
+} from 'three';
+import { geoEquirectangular, geoPath } from 'd3-geo';
 
 type Rgba = { r: number; g: number; b: number; a: number };
 
 function parseColorToRgba(input: string): Rgba {
-  if (!input || input.trim() === "") return { r: 0, g: 0, b: 0, a: 0 };
+  if (!input || input.trim() === '') return { r: 0, g: 0, b: 0, a: 0 };
   const str = input.trim();
   const rgbaMatch = str.match(
     /rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*(?:,\s*([\d.]+)\s*)?\)/i,
@@ -40,7 +40,7 @@ function parseColorToRgba(input: string): Rgba {
     const a = rgbaMatch[4] !== undefined ? Math.max(0, Math.min(1, parseFloat(rgbaMatch[4]))) : 1;
     return { r, g, b, a };
   }
-  const hex = str.replace(/^#/, "");
+  const hex = str.replace(/^#/, '');
   if (hex.length === 8) {
     return {
       r: parseInt(hex.slice(0, 2), 16) / 255,
@@ -76,7 +76,13 @@ function parseColorToRgba(input: string): Rgba {
   return { r: 0, g: 0, b: 0, a: 1 };
 }
 
-function mapLinear(value: number, inMin: number, inMax: number, outMin: number, outMax: number): number {
+function mapLinear(
+  value: number,
+  inMin: number,
+  inMax: number,
+  outMin: number,
+  outMax: number,
+): number {
   if (inMax === inMin) return outMin;
   const t = (value - inMin) / (inMax - inMin);
   return outMin + t * (outMax - outMin);
@@ -126,7 +132,9 @@ function simplifyRing(ring: number[][], detail: number): number[][] {
   }
   const lastPoint = ring[ring.length - 1]!;
   const firstPoint = ring[0]!;
-  const isClosed = Math.abs(lastPoint[0]! - firstPoint[0]!) < 1e-4 && Math.abs(lastPoint[1]! - firstPoint[1]!) < 1e-4;
+  const isClosed =
+    Math.abs(lastPoint[0]! - firstPoint[0]!) < 1e-4 &&
+    Math.abs(lastPoint[1]! - firstPoint[1]!) < 1e-4;
   if (!isClosed) {
     simplified.push(lastPoint);
   }
@@ -168,13 +176,13 @@ interface GlobeProps {
   speed?: number;
   smoothing?: number;
   dots?: DotsConfig;
-  fill?: "dots" | "solid";
+  fill?: 'dots' | 'solid';
   fillColor?: string;
   scale?: number;
   stopOnHover?: boolean;
   markerConfig?: MarkerConfig;
   arcs?: ArcConfig[];
-  direction?: "left" | "right";
+  direction?: 'left' | 'right';
   initialLatitude?: number;
   initialLongitude?: number;
   oceanColor?: string;
@@ -194,9 +202,9 @@ interface GlobeProps {
 export default function Globe({
   speed = 1.2,
   smoothing = 8,
-  dots = { color: "#8A7F6B", size: 4, density: 7, allDots: false },
-  fill = "dots",
-  fillColor = "#141210",
+  dots = { color: '#8A7F6B', size: 4, density: 7, allDots: false },
+  fill = 'dots',
+  fillColor = '#141210',
   scale = 8,
   stopOnHover = false,
   markerConfig = {
@@ -212,17 +220,17 @@ export default function Globe({
       { lat: 26.85, lng: 80.95 }, // Lucknow
       { lat: 38.25, lng: 21.73 }, // Patras
     ],
-    color: "#FFC01E",
+    color: '#FFC01E',
     size: 55,
   },
   arcs = [],
-  direction = "left",
+  direction = 'left',
   initialLatitude = 23,
   initialLongitude = -18,
-  oceanColor = "rgba(0,0,0,0)",
-  outlineColor = "#F5EFE3",
+  oceanColor = 'rgba(0,0,0,0)',
+  outlineColor = '#F5EFE3',
   showOutline = true,
-  graticuleColor = "rgba(245,239,227,0.12)",
+  graticuleColor = 'rgba(245,239,227,0.12)',
   showGrid = true,
   outlineWidth = 1,
   dragSpeed = 5,
@@ -241,7 +249,7 @@ export default function Globe({
   const smoothingN = normalizeSmoothing(smoothing);
 
   const baseRotationSpeed = mapSpeedUiToInternal(speed);
-  const rotationSpeed = direction === "left" ? -baseRotationSpeed : baseRotationSpeed;
+  const rotationSpeed = direction === 'left' ? -baseRotationSpeed : baseRotationSpeed;
   const dotSpacing = mapDensityUiToSpacing(density);
   const dotSizeMultiplier = mapDotSizeUiToMultiplier(dotSize);
   const markerRadiusMultiplier = mapMarkerDotSizeUiToMultiplier(markerConfig.size);
@@ -269,7 +277,7 @@ export default function Globe({
       // rejecting a promise — matches the fetch-failure error path below so
       // this decorative accent degrades to nothing rather than crashing the
       // page (no error boundary sits above this component).
-      setError("Failed to create WebGL context");
+      setError('Failed to create WebGL context');
       return;
     }
     renderer.setSize(containerWidth, containerHeight);
@@ -278,15 +286,15 @@ export default function Globe({
     // reported lag: 2x the fill-rate for a barely-visible sharpness gain on
     // a decorative background element.
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-    renderer.outputColorSpace = "srgb";
+    renderer.outputColorSpace = 'srgb';
     const canvas = renderer.domElement;
-    canvas.style.position = "absolute";
-    canvas.style.inset = "0";
-    canvas.style.width = "100%";
-    canvas.style.height = "100%";
-    canvas.style.display = "block";
-    canvas.style.opacity = "0";
-    canvas.style.visibility = "hidden";
+    canvas.style.position = 'absolute';
+    canvas.style.inset = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.display = 'block';
+    canvas.style.opacity = '0';
+    canvas.style.visibility = 'hidden';
     container.appendChild(canvas);
 
     const resolvedOceanColor = oceanColor;
@@ -326,7 +334,9 @@ export default function Globe({
       }
       const outlinePoints: Vector3[] = [];
       for (let i = 0; i < outlinePositions.length; i += 3) {
-        outlinePoints.push(new Vector3(outlinePositions[i]!, outlinePositions[i + 1]!, outlinePositions[i + 2]!));
+        outlinePoints.push(
+          new Vector3(outlinePositions[i]!, outlinePositions[i + 1]!, outlinePositions[i + 2]!),
+        );
       }
       if (outlinePoints.length >= 2) {
         outlinePoints.push(outlinePoints[0]!.clone());
@@ -348,7 +358,9 @@ export default function Globe({
 
     const graticuleGroup = new Group();
     if (showGrid && resolvedGraticuleColor && graticuleRgba.a > 0) {
-      const graticuleColorObj = resolvedGraticuleColor ? new Color(resolvedGraticuleColor) : new Color(1, 1, 1);
+      const graticuleColorObj = resolvedGraticuleColor
+        ? new Color(resolvedGraticuleColor)
+        : new Color(1, 1, 1);
       const graticuleMaterial = new MeshBasicMaterial({
         color: graticuleColorObj,
         transparent: graticuleRgba.a < 1 || graticuleRgba.a === 0,
@@ -410,9 +422,9 @@ export default function Globe({
       try {
         setIsLoading(true);
         const response = await fetch(
-          "https://raw.githubusercontent.com/martynafford/natural-earth-geojson/refs/heads/master/50m/physical/ne_50m_land.json",
+          'https://raw.githubusercontent.com/martynafford/natural-earth-geojson/refs/heads/master/50m/physical/ne_50m_land.json',
         );
-        if (!response.ok) throw new Error("Failed to load land data");
+        if (!response.ok) throw new Error('Failed to load land data');
         const landFeatures = await response.json();
 
         while (continentOutlineGroup.children.length > 0) {
@@ -432,15 +444,15 @@ export default function Globe({
           let processedCount = 0;
           let skippedCount = 0;
           landFeatures.features.forEach((feature: any) => {
-            const featureType = feature.properties?.featurecla || feature.properties?.type || "";
-            const featureName = feature.properties?.name || "";
+            const featureType = feature.properties?.featurecla || feature.properties?.type || '';
+            const featureName = feature.properties?.name || '';
             if (
-              featureType.toLowerCase().includes("graticule") ||
-              featureType.toLowerCase().includes("grid") ||
-              featureType.toLowerCase().includes("line") ||
-              featureName.toLowerCase().includes("graticule") ||
-              featureName.toLowerCase().includes("grid") ||
-              featureName.toLowerCase().includes("line")
+              featureType.toLowerCase().includes('graticule') ||
+              featureType.toLowerCase().includes('grid') ||
+              featureType.toLowerCase().includes('line') ||
+              featureName.toLowerCase().includes('graticule') ||
+              featureName.toLowerCase().includes('grid') ||
+              featureName.toLowerCase().includes('line')
             ) {
               skippedCount++;
               return;
@@ -468,7 +480,10 @@ export default function Globe({
                 for (let i = 0; i < positions.length; i += 3) {
                   points.push(new Vector3(positions[i]!, positions[i + 1]!, positions[i + 2]!));
                 }
-                if (points.length > 0 && points[0]!.distanceTo(points[points.length - 1]!) > 0.001) {
+                if (
+                  points.length > 0 &&
+                  points[0]!.distanceTo(points[points.length - 1]!) > 0.001
+                ) {
                   points.push(points[0]!.clone());
                 }
                 if (points.length >= 2) {
@@ -481,9 +496,9 @@ export default function Globe({
                 }
               }
             };
-            if (geometry.type === "Polygon" && geometry.coordinates.length > 0) {
+            if (geometry.type === 'Polygon' && geometry.coordinates.length > 0) {
               processRing(geometry.coordinates[0]);
-            } else if (geometry.type === "MultiPolygon") {
+            } else if (geometry.type === 'MultiPolygon') {
               geometry.coordinates.forEach((polygon: any) => {
                 if (polygon.length > 0) {
                   processRing(polygon[0]);
@@ -497,16 +512,20 @@ export default function Globe({
 
         const bitmapWidth = 2048;
         const bitmapHeight = 1024;
-        const offscreenCanvas = document.createElement("canvas");
+        const offscreenCanvas = document.createElement('canvas');
         offscreenCanvas.width = bitmapWidth;
         offscreenCanvas.height = bitmapHeight;
-        const ctx = offscreenCanvas.getContext("2d", { willReadFrequently: true });
-        if (!ctx) throw new Error("Canvas not supported");
-        const projection = geoEquirectangular().fitSize([bitmapWidth, bitmapHeight], { type: "Sphere" } as any);
-        const pathGenerator = geoPath().projection(projection).context(ctx as any);
-        ctx.fillStyle = "#000";
+        const ctx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
+        if (!ctx) throw new Error('Canvas not supported');
+        const projection = geoEquirectangular().fitSize([bitmapWidth, bitmapHeight], {
+          type: 'Sphere',
+        } as any);
+        const pathGenerator = geoPath()
+          .projection(projection)
+          .context(ctx as any);
+        ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, bitmapWidth, bitmapHeight);
-        ctx.fillStyle = "#fff";
+        ctx.fillStyle = '#fff';
         ctx.beginPath();
         landFeatures.features.forEach((feature: any) => {
           pathGenerator(feature);
@@ -522,13 +541,13 @@ export default function Globe({
           return pixels[idx]! > 128;
         };
 
-        if (fill === "solid") {
+        if (fill === 'solid') {
           const texW = 1024;
           const texH = 512;
-          const fillCanvas = document.createElement("canvas");
+          const fillCanvas = document.createElement('canvas');
           fillCanvas.width = texW;
           fillCanvas.height = texH;
-          const fctx = fillCanvas.getContext("2d")!;
+          const fctx = fillCanvas.getContext('2d')!;
           const img = fctx.createImageData(texW, texH);
           const data = img.data;
           const fr = Math.round(fillRgba.r * 255);
@@ -578,7 +597,9 @@ export default function Globe({
 
           if (dotCoordinates.length > 0) {
             const dotGeometry = new SphereGeometry(0.01 * dotSizeMultiplier, 4, 4);
-            const dotColorObj = resolvedDotColor ? new Color(resolvedDotColor) : new Color(0.6, 0.6, 0.6);
+            const dotColorObj = resolvedDotColor
+              ? new Color(resolvedDotColor)
+              : new Color(0.6, 0.6, 0.6);
             const dotMaterial = new MeshBasicMaterial({
               color: dotColorObj,
               transparent: dotRgba.a < 1 || dotRgba.a === 0,
@@ -602,11 +623,11 @@ export default function Globe({
         updateMarkers();
         updateArcs();
         renderer.render(scene, camera);
-        canvas.style.opacity = "1";
-        canvas.style.visibility = "visible";
+        canvas.style.opacity = '1';
+        canvas.style.visibility = 'visible';
         setIsLoading(false);
       } catch {
-        setError("Failed to load land map data");
+        setError('Failed to load land map data');
         setIsLoading(false);
       }
     };
@@ -617,10 +638,12 @@ export default function Globe({
       if (markerConfig.markers && markerConfig.markers.length > 0) {
         const markerSize = 0.01 * markerRadiusMultiplier;
         const markerGeometry = new SphereGeometry(markerSize, 16, 16);
-        const markerColorObj = resolvedMarkerColor ? new Color(resolvedMarkerColor) : new Color(1, 1, 1);
+        const markerColorObj = resolvedMarkerColor
+          ? new Color(resolvedMarkerColor)
+          : new Color(1, 1, 1);
         const markerMaterial = new MeshBasicMaterial({ color: markerColorObj });
         markerConfig.markers.forEach((marker) => {
-          if (!marker || typeof marker.lat !== "number" || typeof marker.lng !== "number") return;
+          if (!marker || typeof marker.lat !== 'number' || typeof marker.lng !== 'number') return;
           const pos = latLngToPosition(marker.lat, marker.lng);
           const markerMesh = new Mesh(markerGeometry, markerMaterial.clone());
           markerMesh.position.set(pos.x * globeRadius, pos.y * globeRadius, pos.z * globeRadius);
@@ -710,7 +733,12 @@ export default function Globe({
       }
       const dx = targetRotation.x - rotation.x;
       const dy = targetRotation.y - rotation.y;
-      if (Math.abs(dx) > threshold || Math.abs(dy) > threshold || rotationSpeed !== 0 || isDragging) {
+      if (
+        Math.abs(dx) > threshold ||
+        Math.abs(dy) > threshold ||
+        rotationSpeed !== 0 ||
+        isDragging
+      ) {
         rotation.x += dx * lerpFactor;
         rotation.y += dy * lerpFactor;
         rotation.y = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotation.y));
@@ -760,14 +788,14 @@ export default function Globe({
         lastMouseY = moveEvent.clientY;
       };
       const handleMouseUp = () => {
-        document.removeEventListener("mousemove", handleMouseMoveDrag);
-        document.removeEventListener("mouseup", handleMouseUp);
+        document.removeEventListener('mousemove', handleMouseMoveDrag);
+        document.removeEventListener('mouseup', handleMouseUp);
         isDragging = false;
       };
-      document.addEventListener("mousemove", handleMouseMoveDrag);
-      document.addEventListener("mouseup", handleMouseUp);
+      document.addEventListener('mousemove', handleMouseMoveDrag);
+      document.addEventListener('mouseup', handleMouseUp);
     };
-    canvas.addEventListener("mousedown", handleMouseDown);
+    canvas.addEventListener('mousedown', handleMouseDown);
 
     const raycaster = new Raycaster();
     const mouse = new Vector2();
@@ -780,7 +808,7 @@ export default function Globe({
       const intersects = raycaster.intersectObject(oceanMesh);
       isHovering = intersects.length > 0;
     };
-    canvas.addEventListener("mousemove", handleMouseMove);
+    canvas.addEventListener('mousemove', handleMouseMove);
 
     const resizeObserver = new ResizeObserver(() => {
       const newWidth = container.clientWidth || container.offsetWidth || 800;
@@ -799,8 +827,8 @@ export default function Globe({
 
     return () => {
       if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
-      canvas.removeEventListener("mousedown", handleMouseDown);
-      canvas.removeEventListener("mousemove", handleMouseMove);
+      canvas.removeEventListener('mousedown', handleMouseDown);
+      canvas.removeEventListener('mousemove', handleMouseMove);
       resizeObserver.disconnect();
       renderer.dispose();
       container.removeChild(canvas);
@@ -839,12 +867,12 @@ export default function Globe({
 
   const containerStyle: CSSProperties = {
     ...style,
-    position: "relative",
-    width: "100%",
-    height: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   };
 
   if (error) {

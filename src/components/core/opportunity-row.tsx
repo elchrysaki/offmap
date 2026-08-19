@@ -26,7 +26,13 @@ type Row = {
 // right if local. 1.5px hairline separator. No card, no border, no shadow.
 // Category tag (17 Aug reversal) is additive colour, doesn't touch the
 // deadline-numeral or NOT ONLINE stamp logic.
-export function OpportunityRow({ opportunity, typeLabel }: { opportunity: Row; typeLabel?: string }) {
+export function OpportunityRow({
+  opportunity,
+  typeLabel,
+}: {
+  opportunity: Row;
+  typeLabel?: string;
+}) {
   return (
     <Link
       href={`/opportunities/${opportunity.id}`}

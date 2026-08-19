@@ -35,7 +35,11 @@ type Opportunity = {
 };
 
 function formatDeadline(iso: string) {
-  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  return new Date(iso).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 }
 
 function daysUntil(iso: string) {
@@ -76,10 +80,13 @@ async function sendAlertEmail(to: string, opportunity: Opportunity) {
 
 Deno.serve(async () => {
   if (!RESEND_API_KEY) {
-    return new Response(JSON.stringify({ error: 'RESEND_API_KEY secret not set for this function' }), {
-      status: 500,
-      headers: { 'content-type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ error: 'RESEND_API_KEY secret not set for this function' }),
+      {
+        status: 500,
+        headers: { 'content-type': 'application/json' },
+      },
+    );
   }
 
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
@@ -104,7 +111,8 @@ Deno.serve(async () => {
     });
   }
 
-  const results: Array<{ saved_opportunity_id: string; opportunity_id: string; status: string }> = [];
+  const results: Array<{ saved_opportunity_id: string; opportunity_id: string; status: string }> =
+    [];
 
   for (const opportunity of closingSoon ?? []) {
     const { data: saves, error: savesError } = await supabase
@@ -114,13 +122,19 @@ Deno.serve(async () => {
       .is('last_alert_sent_at', null);
 
     if (savesError) {
-      results.push({ saved_opportunity_id: '(query failed)', opportunity_id: opportunity.id, status: savesError.message });
+      results.push({
+        saved_opportunity_id: '(query failed)',
+        opportunity_id: opportunity.id,
+        status: savesError.message,
+      });
       continue;
     }
 
     for (const save of saves ?? []) {
       try {
-        const { data: user, error: userError } = await supabase.auth.admin.getUserById(save.profile_id);
+        const { data: user, error: userError } = await supabase.auth.admin.getUserById(
+          save.profile_id,
+        );
         if (userError || !user?.user?.email) {
           throw new Error(userError?.message ?? 'no email on file for this profile');
         }
@@ -132,7 +146,11 @@ Deno.serve(async () => {
           .update({ last_alert_sent_at: new Date().toISOString() })
           .eq('id', save.id);
 
-        results.push({ saved_opportunity_id: save.id, opportunity_id: opportunity.id, status: 'sent' });
+        results.push({
+          saved_opportunity_id: save.id,
+          opportunity_id: opportunity.id,
+          status: 'sent',
+        });
       } catch (err) {
         results.push({
           saved_opportunity_id: save.id,
@@ -143,7 +161,10 @@ Deno.serve(async () => {
     }
   }
 
-  return new Response(JSON.stringify({ checked: closingSoon?.length ?? 0, sent: results.length, results }), {
-    headers: { 'content-type': 'application/json' },
-  });
+  return new Response(
+    JSON.stringify({ checked: closingSoon?.length ?? 0, sent: results.length, results }),
+    {
+      headers: { 'content-type': 'application/json' },
+    },
+  );
 });

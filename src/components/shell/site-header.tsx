@@ -17,7 +17,10 @@ export async function SiteHeader() {
   return (
     <header
       className="sticky top-0 z-40 hidden md:block"
-      style={{ background: 'var(--marigold)', borderBottom: 'var(--border-width) solid var(--ink)' }}
+      style={{
+        background: 'var(--marigold)',
+        borderBottom: 'var(--border-width) solid var(--ink)',
+      }}
     >
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
         <Link
