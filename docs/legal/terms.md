@@ -1,8 +1,8 @@
 # Terms of service
 
-Last updated: [date]
+Last updated: 19 August 2026
 
-These terms govern your use of OffMap, operated by **[legal name / registered address — same as in the privacy policy]**. By using OffMap, you agree to them.
+These terms govern your use of OffMap, operated by **Elena Chrysaki**, an individual, at **Adrianou 26, Keratsini, 18755, Greece**. By using OffMap, you agree to them.
 
 Contact: hello@offmap.gr
 

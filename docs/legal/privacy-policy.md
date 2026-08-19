@@ -1,10 +1,10 @@
 # Privacy policy
 
-Last updated: [date]
+Last updated: 19 August 2026
 
 ## Data controller
 
-OffMap is operated by **[legal name — e.g. "Elena Chrysaki" if operating as an individual/sole trader, or your registered business name]**, registered at **[registered address — required by GDPR Art. 13(1)(a), cannot be published without this]**.
+OffMap is operated by **Elena Chrysaki**, an individual, at **Adrianou 26, Keratsini, 18755, Greece**.
 
 Contact for privacy matters: hello@offmap.gr
 
