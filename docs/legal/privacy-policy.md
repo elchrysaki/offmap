@@ -41,12 +41,12 @@ We don't use automated decision-making or profiling that produces legal or simil
 
 We use a small number of service providers ("processors") to run OffMap, each only processing data on our behalf under a data processing agreement:
 
-| Provider | Purpose                                             | Data location                                                             |
-| -------- | --------------------------------------------------- | ------------------------------------------------------------------------- |
-| Supabase | Database, authentication                            | Frankfurt, Germany (EU)                                                   |
-| Resend   | Sending deadline/digest emails                      | EU region                                                                 |
-| Vercel   | Hosting the website                                 | [confirm region — Vercel's edge network may process data outside the EEA] |
-| Google   | Sign-in, if you choose to use "Sign in with Google" | United States                                                             |
+| Provider | Purpose                                             | Data location           |
+| -------- | --------------------------------------------------- | ----------------------- |
+| Supabase | Database, authentication                            | Frankfurt, Germany (EU) |
+| Resend   | Sending deadline/digest emails                      | EU region               |
+| Vercel   | Hosting the website                                 | Frankfurt, Germany (EU) |
+| Google   | Sign-in, if you choose to use "Sign in with Google" | United States           |
 
 **International transfers:** where a provider (such as Google) processes data outside the EU/EEA, that transfer is covered by an approved safeguard — Standard Contractual Clauses and/or the EU-US Data Privacy Framework, depending on the provider's current certification. [Confirm each provider's current transfer mechanism before publishing — these change.]
 
