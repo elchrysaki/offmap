@@ -26,6 +26,8 @@ jobs:
           node-version: 22.13.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Format check
+        run: pnpm run format:check
       - name: Typecheck
         run: pnpm exec tsc --noEmit
       - name: Build

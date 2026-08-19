@@ -33,7 +33,10 @@ type FindingResult = {
 };
 
 function stripJsonFences(text: string) {
-  return text.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
+  return text
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/```\s*$/, '')
+    .trim();
 }
 
 async function findApplicationLink(o: Opportunity): Promise<FindingResult> {

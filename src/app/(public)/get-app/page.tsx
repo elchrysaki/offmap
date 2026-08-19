@@ -8,8 +8,8 @@ export default function GetAppPage() {
         Get OffMap on your device
       </h1>
       <p className="mt-3 text-[15px]" style={{ color: 'var(--muted)' }}>
-        Installable app support isn&apos;t live yet — OffMap works in any browser today. Placeholder for
-        install instructions (Add to Home Screen) once the PWA build lands.
+        Installable app support isn&apos;t live yet — OffMap works in any browser today. Placeholder
+        for install instructions (Add to Home Screen) once the PWA build lands.
       </p>
     </main>
   );

@@ -28,7 +28,10 @@ export function CountdownNumeral({ daysRemaining, status, opensAt }: Props) {
   }
 
   if (status === 'opens_soon' && opensAt) {
-    const month = new Date(opensAt).toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' });
+    const month = new Date(opensAt).toLocaleDateString('en-GB', {
+      month: 'short',
+      timeZone: 'UTC',
+    });
     return (
       <span
         className="font-[family-name:var(--font-fraunces)] text-[15px] leading-none font-extrabold uppercase"

@@ -13,9 +13,17 @@ const ROWS: { color: string; items: MockCard[] }[] = [
     color: 'var(--cobalt)',
     items: [
       { tag: 'Conference', title: 'TEDx Athens Youth', meta: 'Open call · 16–19 · Athens' },
-      { tag: 'Conference', title: 'Web Summit Lisbon — Student Pass', meta: 'Discounted · 18+ · Lisbon' },
+      {
+        tag: 'Conference',
+        title: 'Web Summit Lisbon — Student Pass',
+        meta: 'Discounted · 18+ · Lisbon',
+      },
       { tag: 'Conference', title: 'Athens Science Festival', meta: 'Free entry · 15–19 · Athens' },
-      { tag: 'Conference', title: 'Youth Diplomacy Forum', meta: 'Travel funded · 16–20 · Brussels' },
+      {
+        tag: 'Conference',
+        title: 'Youth Diplomacy Forum',
+        meta: 'Travel funded · 16–20 · Brussels',
+      },
       { tag: 'Conference', title: 'Climate Futures Summit', meta: 'Fully funded · 17–21 · Berlin' },
       { tag: 'Conference', title: 'Model UN — The Hague', meta: 'Self-funded · 16–19 · The Hague' },
     ],
@@ -37,7 +45,11 @@ const ROWS: { color: string; items: MockCard[] }[] = [
       { tag: 'Course', title: 'MIT PRIMES-USA', meta: 'Fully funded · 16–18 · Remote' },
       { tag: 'Course', title: 'CERN Summer School', meta: 'Stipend · 18–24 · Geneva' },
       { tag: 'Course', title: 'Piraeus Robotics Bootcamp', meta: 'Funded · 16–19 · Piraeus' },
-      { tag: 'Course', title: 'Oxford Summer Politics', meta: 'Fee-based, bursaries · 17–19 · Oxford' },
+      {
+        tag: 'Course',
+        title: 'Oxford Summer Politics',
+        meta: 'Fee-based, bursaries · 17–19 · Oxford',
+      },
       { tag: 'Course', title: 'Deep Learning Intensive', meta: 'Free · 18+ · Remote' },
       { tag: 'Course', title: 'Marine Biology Fieldwork', meta: 'Funded · 17–20 · Crete' },
     ],
@@ -134,7 +146,12 @@ export function OpportunitiesReel() {
           <span
             ref={countRef}
             className="font-[family-name:var(--font-bungee)] text-[11px]"
-            style={{ background: 'var(--lime)', color: 'var(--ink)', borderRadius: 'var(--radius-stamp)', padding: '6px 10px' }}
+            style={{
+              background: 'var(--lime)',
+              color: 'var(--ink)',
+              borderRadius: 'var(--radius-stamp)',
+              padding: '6px 10px',
+            }}
           >
             SCROLL &darr;
           </span>
@@ -160,7 +177,11 @@ export function OpportunitiesReel() {
                 >
                   <span
                     className="font-[family-name:var(--font-archivo)] w-fit px-2 py-0.5 text-[10px] font-bold tracking-[0.06em] uppercase"
-                    style={{ background: row.color, color: 'var(--ink)', borderRadius: 'var(--radius-stamp)' }}
+                    style={{
+                      background: row.color,
+                      color: 'var(--ink)',
+                      borderRadius: 'var(--radius-stamp)',
+                    }}
                   >
                     {item.tag}
                   </span>
@@ -180,7 +201,8 @@ export function OpportunitiesReel() {
           className="font-[family-name:var(--font-archivo)] px-6 text-[11px] font-bold tracking-[0.05em] uppercase"
           style={{ color: 'rgba(245,239,227,0.5)' }}
         >
-          Conferences · Hackathons · Courses — three registers, one deadline spine. Mock listings shown.
+          Conferences · Hackathons · Courses — three registers, one deadline spine. Mock listings
+          shown.
         </p>
       </div>
     </section>

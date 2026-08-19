@@ -59,8 +59,8 @@ export default function SignUpPage() {
         Create an account
       </h1>
       <p className="mt-2 text-sm text-[color:var(--muted)]">
-        Optional — you can keep saving opportunities without one. An account just syncs your
-        saves across devices.
+        Optional — you can keep saving opportunities without one. An account just syncs your saves
+        across devices.
       </p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">

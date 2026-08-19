@@ -8,9 +8,6 @@
     "node": ">=22.13.0 <23"
   },
   "scripts": {
-    "dev": "pnpm --parallel --filter @offmap/app --filter @offmap/cms dev",
-    "dev:app": "pnpm --filter @offmap/app dev",
-    "dev:cms": "pnpm --filter @offmap/cms dev",
     "dev:web": "next dev",
     "build:web": "next build",
     "build": "pnpm -r --if-present build",
@@ -19,14 +16,10 @@
     "lint": "pnpm -r --if-present lint",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
-    "test:e2e": "pnpm --filter @offmap/cms test:e2e && pnpm --filter @offmap/app test:e2e",
-    "playwright:install": "pnpm --filter @offmap/app exec playwright install chromium",
     "test:unit": "pnpm --filter './packages/**' test",
     "generate:taxonomy": "tsx scripts/generate-taxonomy.ts",
-    "generate:brand": "tsx scripts/generate-brand-assets.ts",
     "check:skills": "pnpm exec tsx scripts/validate-skills.ts",
-    "check:legacy": "pnpm --filter @offmap/cms migration:check",
-    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm check:skills && pnpm check:legacy"
+    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm check:skills"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",

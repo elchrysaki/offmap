@@ -62,13 +62,19 @@ export async function listCountries() {
     .not('country', 'is', null);
 
   if (error) throw error;
-  const unique = Array.from(new Set(data.map((row) => row.country).filter((c): c is string => !!c)));
+  const unique = Array.from(
+    new Set(data.map((row) => row.country).filter((c): c is string => !!c)),
+  );
   return unique.sort((a, b) => a.localeCompare(b));
 }
 
 export async function getOpportunityById(id: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase.from('opportunity_public').select('*').eq('id', id).maybeSingle();
+  const { data, error } = await supabase
+    .from('opportunity_public')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
   if (error) throw error;
   return data;
 }

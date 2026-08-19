@@ -54,7 +54,10 @@ export type OpportunityResearch = {
 };
 
 function stripJsonFences(text: string) {
-  return text.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
+  return text
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/```\s*$/, '')
+    .trim();
 }
 
 export async function researchOpportunity(input: {

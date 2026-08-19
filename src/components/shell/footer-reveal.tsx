@@ -38,8 +38,14 @@ export function FooterReveal({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {enabled && spacerHeight !== null && <div aria-hidden="true" style={{ height: spacerHeight }} />}
-      <div ref={footerRef} className={enabled ? 'md:fixed md:inset-x-0 md:bottom-0' : ''} style={{ zIndex: 0 }}>
+      {enabled && spacerHeight !== null && (
+        <div aria-hidden="true" style={{ height: spacerHeight }} />
+      )}
+      <div
+        ref={footerRef}
+        className={enabled ? 'md:fixed md:inset-x-0 md:bottom-0' : ''}
+        style={{ zIndex: 0 }}
+      >
         {children}
       </div>
     </>

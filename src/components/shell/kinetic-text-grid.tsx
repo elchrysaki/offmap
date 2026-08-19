@@ -1,10 +1,10 @@
 // Appear Text — Originkit
 // Re-skinned to OffMap's shell register: ink field, paper wordmark, Bungee.
-"use client";
+'use client';
 
-import * as React from "react";
-import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import * as React from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 
 type Transition = {
   type?: string;
@@ -34,17 +34,17 @@ type Props = {
 
 export default function KineticTextGrid(props: Props) {
   const {
-    text = "OFFMAP",
+    text = 'OFFMAP',
     font = {
-      fontFamily: "var(--font-bungee)",
+      fontFamily: 'var(--font-bungee)',
       fontWeight: 400,
       fontSize: 56,
-      lineHeight: "1em",
-      letterSpacing: "0.01em",
-      textAlign: "left",
+      lineHeight: '1em',
+      letterSpacing: '0.01em',
+      textAlign: 'left',
     },
-    textColor = "#F5EFE3",
-    backgroundColor = "#141210",
+    textColor = '#F5EFE3',
+    backgroundColor = '#141210',
     rowCount = 5,
     repeatCount = 5,
     rowGap = 16,
@@ -54,11 +54,11 @@ export default function KineticTextGrid(props: Props) {
     horizontalShiftPx = 80,
     zoomScalePct = 115,
     transition = {
-      type: "tween",
+      type: 'tween',
       stiffness: 800,
       damping: 60,
       mass: 1,
-      ease: "easeInOut",
+      ease: 'easeInOut',
       duration: 0.8,
     },
     style,
@@ -67,7 +67,7 @@ export default function KineticTextGrid(props: Props) {
   const [reducedMotion, setReducedMotion] = useState(false);
   useEffect(() => {
     try {
-      setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+      setReducedMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     } catch {
       // best-effort only
     }
@@ -80,14 +80,17 @@ export default function KineticTextGrid(props: Props) {
   const centerWordIndex = Math.floor(safeRepeatCount / 2);
 
   const rows = useMemo(() => Array.from({ length: safeRowCount }, (_, i) => i), [safeRowCount]);
-  const words = useMemo(() => Array.from({ length: safeRepeatCount }, (_, i) => i), [safeRepeatCount]);
+  const words = useMemo(
+    () => Array.from({ length: safeRepeatCount }, (_, i) => i),
+    [safeRepeatCount],
+  );
 
   const fontStyles = (font ?? {}) as React.CSSProperties;
   const maxZoomScale = zoomScalePct / 100;
 
   const HOME_FACTOR = 0.4;
 
-  const ease = (transition as any)?.ease ?? "easeInOut";
+  const ease = (transition as any)?.ease ?? 'easeInOut';
 
   const motionSec = Math.max(0.1, expandDurationSec);
   const holdSec = Math.max(0, holdDurationSec);
@@ -107,16 +110,16 @@ export default function KineticTextGrid(props: Props) {
     repeat: Infinity,
   });
 
-  const VISIBLE = "inset(0% 0% 0% 0%)";
+  const VISIBLE = 'inset(0% 0% 0% 0%)';
 
   const containerStyle: React.CSSProperties = {
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
     backgroundColor,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
     ...style,
   };
 
@@ -135,13 +138,13 @@ export default function KineticTextGrid(props: Props) {
         animate={{ scale: [1, maxZoomScale, 1, 1] }}
         transition={seq([0, n(tIn), n(tWipe), 1])}
         style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
           gap: rowGap,
-          position: "relative",
-          willChange: "transform",
+          position: 'relative',
+          willChange: 'transform',
         }}
       >
         {rows.map((rowIndex) => {
@@ -154,7 +157,7 @@ export default function KineticTextGrid(props: Props) {
           const driftHome = driftFull * HOME_FACTOR;
 
           const wipeLTR = rowIndex % 2 === 0;
-          const hidden = wipeLTR ? "inset(0% 0% 0% 100%)" : "inset(0% 100% 0% 0%)";
+          const hidden = wipeLTR ? 'inset(0% 0% 0% 100%)' : 'inset(0% 100% 0% 0%)';
 
           const xAnim = isCenterRow
             ? {
@@ -172,12 +175,12 @@ export default function KineticTextGrid(props: Props) {
               animate={{ x: xAnim.values }}
               transition={seq(xAnim.times)}
               style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 gap: wordGap,
-                whiteSpace: "nowrap",
-                willChange: "transform",
+                whiteSpace: 'nowrap',
+                willChange: 'transform',
               }}
             >
               {words.map((wordIndex) => {
@@ -190,7 +193,7 @@ export default function KineticTextGrid(props: Props) {
                       style={{
                         color: textColor,
                         lineHeight: 1,
-                        display: "inline-block",
+                        display: 'inline-block',
                         clipPath: VISIBLE,
                         ...fontStyles,
                       }}
@@ -201,7 +204,9 @@ export default function KineticTextGrid(props: Props) {
                 }
 
                 const denom = Math.max(1, safeRepeatCount - 1);
-                const sweepT = wipeLTR ? wordIndex / denom : (safeRepeatCount - 1 - wordIndex) / denom;
+                const sweepT = wipeLTR
+                  ? wordIndex / denom
+                  : (safeRepeatCount - 1 - wordIndex) / denom;
 
                 const wipeWindow = tWipe - tIn;
                 const perWipe = wipeWindow * 0.5;
@@ -223,9 +228,9 @@ export default function KineticTextGrid(props: Props) {
                     style={{
                       color: textColor,
                       lineHeight: 1,
-                      display: "inline-block",
+                      display: 'inline-block',
                       clipPath: VISIBLE,
-                      willChange: "clip-path",
+                      willChange: 'clip-path',
                       ...fontStyles,
                     }}
                   >

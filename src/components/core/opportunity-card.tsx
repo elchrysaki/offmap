@@ -26,7 +26,13 @@ type Card = {
 // location beneath, hairline, FUNDING / WHO CAN APPLY grid, provenance +
 // stamp bottom row. Card rule, non-negotiable: answers when it closes, what
 // it costs, who can apply — without a click.
-export function OpportunityCard({ opportunity, typeLabel }: { opportunity: Card; typeLabel?: string }) {
+export function OpportunityCard({
+  opportunity,
+  typeLabel,
+}: {
+  opportunity: Card;
+  typeLabel?: string;
+}) {
   const location = [opportunity.host_city, opportunity.country].filter(Boolean).join(', ');
 
   return (

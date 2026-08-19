@@ -46,10 +46,22 @@ function AppleIcon() {
 function GoogleIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true">
-      <path fill="#4285F4" d="M17.6 9.2c0-.6-.1-1.2-.2-1.8H9v3.5h4.8c-.2 1.1-.9 2.1-1.8 2.7v2.3h3C16.9 14.3 17.6 12 17.6 9.2Z" />
-      <path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-3-2.3c-.8.6-1.9.9-3 .9-2.3 0-4.3-1.6-5-3.7H1v2.3C2.4 15.9 5.5 18 9 18Z" />
-      <path fill="#FBBC05" d="M4 10.7c-.2-.6-.3-1.1-.3-1.7s.1-1.1.3-1.7V5H1C.4 6.2 0 7.5 0 9s.4 2.8 1 4l3-2.3Z" />
-      <path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6C13.5.8 11.4 0 9 0 5.5 0 2.4 2.1 1 5l3 2.3c.7-2.1 2.7-3.7 5-3.7Z" />
+      <path
+        fill="#4285F4"
+        d="M17.6 9.2c0-.6-.1-1.2-.2-1.8H9v3.5h4.8c-.2 1.1-.9 2.1-1.8 2.7v2.3h3C16.9 14.3 17.6 12 17.6 9.2Z"
+      />
+      <path
+        fill="#34A853"
+        d="M9 18c2.4 0 4.5-.8 6-2.2l-3-2.3c-.8.6-1.9.9-3 .9-2.3 0-4.3-1.6-5-3.7H1v2.3C2.4 15.9 5.5 18 9 18Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M4 10.7c-.2-.6-.3-1.1-.3-1.7s.1-1.1.3-1.7V5H1C.4 6.2 0 7.5 0 9s.4 2.8 1 4l3-2.3Z"
+      />
+      <path
+        fill="#EA4335"
+        d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6C13.5.8 11.4 0 9 0 5.5 0 2.4 2.1 1 5l3 2.3c.7-2.1 2.7-3.7 5-3.7Z"
+      />
     </svg>
   );
 }
@@ -127,7 +139,9 @@ function SignInForm() {
             boxShadow: 'var(--shadow-offset)',
           }}
         >
-          <h1 className="font-[family-name:var(--font-fraunces)] text-[1.7rem] font-extrabold">Sign in</h1>
+          <h1 className="font-[family-name:var(--font-fraunces)] text-[1.7rem] font-extrabold">
+            Sign in
+          </h1>
           <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: 'var(--muted)' }}>
             Guest-first, always. Sign in only to sync your saved opportunities across devices.
           </p>
