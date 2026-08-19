@@ -105,7 +105,7 @@ export function TabletMenu({ signedIn }: { signedIn: boolean }) {
               </Link>
             ))}
             <Link
-              href="/profile"
+              href={signedIn ? '/profile' : '/sign-in'}
               onClick={() => setOpen(false)}
               className="font-[family-name:var(--font-archivo)] mt-1 px-4 py-3 text-center text-[14px] font-bold tracking-[0.06em] uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--cobalt)]"
               style={{

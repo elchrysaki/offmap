@@ -44,7 +44,7 @@ export async function SiteHeader() {
             </Link>
           ))}
           <Link
-            href="/profile"
+            href={email ? '/profile' : '/sign-in'}
             className="font-[family-name:var(--font-archivo)] px-4 py-2 text-[13px] font-bold tracking-[0.06em] uppercase transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--cobalt)]"
             style={{
               borderRadius: 'var(--radius-pill)',
