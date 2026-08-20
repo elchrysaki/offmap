@@ -1,5 +1,5 @@
-import { CountryFilter } from '@/components/core/country-filter';
 import { EffortLadder } from '@/components/core/effort-ladder';
+import { FilterDrawer } from '@/components/core/filter-drawer';
 import { OpportunityCard } from '@/components/core/opportunity-card';
 import { OpportunityRow } from '@/components/core/opportunity-row';
 import { SignInBanner } from '@/components/core/sign-in-banner';
@@ -19,7 +19,7 @@ import {
 } from '@/lib/queries/taxonomy';
 import { getCurrentUserFieldIds, getCurrentUserOnboarding } from '@/lib/queries/profile';
 import type { DeadlineRange, EffortRung } from '@/lib/queries/opportunities';
-import { listBrowseOpportunities, listCountries } from '@/lib/queries/opportunities';
+import { listBrowseOpportunities } from '@/lib/queries/opportunities';
 
 type SearchParams = Promise<{
   rung?: string;
@@ -77,19 +77,27 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
     ? (params.deadline as DeadlineRange)
     : undefined;
 
-  const [types, fields, academicLevels, geoScopes, audienceGroups, fundingFeatures, countries, email, onboarding, userFieldIds] =
-    await Promise.all([
-      getTypes(),
-      getFields(),
-      getAcademicLevels(),
-      getGeoScopes(),
-      getAudienceGroups(),
-      getFundingFeatures(),
-      listCountries(),
-      getCurrentUserEmail(),
-      getCurrentUserOnboarding(),
-      getCurrentUserFieldIds(),
-    ]);
+  const [
+    types,
+    fields,
+    academicLevels,
+    geoScopes,
+    audienceGroups,
+    fundingFeatures,
+    email,
+    onboarding,
+    userFieldIds,
+  ] = await Promise.all([
+    getTypes(),
+    getFields(),
+    getAcademicLevels(),
+    getGeoScopes(),
+    getAudienceGroups(),
+    getFundingFeatures(),
+    getCurrentUserEmail(),
+    getCurrentUserOnboarding(),
+    getCurrentUserFieldIds(),
+  ]);
 
   // A signed-in student's onboarding picks pre-select the field/academic
   // level filters (per Elena's brief: "always have picked in filtering the
@@ -124,17 +132,29 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
   const newest = [...rows].slice(0, 3);
   const hasFilters = Boolean(
     rung ||
-      params.country ||
-      params.type ||
-      effectiveFieldId ||
-      effectiveAcademicLevelId ||
-      params.scope ||
-      params.audience ||
-      params.feature ||
-      params.format ||
-      deadline,
+    params.country ||
+    params.type ||
+    effectiveFieldId ||
+    effectiveAcademicLevelId ||
+    params.scope ||
+    params.audience ||
+    params.feature ||
+    params.format ||
+    deadline,
   );
   const activeTypeLabel = params.type ? typeLabels.get(params.type) : undefined;
+  // Count of filters that live inside the drawer specifically (not
+  // rung/country, which stay outside it) — shown as a badge on the trigger.
+  const activeFilterCount = [
+    params.type,
+    effectiveFieldId,
+    effectiveAcademicLevelId,
+    params.scope,
+    params.audience,
+    params.feature,
+    params.format,
+    deadline,
+  ].filter(Boolean).length;
 
   // Every filter's pill bar needs every *other* active param preserved in
   // its links — build the shared set once, each bar below omits its own key.
@@ -158,7 +178,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-10 lg:max-w-6xl">
-      <CountryIntro initialCountry={params.country} />
+      <CountryIntro initialCountry={params.country} fields={fields ?? []} />
       <BrowseTour />
 
       <p
@@ -174,8 +194,8 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
         The opportunities students actually get into.
       </p>
       <p className="mt-1 text-[12px]" style={{ color: 'var(--muted)' }}>
-        Every listing here is checked by a real ambassador or moderator before it goes live —
-        never scraped, never guessed.
+        Every listing here is checked by a real ambassador or moderator before it goes live — never
+        scraped, never guessed.
       </p>
 
       {!email && (
@@ -184,9 +204,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
         </div>
       )}
 
-      <div className="mt-7 flex flex-col gap-3">
-        <CountryFilter countries={countries} active={params.country} otherParams={without('country')} />
-
+      <FilterDrawer activeCount={activeFilterCount}>
         <TypeFilter types={types ?? []} active={params.type} otherParams={without('type')} />
 
         <TaxonomyFilter
@@ -253,7 +271,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
           active={deadline}
           otherParams={without('deadline')}
         />
-      </div>
+      </FilterDrawer>
 
       {newest.length > 0 && !hasFilters && (
         <section className="mt-8">
@@ -310,34 +328,37 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
         </p>
       )}
 
-      {rows.length === 0 ? (
-        <div className="mt-6">
-          <EmptyState />
-        </div>
-      ) : (
-        <>
-          <ul className="mt-6 lg:hidden">
-            {rows.map((opportunity) => (
-              <li key={opportunity.id}>
-                <OpportunityRow
-                  opportunity={opportunity}
-                  typeLabel={typeLabels.get(opportunity.type_id ?? '')}
-                />
-              </li>
-            ))}
-          </ul>
-          <ul className="mt-6 hidden gap-5 lg:grid lg:grid-cols-2 xl:grid-cols-3">
-            {rows.map((opportunity) => (
-              <li key={opportunity.id}>
-                <OpportunityCard
-                  opportunity={opportunity}
-                  typeLabel={typeLabels.get(opportunity.type_id ?? '')}
-                />
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
+      <div data-tour="results">
+        {rows.length === 0 ? (
+          <div className="mt-6">
+            <EmptyState />
+          </div>
+        ) : (
+          <>
+            <ul className="mt-6 lg:hidden">
+              {rows.map((opportunity) => (
+                <li key={opportunity.id}>
+                  <OpportunityRow
+                    opportunity={opportunity}
+                    typeLabel={typeLabels.get(opportunity.type_id ?? '')}
+                  />
+                </li>
+              ))}
+            </ul>
+            <ul className="mt-6 hidden gap-5 lg:grid lg:grid-cols-2 xl:grid-cols-3">
+              {rows.map((opportunity, index) => (
+                <li key={opportunity.id}>
+                  <OpportunityCard
+                    opportunity={opportunity}
+                    typeLabel={typeLabels.get(opportunity.type_id ?? '')}
+                    tourTarget={index === 0}
+                  />
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
     </main>
   );
 }

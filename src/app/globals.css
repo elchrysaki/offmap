@@ -59,6 +59,17 @@ body {
   animation: bob 1.6s ease-in-out infinite;
 }
 
+/* Horizontally-scrolling pill bars (filter navs) keep the native scroll
+   behaviour but hide the OS scrollbar track — it read as a stray grey bar
+   under the pills rather than a real UI element. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee,
   .animate-bob {

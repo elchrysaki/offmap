@@ -58,7 +58,10 @@ export async function getCurrentUserFieldIds(): Promise<string[]> {
 
   if (!user) return [];
 
-  const { data } = await supabase.from('profile_field').select('field_id').eq('profile_id', user.id);
+  const { data } = await supabase
+    .from('profile_field')
+    .select('field_id')
+    .eq('profile_id', user.id);
 
   return (data ?? []).map((row) => row.field_id);
 }

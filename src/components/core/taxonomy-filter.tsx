@@ -45,7 +45,11 @@ export function TaxonomyFilter({
   };
 
   return (
-    <nav aria-label={ariaLabel} className="-mx-6 flex gap-2 overflow-x-auto px-6 pb-1">
+    <nav
+      aria-label={ariaLabel}
+      className="no-scrollbar -mx-6 flex gap-2 overflow-x-auto px-6 pb-1"
+      style={{ overflowAnchor: 'none' }}
+    >
       <Link
         href={buildHref(undefined)}
         className="font-[family-name:var(--font-archivo)] shrink-0 px-3.5 py-1.5 text-[12px] font-bold whitespace-nowrap uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--cobalt)]"

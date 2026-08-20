@@ -30,9 +30,14 @@ type Card = {
 export function OpportunityCard({
   opportunity,
   typeLabel,
+  tourTarget = false,
 }: {
   opportunity: Card;
   typeLabel?: string;
+  // Marks this card's Save button as the browse-tour's spotlight target
+  // (BrowseTour finds it via document.querySelector) — only the first
+  // card in the main results grid should ever set this.
+  tourTarget?: boolean;
 }) {
   const location = [opportunity.host_city, opportunity.country].filter(Boolean).join(', ');
 
@@ -61,7 +66,9 @@ export function OpportunityCard({
         ) : (
           <span />
         )}
-        <SaveButton opportunityId={opportunity.id} compact />
+        <span data-tour={tourTarget ? 'save-button' : undefined}>
+          <SaveButton opportunityId={opportunity.id} compact />
+        </span>
       </div>
 
       <Link href={`/opportunities/${opportunity.id}`} className="flex items-start gap-3">

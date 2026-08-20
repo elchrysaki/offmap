@@ -150,23 +150,6 @@ export async function listRecommendedOpportunities(fieldIds: string[], limit = 6
   return data;
 }
 
-// Distinct countries across published, open opportunities — for the
-// country filter bar. Small dataset for now; a dedicated indexed query if
-// the catalogue grows large enough for this to matter.
-export async function listCountries() {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('opportunity_public')
-    .select('country')
-    .not('country', 'is', null);
-
-  if (error) throw error;
-  const unique = Array.from(
-    new Set(data.map((row) => row.country).filter((c): c is string => !!c)),
-  );
-  return unique.sort((a, b) => a.localeCompare(b));
-}
-
 export async function getOpportunityById(id: string) {
   const supabase = await createClient();
   const { data, error } = await supabase

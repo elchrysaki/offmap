@@ -14,7 +14,9 @@ const COUNTRY_KEY = 'offmap:country';
 // inferred from COUNTRY_KEY being empty/missing alone.
 const CHOSEN_KEY = 'offmap:country-chosen';
 
-type Phase = 'checking' | 'closed' | 'picker' | 'intro';
+type Phase = 'checking' | 'closed' | 'picker' | 'intro' | 'field';
+
+type FieldOption = { id: string; label_en: string };
 
 // Full-screen one-time country/Global picker (Elena's call, 20 Aug) — shown
 // once per browser (cached via localStorage, not sessionStorage: a
@@ -25,7 +27,18 @@ type Phase = 'checking' | 'closed' | 'picker' | 'intro';
 // components/shell/globe.tsx used on the landing page) — matches
 // hero.tsx/how-it-works.tsx's progressive-enhancement convention:
 // prefers-reduced-motion gets the static picker immediately, no plane.
-export function CountryIntro({ initialCountry }: { initialCountry?: string }) {
+//
+// A subject-field step (Elena's call, 20 Aug) follows the country/Global
+// choice on first run only — the "change" pill only ever reopens the
+// country step, not this one; changing subject later goes through the
+// (now-hidden-behind-an-icon) field filter on /browse itself.
+export function CountryIntro({
+  initialCountry,
+  fields,
+}: {
+  initialCountry?: string;
+  fields: FieldOption[];
+}) {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>('checking');
   const [showAnimation, setShowAnimation] = useState(true);
@@ -89,20 +102,38 @@ export function CountryIntro({ initialCountry }: { initialCountry?: string }) {
     return WORLD_COUNTRIES.filter((c) => c.toLowerCase().includes(q)).slice(0, 8);
   }, [query]);
 
-  function choose(country: string) {
+  function chooseCountry(country: string) {
     window.localStorage.setItem(COUNTRY_KEY, country);
     window.localStorage.setItem(CHOSEN_KEY, '1');
     setCurrent(country);
-    setPhase('closed');
     setQuery('');
+
+    // First-run flow continues into the field step; reopening via the
+    // "change" pill (phase === 'picker') goes straight back to closed —
+    // that pill only ever changes country.
+    if (phase === 'intro' && fields.length > 0) {
+      setPhase('field');
+      return;
+    }
+
+    setPhase('closed');
     router.replace(country ? `/browse?country=${encodeURIComponent(country)}` : '/browse');
+  }
+
+  function finishWithField(fieldId: string) {
+    setPhase('closed');
+    const params = new URLSearchParams();
+    if (current) params.set('country', current);
+    if (fieldId) params.set('field', fieldId);
+    const qs = params.toString();
+    router.replace(qs ? `/browse?${qs}` : '/browse');
   }
 
   // Nothing renders until the localStorage check resolves — avoids a
   // flash of "Global" before the real stored country (if any) is read.
   if (phase === 'checking') return null;
 
-  const overlayOpen = phase === 'intro' || phase === 'picker';
+  const overlayOpen = phase === 'intro' || phase === 'picker' || phase === 'field';
 
   return (
     <>
@@ -132,96 +163,154 @@ export function CountryIntro({ initialCountry }: { initialCountry?: string }) {
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Choose a country"
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden px-6"
+          aria-label={phase === 'field' ? 'Choose subjects' : 'Choose a country'}
+          className="fixed inset-0 z-50 flex flex-col items-center overflow-hidden px-6 py-12"
           style={{ background: 'var(--ink)' }}
         >
-          {showAnimation && phase === 'intro' && !reducedMotion && <FlightAnimation />}
+          {showAnimation && (phase === 'intro' || phase === 'field') && !reducedMotion && (
+            <FlightAnimation />
+          )}
 
-          <div className="relative z-10 w-full max-w-md text-center">
-            <p
-              className="font-[family-name:var(--font-bungee)] text-[13px] uppercase"
-              style={{ color: 'var(--marigold)' }}
-            >
-              OffMap
-            </p>
-            <h1
-              className="font-[family-name:var(--font-fraunces)] mt-2 text-3xl leading-tight font-extrabold"
-              style={{ color: 'var(--paper)' }}
-            >
-              Where are you looking?
-            </h1>
-            <p className="mt-2 text-[14px]" style={{ color: 'rgba(245,239,227,0.65)' }}>
-              Pick your country to lead with what&apos;s local, or go global to see everything.
-            </p>
-
-            <div className="mt-6 flex flex-col gap-3">
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search for your country…"
-                autoFocus
-                className="px-4 py-3 text-[15px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--marigold)]"
-                style={{
-                  borderRadius: 'var(--radius-card)',
-                  border: 'var(--border-width) solid var(--paper)',
-                  background: 'rgba(245,239,227,0.06)',
-                  color: 'var(--paper)',
-                }}
-              />
-
-              {results.length > 0 && (
-                <ul
-                  className="flex flex-col overflow-hidden"
-                  style={{
-                    borderRadius: 'var(--radius-card)',
-                    border: 'var(--border-width) solid var(--paper)',
-                  }}
+          <div className="relative z-10 m-auto max-h-full w-full max-w-md overflow-y-auto text-center">
+            {phase === 'field' ? (
+              <>
+                <p
+                  className="font-[family-name:var(--font-bungee)] text-[13px] uppercase"
+                  style={{ color: 'var(--marigold)' }}
                 >
-                  {results.map((country, i) => (
-                    <li key={country}>
-                      <button
-                        type="button"
-                        onClick={() => choose(country)}
-                        className="font-[family-name:var(--font-archivo)] w-full px-4 py-2.5 text-left text-[14px] font-semibold transition-colors hover:bg-[rgba(245,239,227,0.08)]"
-                        style={{
-                          color: 'var(--paper)',
-                          borderTop: i > 0 ? '1px solid rgba(245,239,227,0.15)' : undefined,
-                        }}
-                      >
-                        {country}
-                      </button>
-                    </li>
+                  OffMap
+                </p>
+                <h1
+                  className="font-[family-name:var(--font-fraunces)] mt-2 text-3xl leading-tight font-extrabold"
+                  style={{ color: 'var(--paper)' }}
+                >
+                  What are you into?
+                </h1>
+                <p className="mt-2 text-[14px]" style={{ color: 'rgba(245,239,227,0.65)' }}>
+                  Pick one subject to lead with — STEM, law, medicine, whatever fits. You can change
+                  or clear this anytime from the filters on browse.
+                </p>
+
+                <div className="mt-6 flex flex-wrap justify-center gap-2">
+                  {fields.map((field) => (
+                    <button
+                      key={field.id}
+                      type="button"
+                      onClick={() => finishWithField(field.id)}
+                      className="font-[family-name:var(--font-archivo)] px-3.5 py-2 text-[13px] font-bold whitespace-nowrap uppercase transition-transform hover:-translate-y-0.5"
+                      style={{
+                        borderRadius: 'var(--radius-pill)',
+                        border: 'var(--border-width) solid var(--paper)',
+                        background: 'transparent',
+                        color: 'var(--paper)',
+                      }}
+                    >
+                      {field.label_en}
+                    </button>
                   ))}
-                </ul>
-              )}
+                </div>
 
-              <button
-                type="button"
-                onClick={() => choose('')}
-                className="font-[family-name:var(--font-archivo)] mt-1 px-4 py-3 text-[13px] font-extrabold tracking-[0.05em] uppercase transition-transform hover:-translate-y-0.5"
-                style={{
-                  borderRadius: 'var(--radius-pill)',
-                  border: 'var(--border-width) solid var(--marigold)',
-                  background: 'var(--marigold)',
-                  color: 'var(--ink)',
-                }}
-              >
-                🌐 Go global instead
-              </button>
-
-              {phase === 'picker' && (
                 <button
                   type="button"
-                  onClick={() => setPhase('closed')}
-                  className="font-[family-name:var(--font-archivo)] text-[12px] font-bold underline"
-                  style={{ color: 'rgba(245,239,227,0.6)' }}
+                  onClick={() => finishWithField('')}
+                  className="font-[family-name:var(--font-archivo)] mt-6 px-4 py-3 text-[13px] font-extrabold tracking-[0.05em] uppercase transition-transform hover:-translate-y-0.5"
+                  style={{
+                    borderRadius: 'var(--radius-pill)',
+                    border: 'var(--border-width) solid var(--marigold)',
+                    background: 'var(--marigold)',
+                    color: 'var(--ink)',
+                  }}
                 >
-                  Cancel
+                  Skip — show me everything
                 </button>
-              )}
-            </div>
+              </>
+            ) : (
+              <>
+                <p
+                  className="font-[family-name:var(--font-bungee)] text-[13px] uppercase"
+                  style={{ color: 'var(--marigold)' }}
+                >
+                  OffMap
+                </p>
+                <h1
+                  className="font-[family-name:var(--font-fraunces)] mt-2 text-3xl leading-tight font-extrabold"
+                  style={{ color: 'var(--paper)' }}
+                >
+                  Where are you looking?
+                </h1>
+                <p className="mt-2 text-[14px]" style={{ color: 'rgba(245,239,227,0.65)' }}>
+                  Pick your country to lead with what&apos;s local, or go global to see everything.
+                </p>
+
+                <div className="mt-6 flex flex-col gap-3">
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search for your country…"
+                    autoFocus
+                    className="px-4 py-3 text-[15px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--marigold)]"
+                    style={{
+                      borderRadius: 'var(--radius-card)',
+                      border: 'var(--border-width) solid var(--paper)',
+                      background: 'rgba(245,239,227,0.06)',
+                      color: 'var(--paper)',
+                    }}
+                  />
+
+                  {results.length > 0 && (
+                    <ul
+                      className="flex flex-col overflow-hidden"
+                      style={{
+                        borderRadius: 'var(--radius-card)',
+                        border: 'var(--border-width) solid var(--paper)',
+                      }}
+                    >
+                      {results.map((country, i) => (
+                        <li key={country}>
+                          <button
+                            type="button"
+                            onClick={() => chooseCountry(country)}
+                            className="font-[family-name:var(--font-archivo)] w-full px-4 py-2.5 text-left text-[14px] font-semibold transition-colors hover:bg-[rgba(245,239,227,0.08)]"
+                            style={{
+                              color: 'var(--paper)',
+                              borderTop: i > 0 ? '1px solid rgba(245,239,227,0.15)' : undefined,
+                            }}
+                          >
+                            {country}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => chooseCountry('')}
+                    className="font-[family-name:var(--font-archivo)] mt-1 px-4 py-3 text-[13px] font-extrabold tracking-[0.05em] uppercase transition-transform hover:-translate-y-0.5"
+                    style={{
+                      borderRadius: 'var(--radius-pill)',
+                      border: 'var(--border-width) solid var(--marigold)',
+                      background: 'var(--marigold)',
+                      color: 'var(--ink)',
+                    }}
+                  >
+                    🌐 Go global instead
+                  </button>
+
+                  {phase === 'picker' && (
+                    <button
+                      type="button"
+                      onClick={() => setPhase('closed')}
+                      className="font-[family-name:var(--font-archivo)] text-[12px] font-bold underline"
+                      style={{ color: 'rgba(245,239,227,0.6)' }}
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
