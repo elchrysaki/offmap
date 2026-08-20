@@ -81,15 +81,23 @@ src/
   components/
     core/                     quiet register — opportunity-row (the `<lg` browse layout), opportunity-card (the
                                `lg:` and up desktop grid, landed 20 Aug — see §7), countdown-numeral,
-                               not-online-stamp, effort-ladder, taxonomy-filter (generic pill bar behind 7 of
-                               browse's 9 filter controls), save-button (gained a `compact` prop for cards),
-                               country-filter, type-filter, sign-in-banner, auth-save-sync, service-worker-register
+                               not-online-stamp, effort-ladder, taxonomy-filter (generic pill bar, one per
+                               taxonomy — type/field/level/audience/scope/funding-feature/format/deadline, 8
+                               total), filter-drawer (wraps all 8 behind a single "Filters" trigger + slide-up
+                               panel — replaced always-visible pill bars, see §7), save-button (gained a
+                               `compact` prop for cards), type-filter, sign-in-banner, auth-save-sync,
+                               service-worker-register. `country-filter.tsx` is gone — the sticky country pill
+                               country-intro already renders made it redundant.
     shell/                    loud register — site-header, site-footer, bottom-nav, tablet-menu, hero,
                                how-it-works, opportunities-reel, ticker, network-globe/globe, radial-reveal-button,
                                reveal, empty-state, sign-in-form, sign-up-form, reset-password-form, submit-form,
                                onboarding-flow, saved-board, account-settings (email/password change, sign-out),
-                               country-intro (one-time full-screen country/Global picker, first `/browse` visit),
-                               browse-tour (3-step first-visit walkthrough, same one-time pattern)
+                               country-intro (one-time full-screen country/Global picker, first `/browse` visit —
+                               now a two-step flow, country/Global then a single subject-field pick, both cached
+                               the same way), browse-tour (mandatory, DOM-anchored spotlight walkthrough — dims
+                               the real page and cuts a click-through hole around the actual Filters trigger,
+                               then the first card's Save button, requiring a real click on each to advance; no
+                               skip button; auto-advances past a step whose target never appears)
   lib/
     ai/                       verify-opportunity.ts — the Gemini call itself
     admin/                    ai-research.ts — the one shared write path both "Verify with AI" call sites use;
@@ -229,7 +237,7 @@ Subset to Latin, preload the two variable files, no layout shift on swap.
 | Aim higher   | `reach: international`                                       |
 | Off path     | `reach: local` in a country other than the user's            |
 
-**Open discrepancy (20 Aug 2026):** the desktop-redesign commits below reordered `/browse` so the effort ladder now renders *after* the full filter block (country, type, and 7 taxonomy pill bars), not above it as this rule says. That's either an intentional reprioritization now that browse has 9 filter controls instead of 2, or a regression against "primary navigation" — worth a real decision, not a silent fix either direction.
+**Resolved (20 Aug 2026, follow-up pass):** the desktop-redesign commits had reordered `/browse` so the effort ladder rendered after a full block of 9 always-visible pill bars, burying "primary navigation" under filter chrome. Fixed by hiding all 8 taxonomy/format/deadline filters behind a single `FilterDrawer` trigger+panel (§4) — the ladder now sits directly under that one small button, effectively restoring it as the first thing a student interacts with. The country pill bar was also removed outright (redundant with country-intro's sticky pill).
 
 ### Component rules
 
@@ -308,7 +316,7 @@ Do not reorder. Each step assumes the one above.
 3. **RLS tested by cross-account read.** ✅ done — reconfirmed by direct policy inspection 20 Aug 2026.
 4. **Admin dashboard auth** — email + password for ambassadors/moderators at `/admin`, gated by `profiles.role`. ✅ done.
 5. **Ambassador/moderator review dashboard** — create, edit, publish, reject. ✅ done, and richer than originally scoped: single-row and bulk "Verify with AI" (3-way concurrency cap, per-row error isolation), and a live `publish_gate` preview on the edit form showing exactly which fields are still missing.
-6. **Browse, filters, detail, listing row.** ✅ done, and substantially expanded 20 Aug in a 4-commit "desktop redesign": `/browse` now renders the card grid at `lg:` and up (rows below that), a one-time animated country/Global picker on first visit, pill-bar filters for all 5 remaining multi-select taxonomies plus format and deadline range (9 filter controls total), a signed-in student's onboarding field pick applied as a one-load default filter, and a first-visit 3-step tour. See §7 for the one open discrepancy this introduced (effort ladder now below the filters, not above).
+6. **Browse, filters, detail, listing row.** ✅ done, substantially expanded 20 Aug in a 4-commit "desktop redesign," then refined the same day in two follow-up passes: `/browse` renders a card grid at `lg:` and up (rows below that), a two-step one-time intro (country/Global, then a single subject-field pick) on first visit, and 8 taxonomy/format/deadline filters — all hidden behind a `FilterDrawer` trigger rather than always-visible pill bars, with the country pill bar removed outright as redundant. A signed-in student's onboarding field pick still applies as a one-load default filter. The first-visit walkthrough is now a mandatory, DOM-anchored spotlight tour (real click required on the actual Filters trigger and Save button, not a dismissible corner card). See §7 (now resolved) for the effort-ladder-ordering history.
 7. **Save + deadline alert**, end to end into a real inbox. Save is ✅ done, and richer than originally scoped — not a boolean, a full Goals/Apply/Applied/Archived board (`SavedBoard`) with three independent per-save notify flags. Alert-sending is ✅ built and also richer than scoped: `send-deadline-alerts` fires three independent Resend sends per save (applications open / start writing / closing soon, each with its own sent-timestamp), not the single generic mechanism this section originally sketched. Confirmed correct via manual invocation. **Still unproven with a real inbox** — the live `opportunity` table has 2 rows and `saved_opportunity` has 0, so nothing has triggered a real send yet. Downstream of step 8, not blocked by anything in the alert code itself.
 8. **Existing ~25 listings migrated** — funding and eligibility filled, anything that can't state them goes back to `lead` or gets killed. **Not started.** `data/opportunities.json` (3,050 lines) still sits unmigrated in the repo; the live `opportunity` table has 2 rows. **This is the current top-priority gap** — nearly every ship gate in §13 traces back to it, and it should be running in parallel with everything else, not queued behind other work.
 9. **`/about`** — definition, editorial standard, exclusion list, paid-placement rule. **Not built.**
@@ -366,10 +374,10 @@ Sole owner, sole builder, roughly 20 hours a week of which about 8 is build. Dir
 - Auth: email/password (the "already registered" case is caught and redirected to `/sign-in` with a clear notice, not silently dropped) plus Microsoft and Apple OAuth; Google is code-complete but flagged off. **The legal-doc blocker on Google OAuth is gone**: `docs/legal/privacy-policy.md` and `terms.md` have real values (Elena Chrysaki, Adrianou 26, Keratsini, 18755, Greece) and are rendered live at `/privacy` and `/terms`. What's left for Google OAuth is Google Cloud Console + Supabase provider configuration — click-work, not code. `/callback` now accepts `token_hash`/`type` links (Confirm Signup, Magic Link) the same way `/reset-password` already did, for the same link-scanner-burns-the-token reason.
 - `/profile` gained real account settings (`account-settings.tsx`): change email (Supabase's own confirmation-link flow), change password (deliberately reuses the `/forgot-password` email flow rather than a direct field, so a hijacked session can't silently lock the real owner out), and sign out. Verified end to end against a real test account, including confirming sign-out actually clears the server-side session.
 - Onboarding (4 steps: fields → goals → experience level → a live recommended-opportunities sweep) and the profile page's Goals/Apply/Applied/Archived saved-opportunity board are both built and confirmed working against the real schema.
-- `/submit` is account-gated, nav-wired, confirmed working end to end at the code level; not yet exercised by a real ambassador.
+- `/submit` is account-gated, nav-wired, confirmed working end to end at the code level; not yet exercised by a real ambassador. A server-action bug fixed 20 Aug — `submit/actions.ts` (`'use server'`) was also exporting `SubmitState`/`initialSubmitState` as a type and a plain object, which Next.js's server-action bundler rejects at runtime ("A 'use server' file can only export async functions, found object."). Both now live in a new plain `submit/submit-state.ts`; `actions.ts` exports only the async action.
 - Admin dashboard has single-row and bulk "Verify with AI," confirmed to never write AI output to a gate field directly.
 - PWA (`manifest.webmanifest`, `sw.js`, `/get-app`, the marquee `loading.tsx` screen) is built and ahead of where the build order put it.
-- **`/browse` desktop redesign (20 Aug, 4 commits)**: a responsive card grid at `lg:` and up alongside the existing row list, a one-time animated country/Global intro (`prefers-reduced-motion`-aware), pill-bar filters for the 5 remaining multi-select taxonomies plus format and deadline range, a signed-in student's onboarding field pick applied as a default filter, and a first-visit 3-step tour (no gamified language, per §7's "do not build" list). Also fixed a case-sensitive country-matching bug in `listBrowseOpportunities` that was silently dropping rows. See §7 for the one open design discrepancy this introduced (effort ladder ordering).
+- **`/browse` desktop redesign (20 Aug, 4 commits, then two same-day follow-up passes)**: a responsive card grid at `lg:` and up alongside the row list, a two-step one-time intro (country/Global, then a single subject-field pick, both `prefers-reduced-motion`-aware), and 8 taxonomy/format/deadline filters. Follow-up pass fixed real UX bugs from live testing: the redundant country pill bar removed (the sticky country-intro pill already covers it), all 8 filters moved behind a `FilterDrawer` trigger instead of always-visible pill bars (resolving §7's effort-ladder-ordering discrepancy as a side effect), the native scrollbar hidden under horizontally-scrolling pill bars, and a Chrome scroll-anchoring bug that misaligned sibling pill bars on load (fixed with `overflow-anchor: none`). `BrowseTour` was rewritten from a dismissible corner card into a mandatory, DOM-anchored spotlight walkthrough. Also fixed a case-sensitive country-matching bug in `listBrowseOpportunities` that was silently dropping rows.
 
 **AI pipeline**
 - Model is **`gemini-3.6-flash`** via the Interactions API — earlier notes in this file said `gemini-2.5-flash`/`generateContent`; that shape 404s for new keys against this model. Corrected throughout §3/§6 above.
