@@ -44,3 +44,21 @@ export async function getCurrentUserOnboarding(): Promise<OnboardingProfile | nu
 
   return data;
 }
+
+// profile_field is write-only today (only onboarding-flow.tsx inserts into
+// it) — this is the first read-back, used to default /browse's field
+// filter to a signed-in student's onboarding picks. Only ever seeds the
+// *initial* filter state; changing filters on /browse never writes back
+// here.
+export async function getCurrentUserFieldIds(): Promise<string[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return [];
+
+  const { data } = await supabase.from('profile_field').select('field_id').eq('profile_id', user.id);
+
+  return (data ?? []).map((row) => row.field_id);
+}

@@ -4,10 +4,29 @@ import { createClient } from '@/lib/supabase/server';
 
 export type EffortRung = 'coffee_break' | 'weekend_trip' | 'aim_higher' | 'off_path';
 
+export type DeadlineRange = 'week' | 'month' | 'longer';
+
+const TAXONOMY_JUNCTIONS = {
+  field: { table: 'opportunity_field', column: 'field_id' },
+  academic_level: { table: 'opportunity_academic_level', column: 'academic_level_id' },
+  geo_scope: { table: 'opportunity_geo_scope', column: 'geo_scope_id' },
+  audience_group: { table: 'opportunity_audience_group', column: 'audience_group_id' },
+  funding_feature: { table: 'opportunity_funding_feature', column: 'funding_feature_id' },
+} as const;
+
+export type TaxonomyKey = keyof typeof TAXONOMY_JUNCTIONS;
+
 export type BrowseFilters = {
   rung?: EffortRung;
   country?: string; // the student's own country, needed for coffee_break / off_path
   typeId?: string;
+  fieldId?: string;
+  academicLevelId?: string;
+  geoScopeId?: string;
+  audienceGroupId?: string; // eligibility criteria — audience_group already covers this, no new taxonomy
+  fundingFeatureId?: string;
+  format?: string; // online / in_person / hybrid, labelled Remote/On-site/Hybrid in the UI
+  deadline?: DeadlineRange;
 };
 
 // opportunity_public already filters to published + not-expired rows and
@@ -15,6 +34,41 @@ export type BrowseFilters = {
 // never stored). Effort-ladder logic (CLAUDE.md §7) is applied here.
 export async function listBrowseOpportunities(filters: BrowseFilters = {}) {
   const supabase = await createClient();
+
+  // Multi-select taxonomies live in junction tables, not columns on
+  // opportunity_public — resolve each active one to a set of opportunity
+  // ids first, then intersect, rather than joining in the main query (RLS
+  // on each junction table already scopes rows to published/unexpired
+  // parents, so this stays safe for anon visitors — same approach as
+  // getOpportunityTaxonomyIds below).
+  const activeTaxonomyFilters: { key: TaxonomyKey; value: string }[] = (
+    [
+      ['field', filters.fieldId],
+      ['academic_level', filters.academicLevelId],
+      ['geo_scope', filters.geoScopeId],
+      ['audience_group', filters.audienceGroupId],
+      ['funding_feature', filters.fundingFeatureId],
+    ] as const
+  )
+    .filter((entry): entry is [TaxonomyKey, string] => Boolean(entry[1]))
+    .map(([key, value]) => ({ key, value }));
+
+  let matchingIds: string[] | null = null;
+  for (const { key, value } of activeTaxonomyFilters) {
+    const { table, column } = TAXONOMY_JUNCTIONS[key];
+    // Table/column are picked dynamically from TAXONOMY_JUNCTIONS, so
+    // Supabase's generated per-table overloads can't narrow this — same
+    // trade-off as getOpportunityTaxonomyIds below.
+    const { data, error } = await supabase
+      .from(table)
+      .select('opportunity_id')
+      .eq(column as string, value);
+    if (error) throw error;
+    const ids = new Set((data ?? []).map((row) => row.opportunity_id as string));
+    matchingIds = matchingIds === null ? Array.from(ids) : matchingIds.filter((id) => ids.has(id));
+    if (matchingIds.length === 0) return [];
+  }
+
   let query = supabase
     .from('opportunity_public')
     .select(
@@ -22,7 +76,15 @@ export async function listBrowseOpportunities(filters: BrowseFilters = {}) {
     )
     .order('days_remaining', { ascending: true, nullsFirst: false });
 
+  if (matchingIds !== null) query = query.in('id', matchingIds);
   if (filters.typeId) query = query.eq('type_id', filters.typeId);
+  if (filters.format) {
+    query = query.eq('format', filters.format as 'online' | 'in_person' | 'hybrid');
+  }
+
+  if (filters.deadline === 'week') query = query.lte('days_remaining', 7);
+  else if (filters.deadline === 'month') query = query.lte('days_remaining', 30);
+  else if (filters.deadline === 'longer') query = query.gt('days_remaining', 30);
 
   switch (filters.rung) {
     case 'coffee_break':
@@ -115,16 +177,6 @@ export async function getOpportunityById(id: string) {
   if (error) throw error;
   return data;
 }
-
-const TAXONOMY_JUNCTIONS = {
-  field: { table: 'opportunity_field', column: 'field_id' },
-  academic_level: { table: 'opportunity_academic_level', column: 'academic_level_id' },
-  geo_scope: { table: 'opportunity_geo_scope', column: 'geo_scope_id' },
-  audience_group: { table: 'opportunity_audience_group', column: 'audience_group_id' },
-  funding_feature: { table: 'opportunity_funding_feature', column: 'funding_feature_id' },
-} as const;
-
-export type TaxonomyKey = keyof typeof TAXONOMY_JUNCTIONS;
 
 // Public read of the selected taxonomy ids for one opportunity, via the same
 // junction tables the admin dashboard writes to. RLS on each junction table
