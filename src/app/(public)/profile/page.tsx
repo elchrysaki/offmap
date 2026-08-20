@@ -1,15 +1,23 @@
 import Link from 'next/link';
 
+import { getCurrentUserEmail } from '@/lib/queries/current-user';
 import { getCurrentUserOnboarding } from '@/lib/queries/profile';
 import { getSavedOpportunitiesWithDetails } from '@/lib/queries/saved-opportunities';
 import { statusLabel, experienceLabel } from '@/lib/profile-labels';
+import { AccountSettings } from '@/components/shell/account-settings';
 import { SavedBoard } from '@/components/shell/saved-board';
 
 // Real profile page (Elena's call, 20 Aug) — replaces the earlier
 // sign-in-status-only placeholder. Shows the onboarding-collected profile
-// fields and the Goals/Apply/Applied/Archived saved-opportunity board
+// fields, account settings (change email/password), and the
+// Goals/Apply/Applied/Archived saved-opportunity board
 // (supabase/migrations/20260819172931_profile_personalization.sql).
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ email_changed?: string }>;
+}) {
+  const { email_changed } = await searchParams;
   const profile = await getCurrentUserOnboarding();
 
   if (!profile) {
@@ -37,6 +45,7 @@ export default async function ProfilePage() {
   }
 
   const saves = await getSavedOpportunitiesWithDetails();
+  const email = await getCurrentUserEmail();
   const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
 
   return (
@@ -49,6 +58,8 @@ export default async function ProfilePage() {
           .filter(Boolean)
           .join(' · ')}
       </p>
+
+      <AccountSettings email={email ?? ''} emailJustChanged={email_changed === '1'} />
 
       <p
         className="font-[family-name:var(--font-archivo)] mt-8 text-[12px] font-bold tracking-[0.13em] uppercase"
