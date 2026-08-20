@@ -3,6 +3,7 @@ import { EffortLadder } from '@/components/core/effort-ladder';
 import { OpportunityRow } from '@/components/core/opportunity-row';
 import { SignInBanner } from '@/components/core/sign-in-banner';
 import { TypeFilter } from '@/components/core/type-filter';
+import { CountryIntro } from '@/components/shell/country-intro';
 import { EmptyState } from '@/components/shell/empty-state';
 import { getCurrentUserEmail } from '@/lib/queries/current-user';
 import { getTypes } from '@/lib/queries/taxonomy';
@@ -41,6 +42,8 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-10">
+      <CountryIntro initialCountry={params.country} />
+
       <p
         className="font-[family-name:var(--font-archivo)] text-[11px] font-extrabold tracking-[0.16em] uppercase"
         style={{ color: 'var(--muted)' }}

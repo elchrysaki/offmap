@@ -27,7 +27,12 @@ export async function listBrowseOpportunities(filters: BrowseFilters = {}) {
   switch (filters.rung) {
     case 'coffee_break':
       query = query.eq('reach', 'local').eq('prep_time', 'under_an_hour');
-      if (filters.country) query = query.eq('country', filters.country);
+      // ilike, not eq: country is free text entered by ambassadors with
+      // inconsistent casing ("greece" vs "Greece") — the new world-country
+      // picker (src/lib/countries.ts) always sends proper-cased names, so
+      // an exact match would silently drop real rows. Case-insensitive
+      // matching is strictly safer here regardless of source.
+      if (filters.country) query = query.ilike('country', filters.country);
       break;
     case 'weekend_trip':
       query = query.eq('reach', 'national').eq('prep_time', 'a_weekend');
@@ -37,13 +42,13 @@ export async function listBrowseOpportunities(filters: BrowseFilters = {}) {
       break;
     case 'off_path':
       query = query.eq('reach', 'local');
-      if (filters.country) query = query.neq('country', filters.country);
+      if (filters.country) query = query.not('country', 'ilike', filters.country);
       break;
     default:
       // No rung selected — country is a plain filter, not an
       // effort-ladder qualifier (coffee_break/off_path use it differently
       // above, so this only applies when neither is active).
-      if (filters.country) query = query.eq('country', filters.country);
+      if (filters.country) query = query.ilike('country', filters.country);
   }
 
   const { data, error } = await query;
