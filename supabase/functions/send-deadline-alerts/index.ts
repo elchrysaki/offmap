@@ -38,11 +38,12 @@ type Opportunity = {
 
 type AlertKind = 'opens' | 'start_writing' | 'closing';
 
-const NOTIFY_COLUMN: Record<AlertKind, 'notify_opens' | 'notify_start_writing' | 'notify_closing'> = {
-  opens: 'notify_opens',
-  start_writing: 'notify_start_writing',
-  closing: 'notify_closing',
-};
+const NOTIFY_COLUMN: Record<AlertKind, 'notify_opens' | 'notify_start_writing' | 'notify_closing'> =
+  {
+    opens: 'notify_opens',
+    start_writing: 'notify_start_writing',
+    closing: 'notify_closing',
+  };
 
 const SENT_COLUMN: Record<
   AlertKind,
@@ -143,7 +144,12 @@ async function sendAlertEmail(to: string, kind: AlertKind, opportunity: Opportun
   }
 }
 
-type Result = { saved_opportunity_id: string; opportunity_id: string; kind: AlertKind; status: string };
+type Result = {
+  saved_opportunity_id: string;
+  opportunity_id: string;
+  kind: AlertKind;
+  status: string;
+};
 
 async function fireAlertType(
   // deno-lint-ignore no-explicit-any
@@ -174,7 +180,9 @@ async function fireAlertType(
 
   for (const save of saves ?? []) {
     try {
-      const { data: user, error: userError } = await supabase.auth.admin.getUserById(save.profile_id);
+      const { data: user, error: userError } = await supabase.auth.admin.getUserById(
+        save.profile_id,
+      );
       if (userError || !user?.user?.email) {
         throw new Error(userError?.message ?? 'no email on file for this profile');
       }
@@ -186,7 +194,12 @@ async function fireAlertType(
         .update({ [sentColumn]: new Date().toISOString() })
         .eq('id', save.id);
 
-      results.push({ saved_opportunity_id: save.id, opportunity_id: opportunity.id, kind, status: 'sent' });
+      results.push({
+        saved_opportunity_id: save.id,
+        opportunity_id: opportunity.id,
+        kind,
+        status: 'sent',
+      });
     } catch (err) {
       results.push({
         saved_opportunity_id: save.id,
@@ -212,7 +225,9 @@ Deno.serve(async () => {
 
   const { data: opportunities, error: oppError } = await supabase
     .from('opportunity')
-    .select('id, title, organiser, deadline_at, deadline_precision, apply_url, official_url, opens_at, prep_time')
+    .select(
+      'id, title, organiser, deadline_at, deadline_precision, apply_url, official_url, opens_at, prep_time',
+    )
     .eq('review_state', 'published')
     .limit(MAX_PER_RUN);
 
