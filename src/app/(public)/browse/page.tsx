@@ -5,6 +5,7 @@ import { OpportunityRow } from '@/components/core/opportunity-row';
 import { SignInBanner } from '@/components/core/sign-in-banner';
 import { TaxonomyFilter } from '@/components/core/taxonomy-filter';
 import { TypeFilter } from '@/components/core/type-filter';
+import { BrowseTour } from '@/components/shell/browse-tour';
 import { CountryIntro } from '@/components/shell/country-intro';
 import { EmptyState } from '@/components/shell/empty-state';
 import { getCurrentUserEmail } from '@/lib/queries/current-user';
@@ -158,6 +159,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
   return (
     <main className="mx-auto max-w-2xl px-6 py-10 lg:max-w-6xl">
       <CountryIntro initialCountry={params.country} />
+      <BrowseTour />
 
       <p
         className="font-[family-name:var(--font-archivo)] text-[11px] font-extrabold tracking-[0.16em] uppercase"
@@ -170,6 +172,10 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
       </h1>
       <p className="mt-1 text-[14px]" style={{ color: 'var(--muted)' }}>
         The opportunities students actually get into.
+      </p>
+      <p className="mt-1 text-[12px]" style={{ color: 'var(--muted)' }}>
+        Every listing here is checked by a real ambassador or moderator before it goes live —
+        never scraped, never guessed.
       </p>
 
       {!email && (
