@@ -2,13 +2,7 @@
 
 import { getTypes } from '@/lib/queries/taxonomy';
 import { submitLead } from '@/lib/queries/submit-lead';
-
-export type SubmitState = {
-  status: 'idle' | 'error' | 'success';
-  message?: string;
-};
-
-export const initialSubmitState: SubmitState = { status: 'idle' };
+import type { SubmitState } from './submit-state';
 
 function isHttpUrl(value: string) {
   try {

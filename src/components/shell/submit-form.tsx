@@ -2,11 +2,8 @@
 
 import { useActionState } from 'react';
 
-import {
-  initialSubmitState,
-  submitOpportunity,
-  type SubmitState,
-} from '@/app/(public)/submit/actions';
+import { submitOpportunity } from '@/app/(public)/submit/actions';
+import { initialSubmitState, type SubmitState } from '@/app/(public)/submit/submit-state';
 
 type TypeOption = { id: string; label_en: string };
 
