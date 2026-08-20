@@ -18,7 +18,7 @@ export async function listBrowseOpportunities(filters: BrowseFilters = {}) {
   let query = supabase
     .from('opportunity_public')
     .select(
-      'id, title, organiser, funding, eligibility, host_city, country, format, reach, prep_time, deadline_precision, days_remaining, status, type_id',
+      'id, title, organiser, funding, eligibility, host_city, country, format, reach, prep_time, deadline_precision, days_remaining, status, opens_at, type_id',
     )
     .order('days_remaining', { ascending: true, nullsFirst: false });
 

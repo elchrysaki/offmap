@@ -28,7 +28,13 @@ const NOTIFY_OPTIONS: { key: keyof NotifyFlags; label: string }[] = [
 // since there's no account to email. A button's label matches the
 // confirmation it produces (CLAUDE.md §8): "Save opportunity" produces
 // "Saved".
-export function SaveButton({ opportunityId }: { opportunityId: string }) {
+export function SaveButton({
+  opportunityId,
+  compact = false,
+}: {
+  opportunityId: string;
+  compact?: boolean;
+}) {
   const [saved, setSaved] = useState(false);
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [pending, setPending] = useState(false);
@@ -133,6 +139,25 @@ export function SaveButton({ opportunityId }: { opportunityId: string }) {
       .eq('opportunity_id', opportunityId);
 
     if (error) setNotifyFlags(previous);
+  }
+
+  // Card top-right corner (CLAUDE.md §7 card rule: "quiet Save top-right")
+  // — icon + label only, no pill chrome, no notify bell (that stays on the
+  // full detail-page button once a card is actually saved and opened).
+  if (compact) {
+    return (
+      <button
+        type="button"
+        onClick={toggle}
+        disabled={signedIn === null || pending}
+        aria-pressed={saved}
+        className="font-[family-name:var(--font-archivo)] inline-flex items-center gap-1 text-[11px] font-bold uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--cobalt)] disabled:opacity-60"
+        style={{ color: saved ? 'var(--marigold)' : 'var(--muted)' }}
+      >
+        <span aria-hidden="true">{saved ? '★' : '☆'}</span>
+        {saved ? 'Saved' : 'Save'}
+      </button>
+    );
   }
 
   return (

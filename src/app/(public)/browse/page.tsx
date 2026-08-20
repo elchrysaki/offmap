@@ -1,5 +1,6 @@
 import { CountryFilter } from '@/components/core/country-filter';
 import { EffortLadder } from '@/components/core/effort-ladder';
+import { OpportunityCard } from '@/components/core/opportunity-card';
 import { OpportunityRow } from '@/components/core/opportunity-row';
 import { SignInBanner } from '@/components/core/sign-in-banner';
 import { TypeFilter } from '@/components/core/type-filter';
@@ -41,7 +42,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
   const activeTypeLabel = params.type ? typeLabels.get(params.type) : undefined;
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-10">
+    <main className="mx-auto max-w-2xl px-6 py-10 lg:max-w-6xl">
       <CountryIntro initialCountry={params.country} />
 
       <p
@@ -90,10 +91,20 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
           <p className="mt-0.5 text-[11px]" style={{ color: 'var(--muted)' }}>
             Placeholder — shows newest listings until sector matching is built.
           </p>
-          <ul className="mt-3">
+          <ul className="mt-3 lg:hidden">
             {newest.map((opportunity) => (
               <li key={opportunity.id}>
                 <OpportunityRow
+                  opportunity={opportunity}
+                  typeLabel={typeLabels.get(opportunity.type_id ?? '')}
+                />
+              </li>
+            ))}
+          </ul>
+          <ul className="mt-3 hidden gap-4 lg:grid lg:grid-cols-3">
+            {newest.map((opportunity) => (
+              <li key={opportunity.id}>
+                <OpportunityCard
                   opportunity={opportunity}
                   typeLabel={typeLabels.get(opportunity.type_id ?? '')}
                 />
@@ -129,16 +140,28 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
           <EmptyState />
         </div>
       ) : (
-        <ul className="mt-6">
-          {rows.map((opportunity) => (
-            <li key={opportunity.id}>
-              <OpportunityRow
-                opportunity={opportunity}
-                typeLabel={typeLabels.get(opportunity.type_id ?? '')}
-              />
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul className="mt-6 lg:hidden">
+            {rows.map((opportunity) => (
+              <li key={opportunity.id}>
+                <OpportunityRow
+                  opportunity={opportunity}
+                  typeLabel={typeLabels.get(opportunity.type_id ?? '')}
+                />
+              </li>
+            ))}
+          </ul>
+          <ul className="mt-6 hidden gap-5 lg:grid lg:grid-cols-2 xl:grid-cols-3">
+            {rows.map((opportunity) => (
+              <li key={opportunity.id}>
+                <OpportunityCard
+                  opportunity={opportunity}
+                  typeLabel={typeLabels.get(opportunity.type_id ?? '')}
+                />
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </main>
   );

@@ -5,6 +5,7 @@ import { fundingLabel } from '@/lib/format';
 
 import { CountdownNumeral } from './countdown-numeral';
 import { NotOnlineStamp } from './not-online-stamp';
+import { SaveButton } from './save-button';
 
 type Card = {
   id: string;
@@ -60,14 +61,7 @@ export function OpportunityCard({
         ) : (
           <span />
         )}
-        <span
-          aria-label="Sign in to save"
-          title="Sign in to save"
-          className="text-[11px]"
-          style={{ color: 'var(--muted)' }}
-        >
-          ☆ Save
-        </span>
+        <SaveButton opportunityId={opportunity.id} compact />
       </div>
 
       <Link href={`/opportunities/${opportunity.id}`} className="flex items-start gap-3">
