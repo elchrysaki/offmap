@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Archivo, Bungee, Fraunces } from 'next/font/google';
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Analytics } from '@vercel/analytics/next';
 
 import { AuthSaveSync } from '@/components/core/auth-save-sync';
 import { ServiceWorkerRegister } from '@/components/core/service-worker-register';
@@ -52,6 +54,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AuthSaveSync />
         <ServiceWorkerRegister />
         {children}
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
