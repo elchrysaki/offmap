@@ -53,21 +53,29 @@ export async function listBrowseOpportunities(filters: BrowseFilters = {}) {
     .filter((entry): entry is [TaxonomyKey, string] => Boolean(entry[1]))
     .map(([key, value]) => ({ key, value }));
 
+  // Fired in parallel, not one at a time — with 2+ active filters, a
+  // sequential await-in-a-loop here was adding a full extra round trip per
+  // filter to every browse load, which is exactly the kind of latency
+  // students would feel as "filters are slow."
   let matchingIds: string[] | null = null;
-  for (const { key, value } of activeTaxonomyFilters) {
-    const { table, column } = TAXONOMY_JUNCTIONS[key];
-    // Table/column are picked dynamically from TAXONOMY_JUNCTIONS, so
-    // Supabase's generated per-table overloads can't narrow this — same
-    // trade-off as getOpportunityTaxonomyIds below.
-    const { data, error } = await supabase
-      .from(table)
-      .select('opportunity_id')
-      .eq(column as string, value);
-    if (error) throw error;
-    const ids = new Set((data ?? []).map((row) => row.opportunity_id as string));
+  const taxonomyResults = await Promise.all(
+    activeTaxonomyFilters.map(async ({ key, value }) => {
+      const { table, column } = TAXONOMY_JUNCTIONS[key];
+      // Table/column are picked dynamically from TAXONOMY_JUNCTIONS, so
+      // Supabase's generated per-table overloads can't narrow this — same
+      // trade-off as getOpportunityTaxonomyIds below.
+      const { data, error } = await supabase
+        .from(table)
+        .select('opportunity_id')
+        .eq(column as string, value);
+      if (error) throw error;
+      return new Set((data ?? []).map((row) => row.opportunity_id as string));
+    }),
+  );
+  for (const ids of taxonomyResults) {
     matchingIds = matchingIds === null ? Array.from(ids) : matchingIds.filter((id) => ids.has(id));
-    if (matchingIds.length === 0) return [];
   }
+  if (matchingIds !== null && matchingIds.length === 0) return [];
 
   let query = supabase
     .from('opportunity_public')
