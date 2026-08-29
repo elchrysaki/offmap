@@ -76,8 +76,9 @@ src/
                                submit (account-gated intake form). No /about yet.
     (auth)/                   sign-in, sign-up, forgot-password, reset-password, confirm-age (OAuth-only fallback),
                                callback (the single landing spot for both email-confirmation and OAuth), onboarding
-    admin/                    ambassador/moderator dashboard: queue (page.tsx), new listing, edit/publish/reject
-                               (opportunities/[id]/), single-row + bulk "Verify with AI"
+    admin/                    ambassador/moderator dashboard: queue (page.tsx, grouped by AI-confidence bucket —
+                               see §5), new listing, edit/publish/reject (opportunities/[id]/), single-row + bulk
+                               "Verify with AI", batch/ (moderator-only batch-apply screen for high-confidence rows)
   components/
     core/                     quiet register — opportunity-row (the `<lg` browse layout), opportunity-card (the
                                `lg:` and up desktop grid, landed 20 Aug — see §7), countdown-numeral,
@@ -101,18 +102,33 @@ src/
   lib/
     ai/                       verify-opportunity.ts — the Gemini call itself
     admin/                    ai-research.ts — the one shared write path both "Verify with AI" call sites use;
-                               this is where §6's gate-field boundary actually lives in code
+                               this is where §6's gate-field boundary actually lives in code.
+                               opportunity-buckets.ts — classifies a pending row by what its ai_research actually
+                               confirmed (unverified / needs_intervention / ai_checked / ready_to_batch — see §5)
+                               and builds the batch-apply patch; the only other place AI values cross into gate
+                               fields, and only after a moderator reviews and submits the batch screen.
+                               duplicates.ts — same-event detection (§5): exact-URL vs fuzzy title/organiser
+                               matching, used by both /submit (auto-attach on an exact match) and the /admin
+                               queue (possible-duplicate badges + merge)
     supabase/                 server client, browser client, generated types
     queries/                  server-only data access (admin-opportunities, current-user, merge-local-saves,
                                opportunities — now resolves the taxonomy pill filters through their junction
                                tables, profile — now also exposes a signed-in student's onboarding field picks as
                                a default-filter source, saved-opportunities, submit-lead, taxonomy)
     local-saved.ts            guest (signed-out) saved-opportunity storage, device-local
+    submission-guard.ts       SSRF/private-network URL check + Cloudflare Turnstile server-side
+                               verification for /submit — see §5's rate-limiting note
     colors.ts, countries.ts, format.ts, legal-doc.tsx, opportunity-publish-gate.ts, profile-labels.ts
 docs/                         pillar docs + ADRs — almost entirely stale (pre-Supabase Payload/Expo/OpenAI stack).
                                Don't trust anything under docs/ over this file or the actual code. See §15.
+                               Exception: stage-3-manual-research-runbook.md is current (written 20 Aug 2026).
+scripts/
+  github-pipeline/             research_opportunity.py — Stage 2's GitHub Models + Tavily research script (§5,
+                                §15), run by the workflow below. Inert until its DB secret is set.
 .github/
-  workflows/                  ci.yml — install → format:check → tsc --noEmit → next build against the real app
+  workflows/                  ci.yml — install → format:check → tsc --noEmit → next build against the real app.
+                               research-pending-submissions.yml — Stage 2's scheduled runner (§15), self-skips
+                               until configured.
 ```
 
 **`apps/` and `packages/` (design, taxonomy, contracts) are fully deleted from disk**, not merely unreferenced — confirmed 20 Aug 2026. `pnpm-workspace.yaml` still declares a `packages/*` glob pointing at nothing; harmless, trivial cleanup.
@@ -155,6 +171,15 @@ An ambassador sends a link and a type. Everything else is OffMap's job.
 
 **RLS is on for every table from creation.** Confirmed live 20 Aug 2026: the `published and not expired` policy on `opportunity` (`anon, authenticated`, `SELECT`) reads exactly `review_state = 'published' AND (deadline_at IS NULL OR deadline_at >= now())` — expiry is enforced at the data layer, not in a view or a component filter. Note the implication: a published row with `deadline_at` left null is treated as never-expiring, which is only correct for `rolling` (or not-yet-open) listings — keep that pairing consistent when writing data, including during the §12 step 8 migration.
 
+**`/submit` is rate-limited and bot-guarded, ported from offmap-hub's old severe-risk classifier** (`.github/prompts` era — the GitHub-Issue pipeline this project used before Supabase). `submission_attempt` (migration `20260829094322_submission_rate_limiting.sql`) is a small append-only log, deliberately separate from `opportunity` so it never touches the publish-gate/lead RLS surface: insert/select own rows only. `submitLead()` (`src/lib/queries/submit-lead.ts`) checks it before every insert — 5/hour, 15/day per account — and `src/lib/submission-guard.ts` blocks SSRF targets (localhost, private IPs, `.internal`/`.local`/etc.). A Cloudflare Turnstile CAPTCHA was built and then deliberately removed (20 Aug 2026, Elena's call — Cloudflare setup friction, not worth it yet) — the honeypot, SSRF check, and rate limit are the bot defense for now; revisit CAPTCHA only if spam actually shows up.
+
+**Duplicate detection (added 20 Aug 2026), deliberately conservative — see `src/lib/admin/duplicates.ts`:**
+
+- **Exact official-URL match** (normalized: protocol/`www`/trailing-slash/query-string ignored) is the only case treated as certain. `/submit` checks this before inserting — a match means the resubmission's note gets appended to the _existing_ row instead of creating a duplicate lead.
+- **Everything else is "possible," never auto-merged.** Fuzzy title+organiser similarity (a character-bigram Dice coefficient, no new dependency or Postgres extension needed at today's row counts) surfaces a badge in `/admin`'s queue with a one-click "Merge into it" — merging fills only the canonical row's _missing_ fields from the duplicate, appends the duplicate's notes, and archives the duplicate (reuses the existing `archived` `review_state` value rather than inventing a new one). A moderator always decides; nothing merges itself.
+- **Explicitly guards against the annual-programme trap:** if both titles carry a 4-digit year and the years differ, the match is capped at "possible" with the mismatch called out in the UI, regardless of how similar the rest of the title reads — "Summer School 2026" and "Summer School 2027" must never silently become one row.
+- **RLS workaround, not a hole:** a plain signed-in submitter's own session can't read pending `lead`/`in_review` rows at all (only ambassadors/moderators can). Two narrowly-scoped `SECURITY DEFINER` functions make the check possible without widening that boundary — `find_submission_duplicate_candidates()` (returns only id/title/organiser/official_url/review_state, nothing sensitive, `authenticated`-only) and `append_submission_note()` (appends to `additional_information` only, length-capped, only on live rows, `authenticated`-only) — same pattern already established by `is_moderator()`/`can_edit_opportunities()`.
+
 **Known database hygiene items** (from a live Supabase advisor scan, 20 Aug 2026 — none urgent, none block launch, worth a batch cleanup pass before the row count grows past a handful):
 
 - Leaked-password protection is off in Auth settings (a one-click enable, checks new passwords against HaveIBeenPwned).
@@ -177,6 +202,8 @@ The only thing OffMap sells is that someone checked. This rule protects it.
 - **Concrete implementation, confirmed at code level 20 Aug 2026:** both AI call sites — the admin "Verify with AI" button/bulk flow and the weekly `check-application-links` function — funnel through `runAiResearchForOpportunity` (`src/lib/admin/ai-research.ts`), which only ever writes `ai_research` (jsonb), `ai_research_at`, `apply_url_candidate`, `apply_url_candidate_note`, and — only for the admin flow, and only while a row is still `lead` — bumps `review_state` to `in_review`. It never touches `apply_url`, `funding`, `deadline_at`, `eligibility`, or any other gate field. A moderator reads the AI findings and copies what's correct into the real fields by hand. If you're ever tempted to make either call site write straight to a gate field "since it's usually right," that's this rule's failure mode exactly.
 
 If you are writing code that fills a gap with a plausible value, you are writing the bug this rule exists to prevent.
+
+**One deliberate, narrow exception, added 20 Aug 2026:** the batch-apply screen (`/admin/batch`, `src/lib/admin/opportunity-buckets.ts`) does copy AI-researched values into real gate fields — but only for rows where every fact the AI is allowed to determine came back `confidence: 'confirmed'`, only after a moderator has looked at a review screen showing those exact values, and only after that moderator explicitly picks `reach` and `prep_time` themselves (the AI never researches those two — they're editorial judgment calls by design, not facts a page states). This is still "a human read it and applied it," just for a batch instead of one row — never a background process. If a future change makes this write without a human having seen the values first, that's this rule's failure mode.
 
 ---
 
@@ -315,12 +342,12 @@ Do not reorder. Each step assumes the one above.
 2. **Migrations applied**, types generated, taxonomy seeded. ✅ done — 16 migrations applied.
 3. **RLS tested by cross-account read.** ✅ done — reconfirmed by direct policy inspection 20 Aug 2026.
 4. **Admin dashboard auth** — email + password for ambassadors/moderators at `/admin`, gated by `profiles.role`. ✅ done.
-5. **Ambassador/moderator review dashboard** — create, edit, publish, reject. ✅ done, and richer than originally scoped: single-row and bulk "Verify with AI" (3-way concurrency cap, per-row error isolation), and a live `publish_gate` preview on the edit form showing exactly which fields are still missing.
+5. **Ambassador/moderator review dashboard** — create, edit, publish, reject. ✅ done, and richer than originally scoped: single-row and bulk "Verify with AI" (3-way concurrency cap, per-row error isolation), a live `publish_gate` preview on the edit form showing exactly which fields are still missing, and (20 Aug 2026) the queue now groups pending rows by what AI research actually confirmed — Unverified / Needs human intervention / AI-checked / Ready to batch-apply — plus a `/admin/batch` screen where a moderator can clear every "ready" row in one reviewed pass instead of one at a time (see §6's exception note).
 6. **Browse, filters, detail, listing row.** ✅ done, substantially expanded 20 Aug in a 4-commit "desktop redesign," then refined the same day in two follow-up passes: `/browse` renders a card grid at `lg:` and up (rows below that), a two-step one-time intro (country/Global, then a single subject-field pick) on first visit, and 8 taxonomy/format/deadline filters — all hidden behind a `FilterDrawer` trigger rather than always-visible pill bars, with the country pill bar removed outright as redundant. A signed-in student's onboarding field pick still applies as a one-load default filter. The first-visit walkthrough is now a mandatory, DOM-anchored spotlight tour (real click required on the actual Filters trigger and Save button, not a dismissible corner card). See §7 (now resolved) for the effort-ladder-ordering history.
 7. **Save + deadline alert**, end to end into a real inbox. Save is ✅ done, and richer than originally scoped — not a boolean, a full Goals/Apply/Applied/Archived board (`SavedBoard`) with three independent per-save notify flags. Alert-sending is ✅ built and also richer than scoped: `send-deadline-alerts` fires three independent Resend sends per save (applications open / start writing / closing soon, each with its own sent-timestamp), not the single generic mechanism this section originally sketched. Confirmed correct via manual invocation. **Still unproven with a real inbox** — the live `opportunity` table has 2 rows and `saved_opportunity` has 0, so nothing has triggered a real send yet. Downstream of step 8, not blocked by anything in the alert code itself.
 8. **Existing ~25 listings migrated** — funding and eligibility filled, anything that can't state them goes back to `lead` or gets killed. **Not started.** `data/opportunities.json` (3,050 lines) still sits unmigrated in the repo; the live `opportunity` table has 2 rows. **This is the current top-priority gap** — nearly every ship gate in §13 traces back to it, and it should be running in parallel with everything else, not queued behind other work.
 9. **`/about`** — definition, editorial standard, exclusion list, paid-placement rule. **Not built.**
-10. **`/submit`** — intake form feeding the same review queue ambassadors use in `/admin`. **Built and confirmed working end to end at the code level**: honeypot field, `https://` URL validation, a real taxonomy `type_id` check, and a restrictive RLS `with check` that explicitly nulls every gate/AI/provenance field so a crafted request can't smuggle a value past ambassador review. Gated behind a signed-in account, nav-wired. Not yet exercised by a real ambassador — see §13.
+10. **`/submit`** — intake form feeding the same review queue ambassadors use in `/admin`. **Built and confirmed working end to end at the code level**: honeypot field, `https://` URL validation, an SSRF/private-network guard, per-account rate limiting (5/hour, 15/day), a real taxonomy `type_id` check, and a restrictive RLS `with check` that explicitly nulls every gate/AI/provenance field so a crafted request can't smuggle a value past ambassador review. Gated behind a signed-in account, nav-wired. Not yet exercised by a real ambassador — see §13.
 11. **Landing + featured modules**, lite profile, eligibility chips, match alerts, weekly digest, prep-time alerts. The landing page (`/`) and `/community` exist and render, but their hero, opportunities reel, and ambassador spotlights are confirmed hardcoded mock content, not database-driven — don't mistake "renders nicely" for "wired to real data." Eligibility chips, match alerts, and weekly digest are not built. Lite profile **is** built (see §15) — the "new in your sector" section on `/browse` is explicitly a placeholder (newest 3 listings, not real sector-matching) pending that backend work.
 12. **PWA**, then October: map, archive pages, contributor dashboard, deadline ruler. PWA is done and ahead of schedule: manifest, a real service worker that deliberately never caches Supabase/listing data (protects non-negotiable #6), and a fully working `/get-app` install flow with per-browser instructions.
 
@@ -362,7 +389,7 @@ Sole owner, sole builder, roughly 20 hours a week of which about 8 is build. Dir
 
 - Domain `offmap.gr` (Papaki), `hello@offmap.gr` live. Resend on `contact.offmap.gr`, EU region — verification status not reconfirmed this pass, worth a five-minute check.
 - Supabase project ref `uddfpfdekdltftrmvbqh`, Postgres 17, 16 migrations applied. `GEMINI_API_KEY` in place.
-- `.env.example` is still the stale pre-Supabase template — doesn't list the real required vars (`GEMINI_API_KEY`, `RESEND_API_KEY`, Supabase URL/anon key). Untouched cleanup item.
+- `.env.example` now lists the real required vars (Supabase URL/anon key, `GEMINI_API_KEY`, `RESEND_API_KEY`, `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED`) — rewritten from the stale pre-Supabase template.
 - Two migrations (`schedule_application_link_checker`, `schedule_deadline_alerts`) embed a long-lived anon JWT directly in the migration SQL so `pg_cron` can call the Edge Functions. Not a secret exposure — anon keys are public by design — but brittle: if that key is ever rotated, both cron jobs break silently with nothing obvious surfacing the failure.
 
 **Schema & data**
@@ -375,7 +402,7 @@ Sole owner, sole builder, roughly 20 hours a week of which about 8 is build. Dir
 
 - Every route in §4's tree exists and renders. Four surfaces look finished but aren't wired to real data: the landing page's hero/reel/ambassador spotlights, `/community`'s ambassador cards (the same mock data, duplicated), `/contact` (a bare mailto link), `/licenses` (placeholder text).
 - Auth: email/password (the "already registered" case is caught and redirected to `/sign-in` with a clear notice, not silently dropped) plus Microsoft and Apple OAuth; Google is code-complete but flagged off. **The legal-doc blocker on Google OAuth is gone**: `docs/legal/privacy-policy.md` and `terms.md` have real values (Elena Chrysaki, Adrianou 26, Keratsini, 18755, Greece) and are rendered live at `/privacy` and `/terms`. What's left for Google OAuth is Google Cloud Console + Supabase provider configuration — click-work, not code. `/callback` now accepts `token_hash`/`type` links (Confirm Signup, Magic Link) the same way `/reset-password` already did, for the same link-scanner-burns-the-token reason.
-- `/profile` gained real account settings (`account-settings.tsx`): change email (Supabase's own confirmation-link flow), change password (deliberately reuses the `/forgot-password` email flow rather than a direct field, so a hijacked session can't silently lock the real owner out), and sign out. Verified end to end against a real test account, including confirming sign-out actually clears the server-side session.
+- `/profile` gained real account settings (`account-settings.tsx`): change name (writes straight to `profiles`), change email (Supabase's own confirmation-link flow), change password (deliberately reuses the `/forgot-password` email flow rather than a direct field, so a hijacked session can't silently lock the real owner out), and sign out. Verified end to end against a real test account, including confirming sign-out actually clears the server-side session.
 - Onboarding (4 steps: fields → goals → experience level → a live recommended-opportunities sweep) and the profile page's Goals/Apply/Applied/Archived saved-opportunity board are both built and confirmed working against the real schema.
 - `/submit` is account-gated, nav-wired, confirmed working end to end at the code level; not yet exercised by a real ambassador. A server-action bug fixed 20 Aug — `submit/actions.ts` (`'use server'`) was also exporting `SubmitState`/`initialSubmitState` as a type and a plain object, which Next.js's server-action bundler rejects at runtime ("A 'use server' file can only export async functions, found object."). Both now live in a new plain `submit/submit-state.ts`; `actions.ts` exports only the async action.
 - Admin dashboard has single-row and bulk "Verify with AI," confirmed to never write AI output to a gate field directly.
@@ -386,6 +413,13 @@ Sole owner, sole builder, roughly 20 hours a week of which about 8 is build. Dir
 
 - Model is **`gemini-3.6-flash`** via the Interactions API — earlier notes in this file said `gemini-2.5-flash`/`generateContent`; that shape 404s for new keys against this model. Corrected throughout §3/§6 above.
 - Deadline-alert sending is its own, non-AI function — three independent Resend sends per save (opens / start-writing / closing), not the single generic `filter_alert` concept sketched in an earlier version of §7. That specific mechanism was never built; the real one already covers the same need and then some.
+- **Confidence-scored review queue and batch-apply landed 20 Aug 2026** (see §6's exception, §12 step 5). Decoupled from any particular AI backend by design: it reads Gemini's existing `ai_research.overall_confidence`, so it keeps working unchanged if a second research pipeline (below) starts writing to the same field.
+- **Duplicate detection landed 20 Aug 2026** (see §5) — a prerequisite for Stage 2's higher submission volume, not Stage 2 itself.
+- **Stage 2 built 20 Aug 2026, inert until two secrets are added:** `.github/workflows/research-pending-submissions.yml` (scheduled every 30 min + manual dispatch, self-skips with a clear notice if unconfigured) runs `scripts/github-pipeline/research_opportunity.py` — fetches each pending opportunity's official URL directly (SSRF-checked, stdlib-only HTML-to-text, same rules as `submission-guard.ts`), asks **GitHub Models** (`openai/gpt-4.1`, authenticated via the workflow's own `GITHUB_TOKEN` + `models: read` permission — no separate key) to research it, and falls back to **Tavily** search only if the direct fetch fails. Writes the exact same JSON shape `verify-opportunity.ts` produces into `ai_research`, so the confidence-bucketed queue and batch-apply screen (§12 step 5) work unchanged regardless of which pipeline populated it. Modeled on offmap-hub's old pipeline (confirmed via its actual `research_opportunity.py`: fetch first, Tavily only as fallback, same rule already in the Gemini prompt).
+  - **Database access is a dedicated least-privilege role, not service_role** (`supabase/migrations/20260829182855_github_pipeline_role.sql`): `github_pipeline` can only SELECT pending (`lead`/`in_review`) rows and UPDATE `ai_research`/`ai_research_at`/`apply_url_candidate`/`apply_url_candidate_note`/`review_state` — the column-level GRANT means this role is physically incapable of writing a gate field, enforcing §6 at the database layer, not just in application code.
+  - **Two things still need Elena, both click-work, neither committed anywhere:** (1) set the role's password directly against the live DB (`alter role github_pipeline with password '...'` — deliberately not in the migration), then build `postgresql://github_pipeline:<password>@db.uddfpfdekdltftrmvbqh.supabase.co:5432/postgres` (host/port/db name from Project Settings → Database, NOT the `postgres` superuser shown there) and add it as the repo secret `GITHUB_PIPELINE_DATABASE_URL`; (2) optionally create a free Tavily account and add `TAVILY_API_KEY` as a repo secret — the pipeline still runs and reports `no_source_available` honestly without it, just with less recovery when a submitted link is broken. Test with the workflow's manual "Run workflow" button rather than waiting for the 30-minute schedule.
+- **Stage 3** is `docs/stage-3-manual-research-runbook.md` — a prompt Elena pastes into a subscription-logged-in (not API-key) Claude Code session to clear a backlog on demand. Explicitly documents the one real tradeoff versus Stage 2: this path uses the repo's ordinary Supabase MCP access, not the column-restricted `github_pipeline` role, so the gate-field boundary here is an instruction being followed, not a database-enforced wall — acceptable for a supervised, on-demand session, not equivalent to Stage 2's guarantee. Smoke-tested 20 Aug 2026 against the one real pending row (a test fixture — `official_url` pointed at a 404): correctly reported `identity_confirmed: false` and `overall_confidence: 0` rather than inventing anything, which the queue now correctly buckets as "needs human intervention."
+- **Cloudflare Turnstile CAPTCHA on `/submit` was built, then removed the same day** (Elena's call — Cloudflare account/widget setup friction, not worth fighting yet). The honeypot, SSRF guard, and per-account rate limit (§5) are the bot defense for now.
 
 **Known code-level loose ends**
 
