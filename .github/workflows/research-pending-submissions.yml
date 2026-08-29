@@ -1,0 +1,63 @@
+name: Research pending submissions (Stage 2)
+
+# Stage 2 of CLAUDE.md §15's staged AI-scale plan: a second, independently
+# metered research pipeline (GitHub Models + Tavily) alongside the live
+# Gemini-powered "Verify with AI" button in /admin, so high-volume batches
+# don't compete with real-time admin use for the same API quota. Inert
+# until DATABASE_URL is added as a repo secret (see the migration this
+# depends on: supabase/migrations/20260829182855_github_pipeline_role.sql).
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: offmap-research-pipeline
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  models: read
+
+jobs:
+  research:
+    name: Research pending opportunities
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      DATABASE_URL: ${{ secrets.GITHUB_PIPELINE_DATABASE_URL }}
+      TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+      AI_MODEL: openai/gpt-4.1
+      MAX_PER_RUN: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Skip if not configured yet
+        id: guard
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::notice::GITHUB_PIPELINE_DATABASE_URL secret is not set yet -- skipping this run. See CLAUDE.md §15 for setup."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Python
+        if: steps.guard.outputs.configured == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: scripts/github-pipeline/requirements.txt
+
+      - name: Install dependencies
+        if: steps.guard.outputs.configured == 'true'
+        run: pip install --disable-pip-version-check -r scripts/github-pipeline/requirements.txt
+
+      - name: Run research pipeline
+        if: steps.guard.outputs.configured == 'true'
+        run: python scripts/github-pipeline/research_opportunity.py
