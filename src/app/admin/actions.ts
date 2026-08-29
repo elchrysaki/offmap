@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { runAiResearchForOpportunity } from '@/lib/admin/ai-research';
-import { rejectOpportunity } from '@/lib/queries/admin-opportunities';
+import { mergeOpportunities, rejectOpportunity } from '@/lib/queries/admin-opportunities';
 
 // Cap concurrent Gemini calls when a moderator selects a large batch — a
 // bulk verify across the whole queue at once shouldn't fire 25+ requests in
@@ -45,5 +45,15 @@ export async function runAiResearchFromQueue(id: string) {
 // convenience, not a new privilege.
 export async function quickRejectFromQueue(id: string) {
   await rejectOpportunity(id);
+  revalidatePath('/admin');
+}
+
+// Merges a flagged possible-duplicate into the canonical row a moderator
+// picked (see src/lib/admin/duplicates.ts for how the match was found and
+// mergeOpportunities() for the fill-gaps-only merge rule). RLS enforces the
+// actual privilege check — only a moderator's session can move a row to
+// 'archived' — this is just the UI entry point.
+export async function mergeIntoOpportunity(duplicateId: string, canonicalId: string) {
+  await mergeOpportunities(duplicateId, canonicalId);
   revalidatePath('/admin');
 }

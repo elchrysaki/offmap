@@ -1,10 +1,21 @@
 import Link from 'next/link';
 
-import { getPendingOpportunities, type AdminOpportunity } from '@/lib/queries/admin-opportunities';
+import {
+  getPendingOpportunities,
+  getRecentlyPublishedOpportunities,
+  type AdminOpportunity,
+} from '@/lib/queries/admin-opportunities';
 import { getCurrentUserRole } from '@/lib/queries/profile';
 import { getMissingPublishFields } from '@/lib/opportunity-publish-gate';
+import { classifyOpportunity, getResearch } from '@/lib/admin/opportunity-buckets';
+import { findDuplicateAmong, type DuplicateMatch } from '@/lib/admin/duplicates';
 
-import { bulkRunAiResearch, quickRejectFromQueue, runAiResearchFromQueue } from './actions';
+import {
+  bulkRunAiResearch,
+  mergeIntoOpportunity,
+  quickRejectFromQueue,
+  runAiResearchFromQueue,
+} from './actions';
 import { SelectAllCheckbox } from './select-all-checkbox';
 
 const BULK_FORM_ID = 'bulk-verify-form';
@@ -14,17 +25,35 @@ const pillClass =
 const actionButtonClass =
   'rounded-[3px] border-2 px-3 py-1.5 text-xs font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[color:var(--cobalt)]';
 
+function ConfidencePill({ opportunity }: { opportunity: AdminOpportunity }) {
+  const research = getResearch(opportunity);
+  if (!research || typeof research.overall_confidence !== 'number') return null;
+  const pct = Math.round(research.overall_confidence * 100);
+  const color = pct >= 80 ? 'var(--teal)' : pct >= 30 ? 'var(--marigold)' : 'var(--vermilion)';
+  return (
+    <span className={pillClass} style={{ borderColor: color, color }}>
+      {pct}% confidence
+    </span>
+  );
+}
+
 function QueueRow({
   opportunity,
   isModerator,
+  duplicates,
 }: {
   opportunity: AdminOpportunity;
   isModerator: boolean;
+  duplicates: DuplicateMatch[];
 }) {
   const missing = getMissingPublishFields(opportunity);
   const runAiWithId = runAiResearchFromQueue.bind(null, opportunity.id);
   const rejectWithId = quickRejectFromQueue.bind(null, opportunity.id);
   const label = opportunity.title || opportunity.official_url;
+  const topDuplicate = duplicates[0];
+  const mergeWithTopDuplicate = topDuplicate
+    ? mergeIntoOpportunity.bind(null, opportunity.id, topDuplicate.candidate.id)
+    : undefined;
 
   return (
     <li className="flex flex-wrap items-start gap-3 rounded-[18px] border-2 border-[color:var(--ink)] bg-[color:var(--card)] p-4">
@@ -45,13 +74,7 @@ function QueueRow({
           >
             {opportunity.title || '(untitled)'}
           </Link>
-          {opportunity.ai_research != null && (
-            <span
-              className={`${pillClass} border-[color:var(--cobalt)] text-[color:var(--cobalt)]`}
-            >
-              AI draft ready — review before applying
-            </span>
-          )}
+          <ConfidencePill opportunity={opportunity} />
           {opportunity.apply_url_candidate != null && (
             <span
               className={`${pillClass} border-[color:var(--marigold)] text-[color:var(--marigold)]`}
@@ -71,6 +94,41 @@ function QueueRow({
           <p className="mt-1 text-xs text-[color:var(--muted)]">
             All publish-gate fields filled — ready for a moderator to review and publish.
           </p>
+        )}
+
+        {topDuplicate && (
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+            <span
+              className={pillClass}
+              style={{
+                borderColor:
+                  topDuplicate.confidence === 'certain' ? 'var(--vermilion)' : 'var(--marigold)',
+                color:
+                  topDuplicate.confidence === 'certain' ? 'var(--vermilion)' : 'var(--marigold)',
+              }}
+            >
+              {topDuplicate.confidence === 'certain' ? 'Likely duplicate' : 'Possible duplicate'}
+            </span>
+            <span className="text-[color:var(--muted)]">
+              {topDuplicate.reason} — of{' '}
+              <Link
+                href={`/admin/opportunities/${topDuplicate.candidate.id}`}
+                className="underline"
+              >
+                {topDuplicate.candidate.title || topDuplicate.candidate.official_url}
+              </Link>
+            </span>
+            {isModerator && mergeWithTopDuplicate && (
+              <form action={mergeWithTopDuplicate}>
+                <button
+                  type="submit"
+                  className={`${actionButtonClass} border-[color:var(--vermilion)] text-[color:var(--vermilion)]`}
+                >
+                  Merge into it
+                </button>
+              </form>
+            )}
+          </div>
         )}
       </div>
 
@@ -104,16 +162,73 @@ function QueueRow({
   );
 }
 
+function QueueSection({
+  title,
+  hint,
+  opportunities,
+  isModerator,
+  emptyLabel,
+  duplicatesById,
+}: {
+  title: string;
+  hint?: string;
+  opportunities: AdminOpportunity[];
+  isModerator: boolean;
+  emptyLabel: string;
+  duplicatesById: Map<string, DuplicateMatch[]>;
+}) {
+  return (
+    <section className="mt-10">
+      <h2 className="text-sm font-bold tracking-wide text-[color:var(--muted)] uppercase">
+        {title} ({opportunities.length})
+      </h2>
+      {hint && <p className="mt-1 text-xs text-[color:var(--muted)]">{hint}</p>}
+      {opportunities.length === 0 ? (
+        <p className="mt-2 text-sm text-[color:var(--muted)]">{emptyLabel}</p>
+      ) : (
+        <ul className="mt-3 space-y-3">
+          {opportunities.map((o) => (
+            <QueueRow
+              key={o.id}
+              opportunity={o}
+              isModerator={isModerator}
+              duplicates={duplicatesById.get(o.id) ?? []}
+            />
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 export default async function AdminQueuePage() {
-  const [pending, role] = await Promise.all([getPendingOpportunities(), getCurrentUserRole()]);
+  const [pending, published, role] = await Promise.all([
+    getPendingOpportunities(),
+    getRecentlyPublishedOpportunities(),
+    getCurrentUserRole(),
+  ]);
   const isModerator = role === 'moderator';
 
-  // 'lead' = created but nobody has touched it yet (the public /submit form,
-  // built by a parallel workstream, writes rows in exactly this shape — a
-  // link and a type, nothing else). 'in_review' = someone has already saved
-  // an edit or run AI research on it (see saveOpportunity / runAiResearch).
-  const freshlyCreated = pending.filter((o) => o.review_state === 'lead');
-  const inProgress = pending.filter((o) => o.review_state === 'in_review');
+  // Buckets by what the AI actually found, not by review_state — see
+  // src/lib/admin/opportunity-buckets.ts. "Ready to batch-apply" never means
+  // zero human input (reach/prep_time are always a human's call); it means
+  // every fact the AI is allowed to determine came back confirmed, so a
+  // moderator can clear the whole batch from one review screen instead of
+  // one row at a time.
+  const needsIntervention = pending.filter((o) => classifyOpportunity(o) === 'needs_intervention');
+  const readyToBatch = pending.filter((o) => classifyOpportunity(o) === 'ready_to_batch');
+  const aiChecked = pending.filter((o) => classifyOpportunity(o) === 'ai_checked');
+  const unverified = pending.filter((o) => classifyOpportunity(o) === 'unverified');
+
+  // Every pending row checked against every other live row (pending +
+  // published) — see src/lib/admin/duplicates.ts. Computed here rather than
+  // stored, same "derived values aren't stored" reasoning as everything
+  // else in this codebase: titles/organisers get edited, so a stored match
+  // would go stale.
+  const allLive = [...pending, ...published];
+  const duplicatesById = new Map<string, DuplicateMatch[]>(
+    pending.map((o) => [o.id, findDuplicateAmong(o, allLive, o.id)]),
+  );
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-16">
@@ -128,6 +243,21 @@ export default async function AdminQueuePage() {
           New listing
         </Link>
       </div>
+
+      {readyToBatch.length > 0 && (
+        <Link
+          href="/admin/batch"
+          className="mt-6 flex items-center justify-between rounded-[18px] border-2 border-[color:var(--teal)] bg-[color:var(--card)] p-4 hover:bg-[color:var(--paper)]"
+        >
+          <span className="text-sm font-bold" style={{ color: 'var(--teal)' }}>
+            {readyToBatch.length} opportunit{readyToBatch.length === 1 ? 'y' : 'ies'} ready to
+            batch-apply →
+          </span>
+          <span className="text-xs text-[color:var(--muted)]">
+            AI confirmed the facts it can; two quick judgment calls per row and you're done.
+          </span>
+        </Link>
+      )}
 
       {pending.length === 0 ? (
         <p className="mt-4 text-[color:var(--muted)]">Nothing waiting on review.</p>
@@ -153,37 +283,59 @@ export default async function AdminQueuePage() {
             </button>
           </form>
 
-          <section className="mt-6">
-            <h2 className="text-sm font-bold tracking-wide text-[color:var(--muted)] uppercase">
-              New — not yet reviewed ({freshlyCreated.length})
-            </h2>
-            {freshlyCreated.length === 0 ? (
-              <p className="mt-2 text-sm text-[color:var(--muted)]">Nothing fresh right now.</p>
-            ) : (
-              <ul className="mt-3 space-y-3">
-                {freshlyCreated.map((o) => (
-                  <QueueRow key={o.id} opportunity={o} isModerator={isModerator} />
-                ))}
-              </ul>
-            )}
-          </section>
+          <QueueSection
+            title="Needs human intervention"
+            hint="AI couldn't confirm it had the right page, or its own confidence came back too low to trust."
+            opportunities={needsIntervention}
+            isModerator={isModerator}
+            emptyLabel="None right now."
+            duplicatesById={duplicatesById}
+          />
 
-          <section className="mt-10">
-            <h2 className="text-sm font-bold tracking-wide text-[color:var(--muted)] uppercase">
-              In progress ({inProgress.length})
-            </h2>
-            {inProgress.length === 0 ? (
-              <p className="mt-2 text-sm text-[color:var(--muted)]">Nothing being worked on yet.</p>
-            ) : (
-              <ul className="mt-3 space-y-3">
-                {inProgress.map((o) => (
-                  <QueueRow key={o.id} opportunity={o} isModerator={isModerator} />
-                ))}
-              </ul>
-            )}
-          </section>
+          <QueueSection
+            title="AI-checked — needs review"
+            hint="Research ran, but at least one fact wasn't confirmed — review before publishing."
+            opportunities={aiChecked}
+            isModerator={isModerator}
+            emptyLabel="Nothing partially checked right now."
+            duplicatesById={duplicatesById}
+          />
+
+          <QueueSection
+            title="Unverified — not yet run"
+            opportunities={unverified}
+            isModerator={isModerator}
+            emptyLabel="Nothing fresh right now."
+            duplicatesById={duplicatesById}
+          />
         </>
       )}
+
+      <section className="mt-10">
+        <h2 className="text-sm font-bold tracking-wide text-[color:var(--muted)] uppercase">
+          Recently launched
+        </h2>
+        {published.length === 0 ? (
+          <p className="mt-2 text-sm text-[color:var(--muted)]">Nothing published yet.</p>
+        ) : (
+          <ul className="mt-3 space-y-2">
+            {published.map((o) => (
+              <li
+                key={o.id}
+                className="flex items-center justify-between rounded-[12px] border-2 border-[color:var(--rule)] px-4 py-2.5 text-sm"
+              >
+                <Link href={`/opportunities/${o.id}`} className="font-medium hover:underline">
+                  {o.title || o.official_url}
+                </Link>
+                <span className="text-xs text-[color:var(--muted)]">
+                  Verified{' '}
+                  {o.last_verified_at ? new Date(o.last_verified_at).toLocaleDateString() : '—'}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </main>
   );
 }

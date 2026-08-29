@@ -29,6 +29,19 @@ export async function getPendingOpportunities() {
   return data;
 }
 
+export async function getRecentlyPublishedOpportunities(limit = 10) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('opportunity')
+    .select('*')
+    .eq('review_state', 'published')
+    .order('last_verified_at', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return data;
+}
+
 export async function getOpportunityById(id: string) {
   const supabase = await createClient();
   const { data, error } = await supabase.from('opportunity').select('*').eq('id', id).single();
@@ -84,6 +97,71 @@ export async function setOpportunitySelections(
   const rows = selectedIds.map((value) => ({ opportunity_id: id, [column]: value }));
   const { error: insertError } = await supabase.from(table).insert(rows as never[]);
   if (insertError) throw insertError;
+}
+
+// Merges a duplicate row into the canonical one a moderator picked: fills
+// only the canonical's *missing* fields from the duplicate (never
+// overwrites something already on file — the canonical is the source of
+// truth, the duplicate just fills gaps), folds the duplicate's
+// additional_information/credit into the canonical's, and archives the
+// duplicate rather than deleting it (keeps history, matches the existing
+// review_state enum instead of inventing a new "merged" concept). RLS
+// still applies normally here — only a moderator's session can actually
+// move a row to 'archived'.
+const FILL_GAP_FIELDS = [
+  'title',
+  'organiser',
+  'funding',
+  'funding_details',
+  'eligibility',
+  'deadline_raw',
+  'deadline_at',
+  'host_city',
+  'country',
+  'apply_url',
+  'format',
+  'specific_majors',
+  'application_requirements',
+  'expected_application_season',
+  'audience_notes',
+  'eligible_countries',
+] as const;
+
+export async function mergeOpportunities(duplicateId: string, canonicalId: string) {
+  if (duplicateId === canonicalId) throw new Error('Cannot merge an opportunity into itself.');
+
+  const supabase = await createClient();
+  const [{ data: duplicate, error: dupError }, { data: canonical, error: canError }] =
+    await Promise.all([
+      supabase.from('opportunity').select('*').eq('id', duplicateId).single(),
+      supabase.from('opportunity').select('*').eq('id', canonicalId).single(),
+    ]);
+  if (dupError) throw dupError;
+  if (canError) throw canError;
+
+  const patch: TablesUpdate<'opportunity'> = {};
+  for (const key of FILL_GAP_FIELDS) {
+    if (canonical[key] == null && duplicate[key] != null) {
+      // Each field's value type varies by column; the gap-fill rule
+      // (only copy when the canonical side is empty) is the same for all
+      // of them, which the per-column generated types can't express here.
+      (patch as Record<string, unknown>)[key] = duplicate[key];
+    }
+  }
+
+  const mergedNote = [
+    canonical.additional_information,
+    duplicate.submitted_by
+      ? `Also found by ${duplicate.submitted_by} (merged duplicate entry):`
+      : 'Merged duplicate entry:',
+    duplicate.additional_information,
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+  if (mergedNote) patch.additional_information = mergedNote;
+
+  await updateOpportunity(canonicalId, patch);
+  await updateOpportunity(duplicateId, { review_state: 'archived' });
 }
 
 export async function rejectOpportunity(id: string) {

@@ -4,7 +4,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: '14.15';
+    PostgrestVersion: '14.5';
   };
   public: {
     Tables: {
@@ -619,6 +619,27 @@ export type Database = {
           },
         ];
       };
+      submission_attempt: {
+        Row: {
+          created_at: string;
+          id: string;
+          official_url: string;
+          profile_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          official_url: string;
+          profile_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          official_url?: string;
+          profile_id?: string;
+        };
+        Relationships: [];
+      };
       type: {
         Row: {
           id: string;
@@ -781,7 +802,21 @@ export type Database = {
       };
     };
     Functions: {
+      append_submission_note: {
+        Args: { p_note: string; p_opportunity_id: string };
+        Returns: undefined;
+      };
       can_edit_opportunities: { Args: never; Returns: boolean };
+      find_submission_duplicate_candidates: {
+        Args: never;
+        Returns: {
+          id: string;
+          official_url: string;
+          organiser: string;
+          review_state: Database['public']['Enums']['review_state'];
+          title: string;
+        }[];
+      };
       is_moderator: { Args: never; Returns: boolean };
     };
     Enums: {
