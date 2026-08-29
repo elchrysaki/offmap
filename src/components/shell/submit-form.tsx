@@ -60,12 +60,11 @@ export function SubmitForm({
           SUBMITTED
         </span>
         <p className="font-[family-name:var(--font-fraunces)] mt-5 text-2xl font-extrabold md:text-3xl">
-          It&apos;s in the queue.
+          {state.message ? "You're not the first to find this." : "It's in the queue."}
         </p>
         <p className="mx-auto mt-3 max-w-md text-[15px]" style={{ color: 'var(--muted)' }}>
-          An ambassador or moderator checks every submission by hand — the funding, the eligibility,
-          whether it&apos;s actually selective. If it holds up, it goes live with a &ldquo;Submitted
-          by&rdquo; line crediting you. Nothing publishes just because it was sent in.
+          {state.message ??
+            'An ambassador or moderator checks every submission by hand — the funding, the eligibility, whether it’s actually selective. If it holds up, it goes live with a “Submitted by” line crediting you. Nothing publishes just because it was sent in.'}
         </p>
         <a
           href="/submit"
@@ -94,6 +93,21 @@ export function SubmitForm({
       <div className="absolute -left-[9999px]" aria-hidden="true">
         <label htmlFor="website">Leave this field blank</label>
         <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+      </div>
+
+      <div>
+        <label htmlFor="title" className={labelClass}>
+          Name <span style={{ color: 'var(--muted)', fontWeight: 500 }}>(optional)</span>
+        </label>
+        <input
+          id="title"
+          name="title"
+          type="text"
+          maxLength={200}
+          placeholder="The programme's own name for it"
+          className="mt-1.5 w-full px-3.5 py-2.5 text-[15px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--cobalt)]"
+          style={inputStyle}
+        />
       </div>
 
       <div>
