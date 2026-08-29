@@ -59,7 +59,12 @@ export default async function ProfilePage({
           .join(' · ')}
       </p>
 
-      <AccountSettings email={email ?? ''} emailJustChanged={email_changed === '1'} />
+      <AccountSettings
+        email={email ?? ''}
+        firstName={profile.first_name ?? ''}
+        lastName={profile.last_name ?? ''}
+        emailJustChanged={email_changed === '1'}
+      />
 
       <p
         className="font-[family-name:var(--font-archivo)] mt-8 text-[12px] font-bold tracking-[0.13em] uppercase"

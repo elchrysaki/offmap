@@ -35,14 +35,24 @@ const buttonStyle: React.CSSProperties = {
 // settings too instead of only from the signed-out sign-in page.
 export function AccountSettings({
   email,
+  firstName,
+  lastName,
   emailJustChanged,
 }: {
   email: string;
+  firstName: string;
+  lastName: string;
   emailJustChanged: boolean;
 }) {
   const router = useRouter();
   const supabase = createClient();
   const [signingOut, setSigningOut] = useState(false);
+
+  const [nameFirst, setNameFirst] = useState(firstName);
+  const [nameLast, setNameLast] = useState(lastName);
+  const [namePending, setNamePending] = useState(false);
+  const [nameSaved, setNameSaved] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
 
   const [newEmail, setNewEmail] = useState('');
   const [emailPending, setEmailPending] = useState(false);
@@ -52,6 +62,44 @@ export function AccountSettings({
   const [passwordPending, setPasswordPending] = useState(false);
   const [passwordSent, setPasswordSent] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+
+  // Writes straight to `profiles` via the browser client — the "update own
+  // profile" RLS policy (auth.uid() = id) already allows this, same
+  // accepted-exception pattern as SaveButton/OnboardingFlow (CLAUDE.md §4).
+  async function handleChangeName(e: React.FormEvent) {
+    e.preventDefault();
+    setNamePending(true);
+    setNameError(null);
+    setNameSaved(false);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setNamePending(false);
+      setNameError('Your session expired — sign in again.');
+      return;
+    }
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        first_name: nameFirst.trim() || null,
+        last_name: nameLast.trim() || null,
+      })
+      .eq('id', user.id);
+
+    setNamePending(false);
+
+    if (error) {
+      setNameError(error.message);
+      return;
+    }
+
+    setNameSaved(true);
+    router.refresh();
+  }
 
   async function handleChangeEmail(e: React.FormEvent) {
     e.preventDefault();
@@ -129,6 +177,51 @@ export function AccountSettings({
           Email updated.
         </p>
       )}
+
+      <div>
+        <p
+          className="text-[11px] font-bold tracking-[0.06em] uppercase"
+          style={{ color: 'var(--muted)' }}
+        >
+          Name
+        </p>
+        <form onSubmit={handleChangeName} className="mt-2.5 flex flex-wrap items-start gap-2">
+          <input
+            type="text"
+            placeholder="First name"
+            value={nameFirst}
+            onChange={(e) => setNameFirst(e.target.value)}
+            className="min-w-0 flex-1 px-3 py-2 text-[14px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--cobalt)]"
+            style={inputStyle}
+          />
+          <input
+            type="text"
+            placeholder="Last name"
+            value={nameLast}
+            onChange={(e) => setNameLast(e.target.value)}
+            className="min-w-0 flex-1 px-3 py-2 text-[14px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--cobalt)]"
+            style={inputStyle}
+          />
+          <button
+            type="submit"
+            disabled={namePending}
+            className="font-[family-name:var(--font-archivo)] px-4 py-2 text-[12px] font-extrabold tracking-[0.05em] uppercase disabled:opacity-60"
+            style={buttonStyle}
+          >
+            {namePending ? 'Saving…' : 'Save'}
+          </button>
+        </form>
+        {nameSaved && (
+          <p className="mt-2 text-[13px]" style={{ color: 'var(--muted)' }}>
+            Saved.
+          </p>
+        )}
+        {nameError && (
+          <p className="mt-2 text-[13px] font-semibold" style={{ color: 'var(--vermilion)' }}>
+            {nameError}
+          </p>
+        )}
+      </div>
 
       <div>
         <p
