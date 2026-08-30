@@ -27,7 +27,7 @@ jobs:
     timeout-minutes: 20
     env:
       GITHUB_TOKEN: ${{ github.token }}
-      DATABASE_URL: ${{ secrets.GITHUB_PIPELINE_DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.PIPELINE_DATABASE_URL }}
       TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
       AI_MODEL: openai/gpt-4.1
       MAX_PER_RUN: 20
@@ -40,7 +40,7 @@ jobs:
         id: guard
         run: |
           if [ -z "$DATABASE_URL" ]; then
-            echo "::notice::GITHUB_PIPELINE_DATABASE_URL secret is not set yet -- skipping this run. See CLAUDE.md §15 for setup."
+            echo "::notice::PIPELINE_DATABASE_URL secret is not set yet -- skipping this run. See CLAUDE.md §15 for setup."
             echo "configured=false" >> "$GITHUB_OUTPUT"
           else
             echo "configured=true" >> "$GITHUB_OUTPUT"
